@@ -3,15 +3,12 @@ package com.ddac.assignment.entity;
 import lombok.Data;
 
 @Data
-public class LoginDO {
-
-    private Long id;
-
+public class RegisterDO {
     private String username;
 
     private String password;
 
-    private String role;
+    private String password2;
 
-    private Long deleted;
+    private String role;
 }

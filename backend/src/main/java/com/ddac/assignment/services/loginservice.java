@@ -1,4 +1,8 @@
 package com.ddac.assignment.services;
 
-public interface loginservice {
+import com.ddac.assignment.entity.*;
+
+public interface LoginService {
+    MessageDO login(LoginDO loginDO);
+    MessageDO register(RegisterDO registerDO);
 }
