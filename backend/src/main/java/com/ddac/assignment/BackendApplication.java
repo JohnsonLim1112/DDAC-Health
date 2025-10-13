@@ -1,4 +1,4 @@
-package com.ddac.backend;
+package com.ddac.assignment;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
