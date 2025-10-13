@@ -47,15 +47,8 @@ export default function HomePage() {
     { icon: Clock, text: "24/7 Support" }
   ];
 
-  const stats = [
-    { number: "10K+", label: "Active Users" },
-    { number: "500+", label: "Doctors" },
-    { number: "50K+", label: "Appointments" },
-    { number: "98%", label: "Satisfaction" }
-  ];
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-green-50 overflow-hidden font-sans relative">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-green-50 overflow-hidden font-sans relative flex flex-col">
       {/* Advanced Animated Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
@@ -87,7 +80,6 @@ export default function HomePage() {
         
         {/* Floating particles - only render on client */}
         {isVisible && [...Array(20)].map((_, i) => {
-          // Use fixed seed-based positions instead of random
           const leftPos = ((i * 37) % 100);
           const topPos = ((i * 53) % 100);
           const xOffset = ((i * 7) % 20) - 10;
@@ -118,7 +110,7 @@ export default function HomePage() {
       {/* Navigation */}
       <nav className="relative z-20 container mx-auto px-4 sm:px-6 py-6">
         <motion.div
-          className="flex items-center justify-between backdrop-blur-sm bg-white/60 rounded-2xl px-6 py-4 shadow-lg border border-white/20"
+          className="flex flex-wrap items-center justify-between backdrop-blur-sm bg-white/60 rounded-2xl px-6 py-4 shadow-lg border border-white/20"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
@@ -136,7 +128,7 @@ export default function HomePage() {
             </span>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 mt-3 sm:mt-0">
             <motion.button
               onClick={() => router.push('/login')}
               className="px-4 sm:px-6 py-2.5 text-gray-700 font-semibold rounded-xl hover:bg-white/80 transition-all duration-300"
@@ -162,21 +154,11 @@ export default function HomePage() {
         <AnimatePresence>
           {isVisible && (
             <motion.div
-              className="text-center max-w-5xl mx-auto"
+              className="text-center max-w-5xl mx-auto flex flex-col items-center"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, ease: "easeOut" }}
             >
-              <motion.div
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-100 to-green-100 text-blue-700 px-5 py-2.5 rounded-full text-sm font-semibold mb-8 border border-blue-200/50 shadow-sm"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
-              >
-                <CheckCircle className="w-4 h-4" />
-                Trusted by 10,000+ users worldwide
-              </motion.div>
-
               <motion.h1 
                 className="text-5xl sm:text-6xl md:text-7xl font-black text-gray-900 mb-8 leading-tight"
                 initial={{ opacity: 0, y: 20 }}
@@ -208,7 +190,7 @@ export default function HomePage() {
               </motion.p>
 
               <motion.div 
-                className="flex flex-col sm:flex-row gap-5 justify-center items-center mb-12"
+                className="flex flex-wrap gap-5 justify-center items-center mb-12"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.7 }}
@@ -259,9 +241,6 @@ export default function HomePage() {
                   </motion.div>
                 ))}
               </motion.div>
-
-              {/* Stats */}
-            
             </motion.div>
           )}
         </AnimatePresence>
@@ -284,11 +263,11 @@ export default function HomePage() {
           </p>
         </motion.div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="flex flex-wrap gap-6 justify-center">
           {features.map((feature, index) => (
             <motion.div
               key={index}
-              className="group relative"
+              className="group relative w-full sm:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)]"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -300,7 +279,7 @@ export default function HomePage() {
                   background: `linear-gradient(135deg, var(--tw-gradient-stops))`,
                 }}
               />
-              <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-white/50 h-full">
+              <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-white/50 h-full flex flex-col">
                 <motion.div 
                   className={`bg-gradient-to-br ${feature.gradient} w-14 h-14 rounded-2xl flex items-center justify-center mb-6 shadow-lg`}
                   whileHover={{ rotate: 360, scale: 1.1 }}
@@ -311,7 +290,7 @@ export default function HomePage() {
                 <h3 className="text-xl font-bold text-gray-900 mb-3">
                   {feature.title}
                 </h3>
-                <p className="text-gray-600 leading-relaxed">
+                <p className="text-gray-600 leading-relaxed flex-1">
                   {feature.description}
                 </p>
               </div>
@@ -329,7 +308,6 @@ export default function HomePage() {
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          {/* Animated background pattern */}
           <div className="absolute inset-0 opacity-20">
             <div className="absolute inset-0" style={{
               backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
@@ -353,7 +331,7 @@ export default function HomePage() {
             viewport={{ once: true }}
             transition={{ delay: 0.3 }}
           >
-            Join thousands of users who are already managing their health smarter.
+            Join thousands managing their health smarter with HLife.
           </motion.p>
           <motion.button
             onClick={() => router.push('/register')}
@@ -373,7 +351,7 @@ export default function HomePage() {
 
       {/* Footer */}
       <footer className="relative z-10 container mx-auto px-4 sm:px-6 py-12 border-t border-gray-200/50">
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-6">
+        <div className="flex flex-wrap justify-between items-center gap-6">
           <motion.div
             className="flex items-center gap-3"
             initial={{ opacity: 0, x: -20 }}
