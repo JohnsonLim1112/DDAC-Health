@@ -1,46 +1,28 @@
-﻿namespace backend
+﻿using Mapper;
+using System.Linq;
+
+
+namespace Service;
+
+public static class LoginService
 {
-    public class LoginService
+    public static void Register(string username, string password, string role = "customer")
     {
-        // 暂时移除 mapper 依赖
-        // private readonly LoginMapper _mapper;
-
-        public LoginService()
+        var login = new LoginDO
         {
-            // _mapper = mapper;
-        }
+            Username = username,
+            Password = password,
+            Role = role
+        };
 
-        public void Register(string username, string password, string role = "customer")
-        {
-            // ========== 模拟注册 ==========
-            Console.WriteLine($"[模拟注册成功] 用户: {username}, 角色: {role}");
-            // =============================
 
-            // 以后恢复真实数据库：
-            /*
-            var login = new LoginDO
-            {
-                Username = username,
-                Password = password,
-                Role = role
-            };
-            _mapper.Insert(login);
-            */
-        }
+        LoginMapper.Insert(login);
+    }
 
-        public bool ValidateLogin(string username, string password)
-        {
-            // ========== 模拟登录 ==========
-            Console.WriteLine($"[模拟登录] 用户: {username}");
-            return username == "admin" && password == "123";
-            // =============================
-
-            // 以后恢复真实数据库：
-            /*
-            var users = _mapper.GetAll();
-            var user = users.FirstOrDefault(u => u.Username == username);
-            return user != null && user.Password == password;
-            */
-        }
+    public static bool ValidateLogin(string username, string password)
+    {
+        var users = LoginMapper.GetAll();
+        var user = users.FirstOrDefault(u => u.Username == username);
+        return user != null && user.Password == password;
     }
 }

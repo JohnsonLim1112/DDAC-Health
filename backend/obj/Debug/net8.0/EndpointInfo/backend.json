@@ -66,18 +66,6 @@
           }
         }
       }
-    },
-    "/login/ping": {
-      "get": {
-        "tags": [
-          "Login"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
     }
   },
   "components": {
