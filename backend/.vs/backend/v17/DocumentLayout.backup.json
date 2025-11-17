@@ -3,16 +3,20 @@
   "WorkspaceRootPath": "C:\\Users\\geigl\\Desktop\\DDAC-Health\\backend\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{B0761437-7E7A-4A76-A943-4AA8340C04F1}|backend.csproj|c:\\users\\geigl\\desktop\\ddac-health\\backend\\controllers\\logincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{B0761437-7E7A-4A76-A943-4AA8340C04F1}|backend.csproj|solutionrelative:controllers\\logincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{B0761437-7E7A-4A76-A943-4AA8340C04F1}|backend.csproj|c:\\users\\geigl\\desktop\\ddac-health\\backend\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{B0761437-7E7A-4A76-A943-4AA8340C04F1}|backend.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{B0761437-7E7A-4A76-A943-4AA8340C04F1}|backend.csproj|c:\\users\\geigl\\desktop\\ddac-health\\backend\\mapper\\loginmapper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{B0761437-7E7A-4A76-A943-4AA8340C04F1}|backend.csproj|solutionrelative:mapper\\loginmapper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{B0761437-7E7A-4A76-A943-4AA8340C04F1}|backend.csproj|c:\\users\\geigl\\desktop\\ddac-health\\backend\\controllers\\logincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B0761437-7E7A-4A76-A943-4AA8340C04F1}|backend.csproj|solutionrelative:controllers\\logincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B0761437-7E7A-4A76-A943-4AA8340C04F1}|backend.csproj|c:\\users\\geigl\\desktop\\ddac-health\\backend\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{B0761437-7E7A-4A76-A943-4AA8340C04F1}|backend.csproj|solutionrelative:appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B0761437-7E7A-4A76-A943-4AA8340C04F1}|backend.csproj|c:\\users\\geigl\\desktop\\ddac-health\\backend\\pojo\\logindo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B0761437-7E7A-4A76-A943-4AA8340C04F1}|backend.csproj|solutionrelative:pojo\\logindo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -22,7 +26,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 3,
+          "SelectedChildIndex": 6,
           "Children": [
             {
               "$type": "Bookmark",
@@ -38,39 +42,52 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "LoginController.cs",
               "DocumentMoniker": "C:\\Users\\geigl\\Desktop\\DDAC-Health\\backend\\Controllers\\LoginController.cs",
               "RelativeDocumentMoniker": "Controllers\\LoginController.cs",
               "ToolTip": "C:\\Users\\geigl\\Desktop\\DDAC-Health\\backend\\Controllers\\LoginController.cs",
               "RelativeToolTip": "Controllers\\LoginController.cs",
-              "ViewState": "AgIAACQAAAAAAAAAAAAowDkAAAAFAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAUAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-17T06:32:26.506Z",
+              "WhenOpened": "2025-11-17T13:21:36.634Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "LoginDO.cs",
+              "DocumentMoniker": "C:\\Users\\geigl\\Desktop\\DDAC-Health\\backend\\POJO\\LoginDO.cs",
+              "RelativeDocumentMoniker": "POJO\\LoginDO.cs",
+              "ToolTip": "C:\\Users\\geigl\\Desktop\\DDAC-Health\\backend\\POJO\\LoginDO.cs",
+              "RelativeToolTip": "POJO\\LoginDO.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-17T12:52:02.851Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 2,
-              "Title": "LoginMapper.cs",
-              "DocumentMoniker": "C:\\Users\\geigl\\Desktop\\DDAC-Health\\backend\\Mapper\\LoginMapper.cs",
-              "RelativeDocumentMoniker": "Mapper\\LoginMapper.cs",
-              "ToolTip": "C:\\Users\\geigl\\Desktop\\DDAC-Health\\backend\\Mapper\\LoginMapper.cs",
-              "RelativeToolTip": "Mapper\\LoginMapper.cs",
-              "ViewState": "AgIAAFIAAAAAAAAAAAAcwGsAAAAaAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-17T06:31:55.43Z",
+              "Title": "appsettings.Development.json",
+              "DocumentMoniker": "C:\\Users\\geigl\\Desktop\\DDAC-Health\\backend\\appsettings.Development.json",
+              "RelativeDocumentMoniker": "appsettings.Development.json",
+              "ToolTip": "C:\\Users\\geigl\\Desktop\\DDAC-Health\\backend\\appsettings.Development.json",
+              "RelativeToolTip": "appsettings.Development.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-11-17T12:20:07.266Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\geigl\\Desktop\\DDAC-Health\\backend\\Program.cs",
               "RelativeDocumentMoniker": "Program.cs",
-              "ToolTip": "C:\\Users\\geigl\\Desktop\\DDAC-Health\\backend\\Program.cs",
-              "RelativeToolTip": "Program.cs",
-              "ViewState": "AgIAAAsAAAAAAAAAAAAiwCEAAAAVAAAAAAAAAA==",
+              "ToolTip": "C:\\Users\\geigl\\Desktop\\DDAC-Health\\backend\\Program.cs*",
+              "RelativeToolTip": "Program.cs*",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-11-17T06:28:40.52Z",
               "EditorCaption": ""

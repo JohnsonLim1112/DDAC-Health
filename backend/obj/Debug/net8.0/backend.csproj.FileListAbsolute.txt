@@ -34,3 +34,6 @@ C:\Users\geigl\Desktop\DDAC-Health\backend\obj\Debug\net8.0\refint\backend.dll
 C:\Users\geigl\Desktop\DDAC-Health\backend\obj\Debug\net8.0\backend.pdb
 C:\Users\geigl\Desktop\DDAC-Health\backend\obj\Debug\net8.0\backend.genruntimeconfig.cache
 C:\Users\geigl\Desktop\DDAC-Health\backend\obj\Debug\net8.0\ref\backend.dll
+C:\Users\geigl\Desktop\DDAC-Health\backend\bin\Debug\net8.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll
+C:\Users\geigl\Desktop\DDAC-Health\backend\bin\Debug\net8.0\Microsoft.Extensions.Logging.Abstractions.dll
+C:\Users\geigl\Desktop\DDAC-Health\backend\bin\Debug\net8.0\Npgsql.dll

@@ -1,59 +1,40 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using backend;
+using Service;
 
-namespace backend
+namespace Controller;
+
+[ApiController]
+[Route("login")]
+public class LoginController : ControllerBase
 {
-    [ApiController]
-    [Route("login")]
-    public class LoginController : ControllerBase
+
+    [HttpPost("register")]
+    public IActionResult Register([FromBody] LoginDO logindo)
     {
-        private readonly LoginService loginService;
-
-        public LoginController(LoginService service)
+        try
         {
-            loginService = service;
+            LoginService.Register(logindo.Username, logindo.Password, logindo.Role);
+            return Ok(true);
         }
-
-        [HttpPost("register")]
-        public IActionResult Register([FromBody] LoginDO logindo)
+        catch (Exception ex)
         {
-            try
-            {
-                loginService.Register(logindo.Username, logindo.Password, logindo.Role);
-                return Ok(true);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Register Error: " + ex.Message);
-                return BadRequest(ex.Message);
-            }
+            Console.WriteLine("Register Error: " + ex.Message);
+            return BadRequest(ex.Message);
         }
+    }
 
-        [HttpPost("login")]
-        public IActionResult Login([FromBody] LoginDO dto)
+    [HttpPost("login")]
+    public IActionResult Login([FromBody] LoginDO dto)
+    {
+        try
         {
-            try
-            {
-                bool isValid = loginService.ValidateLogin(dto.Username, dto.Password);
-                return Ok(isValid);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Login Error: " + ex.Message);
-                return BadRequest(ex.Message);
-            }
+            bool isValid = LoginService.ValidateLogin(dto.Username, dto.Password);
+            return Ok(isValid);
         }
-
-        [HttpGet("ping")]
-        public IActionResult Ping()
+        catch (Exception ex)
         {
-            var port = HttpContext.Connection.LocalPort;
-            return Ok(new
-            {
-                message = "Login API 正常运行",
-                time = DateTime.Now,
-                port = port
-            });
+            Console.WriteLine("Login Error: " + ex.Message);
+            return BadRequest(ex.Message);
         }
     }
 }
