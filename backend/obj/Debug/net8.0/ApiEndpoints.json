@@ -1,0 +1,44 @@
+[
+  {
+    "ContainingType": "backend.LoginController",
+    "Method": "Login",
+    "RelativePath": "login/login",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "backend.LoginDO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "backend.LoginController",
+    "Method": "Ping",
+    "RelativePath": "login/ping",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "backend.LoginController",
+    "Method": "Register",
+    "RelativePath": "login/register",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "logindo",
+        "Type": "backend.LoginDO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  }
+]
