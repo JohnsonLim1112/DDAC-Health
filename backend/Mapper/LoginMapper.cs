@@ -12,11 +12,12 @@ public static class LoginMapper
 
     static LoginMapper()
     {
-        // read appsettings.json 
+        var basePath = AppContext.BaseDirectory;
         var configuration = new ConfigurationBuilder()
-            .SetBasePath(AppContext.BaseDirectory)
+            .SetBasePath(basePath) 
             .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
             .Build();
+
         _connectionString = configuration.GetConnectionString("PostgresConnection")
             ?? throw new ArgumentNullException("please check appsettings.json");
     }
@@ -38,7 +39,7 @@ public static class LoginMapper
     public static List<LoginDO> GetAll()
     {
         var list = new List<LoginDO>();
-        string sql = $"SELECT id, username, password, role FROM {TableName}";
+        string sql = $"SELECT * FROM {TableName}";
 
         using var conn = new NpgsqlConnection(_connectionString);
         using var cmd = new NpgsqlCommand(sql, conn);
@@ -48,12 +49,12 @@ public static class LoginMapper
         while (reader.Read())
         {
             list.Add(new LoginDO
-            {
-                Id = reader.GetInt32(0),
-                Username = reader.GetString(1),
-                Password = reader.GetString(2),
-                Role = reader.GetString(3)
-            });
+            (
+                reader.GetInt32(0),
+                reader.GetString(1),
+                reader.GetString(2),
+                reader.GetString(3)
+            ));
         }
         return list;
     }
@@ -71,12 +72,12 @@ public static class LoginMapper
         if (reader.Read())
         {
             return new LoginDO
-            {
-                Id = reader.GetInt32(0),
-                Username = reader.GetString(1),
-                Password = reader.GetString(2),
-                Role = reader.GetString(3)
-            };
+            (
+                reader.GetInt32(0),
+                reader.GetString(1),
+                reader.GetString(2),
+                reader.GetString(3)
+            );
         }
         return null;
     }

@@ -14,24 +14,41 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/LoginDO"
+                "$ref": "#/components/schemas/RegisterVO"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/LoginDO"
+                "$ref": "#/components/schemas/RegisterVO"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/LoginDO"
+                "$ref": "#/components/schemas/RegisterVO"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpVO"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpVO"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpVO"
+                }
+              }
+            }
           }
         }
       }
@@ -45,24 +62,41 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/LoginDO"
+                "$ref": "#/components/schemas/LoginVO"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/LoginDO"
+                "$ref": "#/components/schemas/LoginVO"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/LoginDO"
+                "$ref": "#/components/schemas/LoginVO"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpVO"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpVO"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpVO"
+                }
+              }
+            }
           }
         }
       }
@@ -70,13 +104,39 @@
   },
   "components": {
     "schemas": {
-      "LoginDO": {
+      "HttpVO": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32"
+          "success": {
+            "type": "boolean"
           },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "LoginVO": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "nullable": true
+          },
+          "password": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RegisterVO": {
+        "type": "object",
+        "properties": {
           "username": {
             "type": "string",
             "nullable": true
@@ -85,7 +145,7 @@
             "type": "string",
             "nullable": true
           },
-          "role": {
+          "password2": {
             "type": "string",
             "nullable": true
           }

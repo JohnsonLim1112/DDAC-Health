@@ -3,20 +3,16 @@
   "WorkspaceRootPath": "C:\\Users\\geigl\\Desktop\\DDAC-Health\\backend\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{B0761437-7E7A-4A76-A943-4AA8340C04F1}|backend.csproj|c:\\users\\geigl\\desktop\\ddac-health\\backend\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{B0761437-7E7A-4A76-A943-4AA8340C04F1}|backend.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{B0761437-7E7A-4A76-A943-4AA8340C04F1}|backend.csproj|c:\\users\\geigl\\desktop\\ddac-health\\backend\\controllers\\logincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{B0761437-7E7A-4A76-A943-4AA8340C04F1}|backend.csproj|solutionrelative:controllers\\logincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{B0761437-7E7A-4A76-A943-4AA8340C04F1}|backend.csproj|c:\\users\\geigl\\desktop\\ddac-health\\backend\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{B0761437-7E7A-4A76-A943-4AA8340C04F1}|backend.csproj|solutionrelative:appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+      "AbsoluteMoniker": "D:0:0:{B0761437-7E7A-4A76-A943-4AA8340C04F1}|backend.csproj|c:\\users\\geigl\\desktop\\ddac-health\\backend\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{B0761437-7E7A-4A76-A943-4AA8340C04F1}|backend.csproj|solutionrelative:appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{B0761437-7E7A-4A76-A943-4AA8340C04F1}|backend.csproj|c:\\users\\geigl\\desktop\\ddac-health\\backend\\pojo\\logindo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{B0761437-7E7A-4A76-A943-4AA8340C04F1}|backend.csproj|solutionrelative:pojo\\logindo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{B0761437-7E7A-4A76-A943-4AA8340C04F1}|backend.csproj|c:\\users\\geigl\\desktop\\ddac-health\\backend\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{B0761437-7E7A-4A76-A943-4AA8340C04F1}|backend.csproj|solutionrelative:appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     }
   ],
   "DocumentGroupContainers": [
@@ -26,7 +22,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 6,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Bookmark",
@@ -42,28 +38,28 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
               "Title": "LoginController.cs",
               "DocumentMoniker": "C:\\Users\\geigl\\Desktop\\DDAC-Health\\backend\\Controllers\\LoginController.cs",
               "RelativeDocumentMoniker": "Controllers\\LoginController.cs",
               "ToolTip": "C:\\Users\\geigl\\Desktop\\DDAC-Health\\backend\\Controllers\\LoginController.cs",
               "RelativeToolTip": "Controllers\\LoginController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAUAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAMAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-17T13:21:36.634Z",
+              "WhenOpened": "2025-11-20T06:23:45.958Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "LoginDO.cs",
-              "DocumentMoniker": "C:\\Users\\geigl\\Desktop\\DDAC-Health\\backend\\POJO\\LoginDO.cs",
-              "RelativeDocumentMoniker": "POJO\\LoginDO.cs",
-              "ToolTip": "C:\\Users\\geigl\\Desktop\\DDAC-Health\\backend\\POJO\\LoginDO.cs",
-              "RelativeToolTip": "POJO\\LoginDO.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-17T12:52:02.851Z",
+              "DocumentIndex": 1,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\geigl\\Desktop\\DDAC-Health\\backend\\appsettings.json",
+              "RelativeDocumentMoniker": "appsettings.json",
+              "ToolTip": "C:\\Users\\geigl\\Desktop\\DDAC-Health\\backend\\appsettings.json",
+              "RelativeToolTip": "appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-11-20T06:06:53.689Z",
               "EditorCaption": ""
             },
             {
@@ -74,22 +70,9 @@
               "RelativeDocumentMoniker": "appsettings.Development.json",
               "ToolTip": "C:\\Users\\geigl\\Desktop\\DDAC-Health\\backend\\appsettings.Development.json",
               "RelativeToolTip": "appsettings.Development.json",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-11-17T12:20:07.266Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "Program.cs",
-              "DocumentMoniker": "C:\\Users\\geigl\\Desktop\\DDAC-Health\\backend\\Program.cs",
-              "RelativeDocumentMoniker": "Program.cs",
-              "ToolTip": "C:\\Users\\geigl\\Desktop\\DDAC-Health\\backend\\Program.cs",
-              "RelativeToolTip": "Program.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-17T06:28:40.52Z",
+              "WhenOpened": "2025-11-20T06:06:50.363Z",
               "EditorCaption": ""
             }
           ]
