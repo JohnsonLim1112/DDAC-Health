@@ -1,7 +1,10 @@
-﻿public class LoginDO
-{
-    public int Id { get; set; }
-    public string Username { get; set; }
-    public string Password { get; set; }
-    public string Role { get; set; }
-}
+﻿using System.ComponentModel.DataAnnotations;
+
+public record LoginDO
+(
+    [property: Key] int Id,               
+    string Username,
+    string Password,
+    string Role
+);
+

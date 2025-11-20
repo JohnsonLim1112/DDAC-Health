@@ -9,11 +9,21 @@
     "Parameters": [
       {
         "Name": "dto",
-        "Type": "LoginDO",
+        "Type": "LoginVO",
         "IsRequired": true
       }
     ],
-    "ReturnTypes": []
+    "ReturnTypes": [
+      {
+        "Type": "HttpVO",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
   },
   {
     "ContainingType": "Controller.LoginController",
@@ -24,11 +34,21 @@
     "Order": 0,
     "Parameters": [
       {
-        "Name": "logindo",
-        "Type": "LoginDO",
+        "Name": "reg",
+        "Type": "RegisterVO",
         "IsRequired": true
       }
     ],
-    "ReturnTypes": []
+    "ReturnTypes": [
+      {
+        "Type": "HttpVO",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
   }
 ]

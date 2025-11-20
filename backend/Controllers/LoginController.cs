@@ -4,37 +4,22 @@ using Service;
 namespace Controller;
 
 [ApiController]
-[Route("login")]
+[Route("User")]
 public class LoginController : ControllerBase
 {
 
     [HttpPost("register")]
-    public IActionResult Register([FromBody] LoginDO logindo)
+    public HttpVO Register([FromBody] RegisterVO reg)
     {
-        try
-        {
-            LoginService.Register(logindo.Username, logindo.Password, logindo.Role);
-            return Ok(true);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Register Error: " + ex.Message);
-            return BadRequest(ex.Message);
-        }
+        HttpVO vo= LoginService.Register(reg.Username,reg.Password,reg.Password2);
+        return vo;
     }
 
+
     [HttpPost("login")]
-    public IActionResult Login([FromBody] LoginDO dto)
+    public HttpVO Login([FromBody] LoginVO dto)
     {
-        try
-        {
-            bool isValid = LoginService.ValidateLogin(dto.Username, dto.Password);
-            return Ok(isValid);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Login Error: " + ex.Message);
-            return BadRequest(ex.Message);
-        }
+        HttpVO isValid = LoginService.ValidateLogin(dto.Username, dto.Password);
+        return isValid;
     }
 }
