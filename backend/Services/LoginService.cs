@@ -35,15 +35,6 @@ public static class LoginService
         return httpVO;
     }
 
-    private static string Token(string Password)
-    {
-
-        byte[] PasswordBytes = System.Text.Encoding.UTF8.GetBytes(Password);
-        byte[] HashBytes = System.Security.Cryptography.SHA256.Create().ComputeHash(PasswordBytes);
-        string Hash = Convert.ToBase64String(HashBytes);
-
-        return Hash;
-    }
 
     //Service Funtion
     public static HttpVO Register(string username, string password, string password2, string SecurityPassword)
@@ -53,8 +44,8 @@ public static class LoginService
         
         if (httpvo.success == true)
         {
-            string PasswordToken = Token(password);
-            string SecurityPasswordToken = Token(SecurityPassword);
+            string PasswordToken = Tools.Token(password);
+            string SecurityPasswordToken = Tools.Token(SecurityPassword);
             string uuid = Guid.NewGuid().ToString();
             var loginDO = new LoginDO(
                 Id: uuid,
@@ -76,7 +67,7 @@ public static class LoginService
 
     public static HttpVO ValidateLogin(string username, string password)
     {
-        String passwordToken = Token(password);
+        String passwordToken = Tools.Token(password);
         var users = LoginMapper.GetAll();
         HttpVO httpVO = new HttpVO();
         httpVO.success = false;
@@ -120,7 +111,7 @@ public static class LoginService
     }
     public static HttpVO ValidateSecurityPassword(string id, string SecurityPassword)
     {
-        string SecurityPasswordToken = Token(SecurityPassword);
+        string SecurityPasswordToken = Tools.Token(SecurityPassword);
         var user = LoginMapper.SelectById(id);
         HttpVO httpVO = new HttpVO();
         if (user.SecurityPassword.Equals(SecurityPasswordToken))
@@ -142,7 +133,7 @@ public static class LoginService
     public  static HttpVO ChangePassword(string id, string password)
     {
         HttpVO httpVO = new HttpVO();
-        string psToken = Token(password);
+        string psToken = Tools.Token(password);
         var data = LoginMapper.SelectById(id);
         LoginDO loginDO = new LoginDO(
             Id: id,
