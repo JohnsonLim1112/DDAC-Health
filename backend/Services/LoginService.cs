@@ -1,12 +1,12 @@
 ﻿using Mapper;
-using System.Linq;
-
 
 namespace Service;
 
+
+
 public static class LoginService
 {
-    private static HttpVO Registercheck(String username , String password , String password2)
+    private static HttpVO Registercheck(string username, string password, string password2, string SecurityPassword)
     {
         var users = LoginMapper.GetAll();
         HttpVO httpVO = new HttpVO();
@@ -26,63 +26,63 @@ public static class LoginService
             httpVO.message = "Passwords do not match";
             return httpVO;
         }
+        string pas = password.ToString();
+        if (SecurityPassword.Equals(pas))
+        {
+            httpVO.success = false;
+            httpVO.message = "security password cannot be the same as the Password";
+        }
         return httpVO;
     }
 
-    public static HttpVO Register(String username, String password, String password2)
+    private static string Token(string Password)
     {
-        // 输出注册请求的入参（调试用，确认接收的参数是否正确）
-        Console.WriteLine($"=== 开始处理注册请求 ===");
-        Console.WriteLine($"接收的注册参数：");
-        Console.WriteLine($"用户名：{username}");
-        Console.WriteLine($"密码：{password}（注意：生产环境请勿输出明文密码！）");
-        Console.WriteLine($"确认密码：{password2}");
 
-        // 执行注册校验
-        HttpVO httpvo = Registercheck(username, password, password2);
-        bool isCheckPass = httpvo.success;
+        byte[] PasswordBytes = System.Text.Encoding.UTF8.GetBytes(Password);
+        byte[] HashBytes = System.Security.Cryptography.SHA256.Create().ComputeHash(PasswordBytes);
+        string Hash = Convert.ToBase64String(HashBytes);
 
-        Console.WriteLine($"注册校验结果：{(isCheckPass ? "通过" : "失败")}");
-        if (!isCheckPass)
+        return Hash;
+    }
+
+    //Service Funtion
+    public static HttpVO Register(string username, string password, string password2, string SecurityPassword)
+    {
+
+        HttpVO httpvo = Registercheck(username, password, password2, SecurityPassword);
+        
+        if (httpvo.success == true)
         {
-            // 校验失败，输出失败原因（假设 HttpVO 有 Message 属性存储失败信息）
-            Console.WriteLine($"校验失败原因：{httpvo.message ?? "未说明具体原因"}");
-            Console.WriteLine($"=== 注册请求处理结束（校验失败）===\n");
-            return httpvo;
+            string PasswordToken = Token(password);
+            string SecurityPasswordToken = Token(SecurityPassword);
+            string uuid = Guid.NewGuid().ToString();
+            var loginDO = new LoginDO(
+                Id: uuid,
+                Username: username,
+                Password: PasswordToken,
+                SecurityPassword: SecurityPasswordToken,
+                Role: "customer"
+            );
+            LoginMapper.Insert(loginDO);
+            // check Object
+            Console.WriteLine($"Successfully created the LoginDO object：");
+            Console.WriteLine($"LoginDO.Id：{loginDO.Id}");
+            Console.WriteLine($"LoginDO.Username：{loginDO.Username}");
+            Console.WriteLine($"LoginDO.Role：{loginDO.Role}");
         }
-
-        // 校验通过，创建 LoginDO（此处原代码未调用 Insert 方法，注意：仅创建对象不会写入数据库！）
-        var loginDO = new LoginDO(
-            Id: 0,
-            Username: username,
-            Password: password,
-            Role: "customer"
-        );
-        LoginMapper.Insert(loginDO);
-
-        // 输出创建的 LoginDO 信息（确认对象属性是否正确）
-        Console.WriteLine($"校验通过，成功创建 LoginDO 对象：");
-        Console.WriteLine($"LoginDO.Id：{loginDO.Id}");
-        Console.WriteLine($"LoginDO.Username：{loginDO.Username}");
-        Console.WriteLine($"LoginDO.Role：{loginDO.Role}");
-        Console.WriteLine($"=== 注册请求处理结束（校验通过）===\n");
-
-        // 【重要提醒】原代码仅创建了 LoginDO，未调用 LoginMapper.Insert(loginDO) 写入数据库！
-        // 若需要将注册信息保存到数据库，需添加以下代码：
-        // LoginMapper.Insert(loginDO);
-        // Console.WriteLine($"注册信息已成功写入数据库（用户名：{username}）");
-
+        
         return httpvo;
     }
 
     public static HttpVO ValidateLogin(string username, string password)
     {
+        String passwordToken = Token(password);
         var users = LoginMapper.GetAll();
         HttpVO httpVO = new HttpVO();
         httpVO.success = false;
         foreach (var user in users)
         {
-            if (user.Username == username && user.Password == password)
+            if (username == user.Username && passwordToken == user.Password)
             {
                 httpVO.success = true;
                 httpVO.message = "Login successful";
@@ -96,5 +96,80 @@ public static class LoginService
         }
         httpVO.message = "Invalid username or password";
         return httpVO;
+    }
+
+    public static HttpVO ValidateEmail(string email)
+    {
+        var users = LoginMapper.GetAll();
+        HttpVO httpVO = new HttpVO();
+        httpVO.success = false;
+        foreach (var user in users)
+        {
+            if (email == user.Username)
+            {
+                httpVO.success = true;
+                httpVO.data = new
+                {
+                    LoginId = user.Id,
+                };
+                return httpVO;
+            }
+        }
+        httpVO.message = "Email does not exist";
+        return httpVO;
+    }
+    public static HttpVO ValidateSecurityPassword(string id, string SecurityPassword)
+    {
+        string SecurityPasswordToken = Token(SecurityPassword);
+        var user = LoginMapper.SelectById(id);
+        HttpVO httpVO = new HttpVO();
+        if (user.SecurityPassword.Equals(SecurityPasswordToken))
+        {
+            httpVO.success = true;
+            httpVO.data = new
+            {
+                LoginId = user.Id,
+            };
+            return httpVO;
+        }
+        else
+        {
+            httpVO.success = false;
+            httpVO.message = "Security password is incorrect";
+        }
+        return httpVO;
+    }
+    public  static HttpVO ChangePassword(string id, string password)
+    {
+        HttpVO httpVO = new HttpVO();
+        string psToken = Token(password);
+        var data = LoginMapper.SelectById(id);
+        LoginDO loginDO = new LoginDO(
+            Id: id,
+            Username: data.Username,
+            Password: psToken,
+            SecurityPassword: data.SecurityPassword,
+            Role: data.Role
+        );
+        LoginMapper.Update(loginDO);
+        httpVO.success = true;
+        return httpVO;
+    }
+
+    public static HttpVO DeleteUser(string id)
+    {
+        var user = LoginMapper.SelectById(id);
+        HttpVO httpVO = new HttpVO();
+        if (user == null)
+        {
+            httpVO.success = false;
+            httpVO.message = "User does not exist";
+            return httpVO;
+        }
+        else {
+            LoginMapper.Delete(id);
+            httpVO.success = true;
+            return httpVO;
+        }
     }
 }
