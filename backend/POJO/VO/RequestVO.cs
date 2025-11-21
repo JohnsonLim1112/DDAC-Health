@@ -32,4 +32,19 @@ public class DeleteVO
 {
     public string id { get; set; }
 }
+public class AdminRequestVO
+{
+    public string id { get; set; }
+}
 
+public class  AdminUpdateUsersVO
+{
+    public String id { get; set; }
+    public List<LoginDO>? Data { get; set; }
+}
+public class CreateUserVO
+{
+    public String Username { get; set; }
+    public String Password { get; set; }
+    public String role { get; set; }
+}
