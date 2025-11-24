@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Mapper;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Service;
 
 namespace Controllers
@@ -8,9 +10,9 @@ namespace Controllers
     public class AdminController : ControllerBase
     {
         [HttpGet("users")]
-        public HttpVO GetUsers([FromBody] AdminRequestVO admin)
+        public HttpVO GetUsers([FromQuery] string adminId)
         {
-            HttpVO users = AdminService.CheckUsers(admin.id);
+            HttpVO users = AdminService.CheckUsers(adminId);
             return users;
         }
         [HttpPost("update")]
@@ -35,14 +37,23 @@ namespace Controllers
         {
             HttpVO user = AdminService.DeleteUser(admindelete.id);
             return user;
-
         }
 
         [HttpPost("create")]
         public HttpVO CreateUser([FromBody] CreateUserVO admincreate)
         {
-            HttpVO user = AdminService.CreateUser(admincreate);
-            return user;
+            LoginDO user = LoginMapper.SelectById(admincreate.AdminId);
+            HttpVO res = new HttpVO();
+            if (user != null && user.Role != "admin")
+            {
+                res.success = false;
+                res.message = "No permission to perform the operation.";
+                return res;
+            }
+            else
+            {
+                return AdminService.CreateUser(admincreate);
+            }
 
         }
     }

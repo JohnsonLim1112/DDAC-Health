@@ -45,13 +45,26 @@ namespace Service
                         );
                         LoginMapper.Update(LoginDO);
                     }
-                    else
+                    else if (originalUser.SecurityPassword != item.SecurityPassword)
                     {
                         string SafePasswordToken = Tools.Token(item.SecurityPassword);
                         var LoginDO = new LoginDO(
                             Id: item.Id,
                             Username: item.Username,
                             Password: item.Password,
+                            SecurityPassword: SafePasswordToken,
+                            Role: item.Role
+                        );
+                        LoginMapper.Update(LoginDO);
+                    }
+                    else
+                    {
+                        string PasswordToken = Tools.Token(item.Password);
+                        string SafePasswordToken = Tools.Token(item.SecurityPassword);
+                        var LoginDO = new LoginDO(
+                            Id: item.Id,
+                            Username: item.Username,
+                            Password: PasswordToken,
                             SecurityPassword: SafePasswordToken,
                             Role: item.Role
                         );

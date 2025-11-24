@@ -32,10 +32,6 @@ public class DeleteVO
 {
     public string id { get; set; }
 }
-public class AdminRequestVO
-{
-    public string id { get; set; }
-}
 
 public class  AdminUpdateUsersVO
 {
@@ -44,6 +40,7 @@ public class  AdminUpdateUsersVO
 }
 public class CreateUserVO
 {
+    public String AdminId { get; set; }
     public String Username { get; set; }
     public String Password { get; set; }
     public String role { get; set; }
