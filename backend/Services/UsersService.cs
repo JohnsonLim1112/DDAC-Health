@@ -2,8 +2,9 @@
 
 namespace Service
 {
-    public class AdminService
+    public class UsersService
     {
+        // admin check users
         public static HttpVO CheckUsers(String id)
         {
             LoginDO user = LoginMapper.SelectById(id);
@@ -25,6 +26,7 @@ namespace Service
             return admin;
         }
 
+        // admin reset user's password
         public static string UpdateUser(string id, List<LoginDO> data)
         {
             string mes = "";
@@ -76,7 +78,7 @@ namespace Service
             return mes;
         }
 
-        public static HttpVO DeleteUser(String id)
+        public static HttpVO DeleteUser(string id)
         {
             HttpVO admin = new HttpVO();
             LoginMapper.Delete(id);
@@ -85,6 +87,7 @@ namespace Service
             return admin;
         }
 
+        // admin create users
         public static HttpVO CreateUser(CreateUserVO data)
         {
             HttpVO admin = new HttpVO();

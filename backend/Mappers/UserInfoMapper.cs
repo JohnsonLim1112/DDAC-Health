@@ -1,16 +1,16 @@
-﻿using Microsoft.Extensions.Configuration; // 补充缺失的配置引用
+﻿using Microsoft.Extensions.Configuration;
 using Npgsql;
 using System;
 using System.Collections.Generic;
 
 namespace Mapper;
 
-public static class LoginMapper
+public static class UserInfoMapper
 {
-    private const string TableName = "login";
+    private const string TableName = "user_info";
     private static readonly string _connectionString;
 
-    static LoginMapper()
+    static UserInfoMapper()
     {
         var basePath = AppContext.BaseDirectory;
         var configuration = new ConfigurationBuilder()
@@ -22,25 +22,27 @@ public static class LoginMapper
             ?? throw new ArgumentNullException("please check appsettings.json");
     }
 
-    public static void Insert(LoginDO login)
+    public static void Insert(UserInfoDO userInfo)
     {
-        string sql = $"INSERT INTO {TableName} (id, username, password,security_password, role) VALUES (@id, @username, @password, @security, @role)";
+        string sql = $"INSERT INTO {TableName} (id, user_id, name, gender, age, address) VALUES (@id, @user_id, @name, @gender, @age, @address)";
         using var conn = new NpgsqlConnection(_connectionString);
         using var cmd = new NpgsqlCommand(sql, conn);
 
-        cmd.Parameters.AddWithValue("id", login.Id);
-        cmd.Parameters.AddWithValue("username", login.Username);
-        cmd.Parameters.AddWithValue("password", login.Password);
-        cmd.Parameters.AddWithValue("security", login.SecurityPassword);
-        cmd.Parameters.AddWithValue("role", login.Role);
+        // 直接传值，空值自动映射为数据库 NULL
+        cmd.Parameters.AddWithValue("id", userInfo.Id);
+        cmd.Parameters.AddWithValue("user_id", userInfo.UserId);
+        cmd.Parameters.AddWithValue("name", userInfo.Name);
+        cmd.Parameters.AddWithValue("gender", userInfo.Gender);
+        cmd.Parameters.AddWithValue("age", userInfo.Age);
+        cmd.Parameters.AddWithValue("address", userInfo.Address);
 
         conn.Open();
         cmd.ExecuteNonQuery();
     }
 
-    public static List<LoginDO> GetAll()
+    public static List<UserInfoDO> GetAll()
     {
-        var list = new List<LoginDO>();
+        var list = new List<UserInfoDO>();
         string sql = $"SELECT * FROM {TableName}";
 
         using var conn = new NpgsqlConnection(_connectionString);
@@ -50,19 +52,21 @@ public static class LoginMapper
         using var reader = cmd.ExecuteReader();
         while (reader.Read())
         {
-            list.Add(new LoginDO
+            // 直接读取值，无任何空值判断
+            list.Add(new UserInfoDO
             (
                 reader.GetString(0),
                 reader.GetString(1),
                 reader.GetString(2),
                 reader.GetString(3),
-                reader.GetString(4)
+                reader.GetInt32(4),
+                reader.GetString(5)
             ));
         }
         return list;
     }
 
-    public static LoginDO? SelectById(string id)
+    public static UserInfoDO? SelectById(string id)
     {
         string sql = $"SELECT * FROM {TableName} WHERE id = @id";
 
@@ -74,20 +78,21 @@ public static class LoginMapper
         using var reader = cmd.ExecuteReader();
         if (reader.Read())
         {
-            return new LoginDO
+            return new UserInfoDO
             (
                 reader.GetString(0),
                 reader.GetString(1),
                 reader.GetString(2),
                 reader.GetString(3),
-                reader.GetString(4)
+                reader.GetInt32(4),
+                reader.GetString(5)
             );
         }
         return null;
     }
 
-    //根据 user_id 字段查询
-    public static LoginDO? SelectByUserId(string userId)
+    // 根据用户ID查询用户信息
+    public static UserInfoDO? SelectByUserId(string userId)
     {
         string sql = $"SELECT * FROM {TableName} WHERE user_id = @user_id";
 
@@ -99,30 +104,32 @@ public static class LoginMapper
         using var reader = cmd.ExecuteReader();
         if (reader.Read())
         {
-            return new LoginDO
+            return new UserInfoDO
             (
                 reader.GetString(0),
                 reader.GetString(1),
                 reader.GetString(2),
                 reader.GetString(3),
-                reader.GetString(4)
+                reader.GetInt32(4),
+                reader.GetString(5)
             );
         }
         return null;
     }
 
-    public static void Update(LoginDO login)
+    public static void Update(UserInfoDO userInfo)
     {
-        string sql = $"UPDATE {TableName} SET username=@username, password=@password,security_password=@security, role=@role WHERE id=@id";
+        string sql = $"UPDATE {TableName} SET user_id=@user_id, name=@name, gender=@gender, age=@age, address=@address WHERE id=@id";
 
         using var conn = new NpgsqlConnection(_connectionString);
         using var cmd = new NpgsqlCommand(sql, conn);
 
-        cmd.Parameters.AddWithValue("id", login.Id);
-        cmd.Parameters.AddWithValue("username", login.Username);
-        cmd.Parameters.AddWithValue("password", login.Password);
-        cmd.Parameters.AddWithValue("security", login.SecurityPassword);
-        cmd.Parameters.AddWithValue("role", login.Role);
+        cmd.Parameters.AddWithValue("id", userInfo.Id);
+        cmd.Parameters.AddWithValue("user_id", userInfo.UserId);
+        cmd.Parameters.AddWithValue("name", userInfo.Name);
+        cmd.Parameters.AddWithValue("gender", userInfo.Gender);
+        cmd.Parameters.AddWithValue("age", userInfo.Age);
+        cmd.Parameters.AddWithValue("address", userInfo.Address);
 
         conn.Open();
         cmd.ExecuteNonQuery();
@@ -134,7 +141,6 @@ public static class LoginMapper
 
         using var conn = new NpgsqlConnection(_connectionString);
         using var cmd = new NpgsqlCommand(sql, conn);
-
         cmd.Parameters.AddWithValue("id", id);
 
         conn.Open();

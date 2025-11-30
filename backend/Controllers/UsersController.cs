@@ -6,22 +6,24 @@ using Service;
 namespace Controllers
 {
     [ApiController]
-    [Route("admin")]
-    public class AdminController : ControllerBase
+    [Route("users")]
+    public class UsersController : ControllerBase
     {
-        [HttpGet("users")]
+        // get users
+        [HttpGet("get")]
         public HttpVO GetUsers([FromQuery] string adminId)
         {
-            HttpVO users = AdminService.CheckUsers(adminId);
+            HttpVO users = UsersService.CheckUsers(adminId);
             return users;
         }
+        // update users
         [HttpPost("update")]
         public HttpVO UpdateUser([FromBody] AdminUpdateUsersVO admin)
         {
             HttpVO user = new HttpVO();
             if (admin.Data != null)
             {
-                string mes = AdminService.UpdateUser(admin.id, admin.Data);
+                string mes = UsersService.UpdateUser(admin.id, admin.Data);
                 user.message = mes;
             }
             else
@@ -31,14 +33,14 @@ namespace Controllers
             }
             return user;
         }
-
+        // delete users
         [HttpPost("delete")]
         public HttpVO DeleteUser([FromBody] DeleteVO admindelete)
         {
-            HttpVO user = AdminService.DeleteUser(admindelete.id);
+            HttpVO user = UsersService.DeleteUser(admindelete.id);
             return user;
         }
-
+        //create users
         [HttpPost("create")]
         public HttpVO CreateUser([FromBody] CreateUserVO admincreate)
         {
@@ -52,9 +54,8 @@ namespace Controllers
             }
             else
             {
-                return AdminService.CreateUser(admincreate);
+                return UsersService.CreateUser(admincreate);
             }
-
         }
     }
 }
