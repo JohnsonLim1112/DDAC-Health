@@ -28,7 +28,6 @@ public static class BookMapper
         using var conn = new NpgsqlConnection(_connectionString);
         using var cmd = new NpgsqlCommand(sql, conn);
 
-        // 直接传值，空值自动映射为数据库 NULL（无需任何判断）
         cmd.Parameters.AddWithValue("id", book.Id);
         cmd.Parameters.AddWithValue("user_id", book.UserId);
         cmd.Parameters.AddWithValue("doctor_id", book.DoctorId);

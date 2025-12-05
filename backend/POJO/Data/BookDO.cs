@@ -8,7 +8,5 @@ public record BookDO(
     string IllnessTxt,
     string Medicine,
     double Price,
-    string Status,
-    DateTime CreateTime,
-    DateTime UpdateTime
+    string Status
 );

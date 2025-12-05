@@ -14,7 +14,7 @@ namespace Service
                 DoctorId: createBookVO.DoctorId,
                 IsAccept: false,
                 IllnessTxt: createBookVO.IllnessTxt,
-                Medicine: null,
+                Medicine: "",
                 Price: 0.0,
                 Status: "0",
                 CreateTime: DateTime.Now,
