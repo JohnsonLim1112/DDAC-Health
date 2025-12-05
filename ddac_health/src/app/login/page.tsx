@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import AuthLayout from '../../components/auth/AuthLayout';
 import Link from 'next/link';
+import { authAPI } from '../../lib/api';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -15,6 +16,7 @@ export default function LoginPage() {
     rememberMe: false
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -22,24 +24,32 @@ export default function LoginPage() {
       ...formData,
       [name]: type === 'checkbox' ? checked : value
     });
+    // 清除错误信息
+    setError('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError('');
 
     try {
-      // TODO: 调用后端 API
-      console.log('Login attempt:', formData);
+      // 调用后端 API
+      const result = await authAPI.login(formData.email, formData.password);
       
-      // 模拟 API 调用
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // 成功后跳转到 dashboard
-      router.push('/dashboard');
-    } catch (error) {
+      if (result.success) {
+        // 登录成功
+        console.log('Login successful:', result.data);
+        
+        // 跳转到 dashboard
+        router.push('/dashboard');
+      } else {
+        // 登录失败，显示错误消息
+        setError(result.message || 'Login failed');
+      }
+    } catch (error: any) {
       console.error('Login failed:', error);
-      alert('Login failed. Please check your credentials.');
+      setError(error.message || 'Login failed. Please check your credentials.');
     } finally {
       setIsLoading(false);
     }
@@ -53,7 +63,14 @@ export default function LoginPage() {
       <div className="max-w-md mx-auto">
         <h2 className="text-2xl font-bold text-gray-800 mb-6">Sign In</h2>
 
-        <div className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* 错误提示 */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl">
+              {error}
+            </div>
+          )}
+
           {/* Email */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -118,7 +135,7 @@ export default function LoginPage() {
 
           {/* Submit Button */}
           <button
-            onClick={handleSubmit}
+            type="submit"
             disabled={isLoading}
             className="w-full bg-gradient-to-r from-blue-600 to-green-500 text-white py-3 px-6 rounded-xl font-semibold hover:shadow-lg transform hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
@@ -132,7 +149,7 @@ export default function LoginPage() {
               Create Account
             </Link>
           </p>
-        </div>
+        </form>
       </div>
     </AuthLayout>
   );

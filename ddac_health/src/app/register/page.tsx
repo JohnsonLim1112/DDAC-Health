@@ -2,52 +2,75 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Mail, Lock, User, Phone, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, User, Phone, Eye, EyeOff, Shield } from 'lucide-react';
 import AuthLayout from '../../components/auth/AuthLayout';
 import Link from 'next/link';
+import { authAPI } from '../../lib/api';
 
 export default function RegisterPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [showSecurityPassword, setShowSecurityPassword] = useState(false);
   const [formData, setFormData] = useState({
-    fullName: '',
     email: '',
-    phone: '',
     password: '',
     confirmPassword: '',
-    userType: 'patient' as 'patient' | 'doctor'
+    securityPassword: ''
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     });
+    // 清除错误信息
+    setError('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // 前端验证
     if (formData.password !== formData.confirmPassword) {
-      alert('Passwords do not match!');
+      setError('Passwords do not match!');
+      return;
+    }
+
+    if (formData.password === formData.securityPassword) {
+      setError('Security password cannot be the same as the password!');
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters long!');
       return;
     }
 
     setIsLoading(true);
+    setError('');
 
     try {
-      // TODO: 调用后端 API
-      console.log('Register attempt:', formData);
+      // 调用后端 API
+      const result = await authAPI.register(
+        formData.email,
+        formData.password,
+        formData.confirmPassword,
+        formData.securityPassword
+      );
       
-      // 模拟 API 调用
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // 成功后跳转到登录页
-      router.push('/login');
-    } catch (error) {
+      if (result.success) {
+        // 注册成功，跳转到登录页
+        alert('Registration successful! Please login.');
+        router.push('/login');
+      } else {
+        // 注册失败，显示错误消息
+        setError(result.message || 'Registration failed');
+      }
+    } catch (error: any) {
       console.error('Registration failed:', error);
-      alert('Registration failed. Please try again.');
+      setError(error.message || 'Registration failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -61,25 +84,13 @@ export default function RegisterPage() {
       <div className="max-w-md mx-auto">
         <h2 className="text-2xl font-bold text-gray-800 mb-6">Create Account</h2>
 
-        <div className="space-y-5">
-          {/* Full Name */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Full Name
-            </label>
-            <div className="relative">
-              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
-                type="text"
-                name="fullName"
-                value={formData.fullName}
-                onChange={handleInputChange}
-                className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                placeholder="John Doe"
-                required
-              />
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* 错误提示 */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl">
+              {error}
             </div>
-          </div>
+          )}
 
           {/* Email */}
           <div>
@@ -100,56 +111,6 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          {/* Phone */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Phone Number
-            </label>
-            <div className="relative">
-              <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={handleInputChange}
-                className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                placeholder="+60 12-345 6789"
-                required
-              />
-            </div>
-          </div>
-
-          {/* User Type */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              I am a...
-            </label>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => setFormData({ ...formData, userType: 'patient' })}
-                className={`py-3 px-4 rounded-xl font-medium transition-all ${
-                  formData.userType === 'patient'
-                    ? 'bg-blue-600 text-white shadow-lg'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                Patient
-              </button>
-              <button
-                type="button"
-                onClick={() => setFormData({ ...formData, userType: 'doctor' })}
-                className={`py-3 px-4 rounded-xl font-medium transition-all ${
-                  formData.userType === 'doctor'
-                    ? 'bg-blue-600 text-white shadow-lg'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                Doctor
-              </button>
-            </div>
-          </div>
-
           {/* Password */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -165,6 +126,7 @@ export default function RegisterPage() {
                 className="w-full pl-12 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                 placeholder="••••••••"
                 required
+                minLength={6}
               />
               <button
                 type="button"
@@ -195,9 +157,39 @@ export default function RegisterPage() {
             </div>
           </div>
 
+          {/* Security Password */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Security Password
+              <span className="text-xs text-gray-500 ml-2">(用于找回密码)</span>
+            </label>
+            <div className="relative">
+              <Shield className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                type={showSecurityPassword ? 'text' : 'password'}
+                name="securityPassword"
+                value={formData.securityPassword}
+                onChange={handleInputChange}
+                className="w-full pl-12 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                placeholder="••••••••"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowSecurityPassword(!showSecurityPassword)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                {showSecurityPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              </button>
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              Security password must be different from your login password
+            </p>
+          </div>
+
           {/* Submit Button */}
           <button
-            onClick={handleSubmit}
+            type="submit"
             disabled={isLoading}
             className="w-full bg-gradient-to-r from-blue-600 to-green-500 text-white py-3 px-6 rounded-xl font-semibold hover:shadow-lg transform hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
@@ -219,7 +211,7 @@ export default function RegisterPage() {
               Sign In
             </Link>
           </p>
-        </div>
+        </form>
       </div>
     </AuthLayout>
   );

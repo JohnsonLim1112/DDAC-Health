@@ -79,6 +79,9 @@
       "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
       "Courier New", monospace;
+    --color-red-50: oklch(97.1% 0.013 17.38);
+    --color-red-200: oklch(88.5% 0.062 18.334);
+    --color-red-700: oklch(50.5% 0.213 27.518);
     --color-orange-500: oklch(70.5% 0.213 47.604);
     --color-amber-400: oklch(82.8% 0.189 84.429);
     --color-green-50: oklch(98.2% 0.018 155.826);
@@ -387,6 +390,9 @@
   .mx-auto {
     margin-inline: auto;
   }
+  .mt-1 {
+    margin-top: calc(var(--spacing) * 1);
+  }
   .mt-3 {
     margin-top: calc(var(--spacing) * 3);
   }
@@ -425,9 +431,6 @@
   }
   .flex {
     display: flex;
-  }
-  .grid {
-    display: grid;
   }
   .inline-flex {
     display: inline-flex;
@@ -532,9 +535,6 @@
   .animate-pulse {
     animation: var(--animate-pulse);
   }
-  .grid-cols-2 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
   .flex-col {
     flex-direction: column;
   }
@@ -630,6 +630,9 @@
   .border-gray-300 {
     border-color: var(--color-gray-300);
   }
+  .border-red-200 {
+    border-color: var(--color-red-200);
+  }
   .border-white\/20 {
     border-color: color-mix(in srgb, #fff 20%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
@@ -648,14 +651,11 @@
   .bg-blue-400 {
     background-color: var(--color-blue-400);
   }
-  .bg-blue-600 {
-    background-color: var(--color-blue-600);
-  }
-  .bg-gray-100 {
-    background-color: var(--color-gray-100);
-  }
   .bg-green-200 {
     background-color: var(--color-green-200);
+  }
+  .bg-red-50 {
+    background-color: var(--color-red-50);
   }
   .bg-white {
     background-color: var(--color-white);
@@ -961,6 +961,9 @@
   .text-gray-900 {
     color: var(--color-gray-900);
   }
+  .text-red-700 {
+    color: var(--color-red-700);
+  }
   .text-transparent {
     color: transparent;
   }
@@ -1085,13 +1088,6 @@
     &:hover {
       @media (hover: hover) {
         border-color: var(--color-blue-500);
-      }
-    }
-  }
-  .hover\:bg-gray-200 {
-    &:hover {
-      @media (hover: hover) {
-        background-color: var(--color-gray-200);
       }
     }
   }
