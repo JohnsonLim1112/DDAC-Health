@@ -1,7 +1,7 @@
 // src/lib/api.ts
 
 // ==================== 配置 ====================
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5089';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5255';
 
 // ==================== 类型定义 ====================
 
@@ -23,7 +23,7 @@ export interface HttpVO {
   data?: any;
 }
 
-// 登录成功后的数据（前端使用大写）
+// 登录成功后的数据
 export interface LoginData {
   LoginId: string;
   LoginRole: string;
@@ -32,6 +32,42 @@ export interface LoginData {
 export interface ApiError {
   message: string;
   status: number;
+}
+
+// Appointments (Book) 相关
+export interface Appointment {
+  id: string;
+  userId: string;
+  doctorId: string;
+  isAccept: boolean;
+  illnessTxt: string;
+  medicine: string;
+  price: number;
+  status: string;
+  createTime: string;
+  updateTime: string;
+}
+
+export interface CreateAppointmentRequest {
+  UserId: string;
+  DoctorId: string;
+  IllnessTxt: string;
+}
+
+// User Management 相关
+export interface User {
+  id: string;
+  username: string;
+  password: string;
+  securityPassword: string;
+  role: 'customer' | 'doctor' | 'admin';
+}
+
+export interface CreateUserRequest {
+  AdminId: string;
+  Username: string;
+  Password: string;
+  role: string;
 }
 
 // ==================== 工具函数 ====================
@@ -219,6 +255,196 @@ export const authAPI = {
         body: JSON.stringify({
           id: id,
         }),
+      });
+      
+      return handleResponse<HttpVO>(response);
+    } catch (error) {
+      console.error('Delete user error:', error);
+      throw error;
+    }
+  },
+};
+
+// ==================== Appointments API ====================
+
+export const appointmentsAPI = {
+  /**
+   * 获取所有预约
+   */
+  getAll: async (): Promise<HttpVO> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/book/GetAll`, {
+        method: 'GET',
+        headers: createHeaders(),
+      });
+      
+      return handleResponse<HttpVO>(response);
+    } catch (error) {
+      console.error('Get appointments error:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * 根据用户ID获取预约
+   */
+  getByUserId: async (userId: string): Promise<HttpVO> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/book/UserGet?UserId=${userId}`, {
+        method: 'GET',
+        headers: createHeaders(),
+      });
+      
+      return handleResponse<HttpVO>(response);
+    } catch (error) {
+      console.error('Get user appointments error:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * 根据医生ID获取预约
+   */
+  getByDoctorId: async (doctorId: string): Promise<HttpVO> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/book/DoctorGet?DoctorId=${doctorId}`, {
+        method: 'GET',
+        headers: createHeaders(),
+      });
+      
+      return handleResponse<HttpVO>(response);
+    } catch (error) {
+      console.error('Get doctor appointments error:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * 创建预约
+   */
+  create: async (appointmentData: CreateAppointmentRequest): Promise<HttpVO> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/book/create`, {
+        method: 'POST',
+        headers: createHeaders(),
+        body: JSON.stringify(appointmentData),
+      });
+      
+      return handleResponse<HttpVO>(response);
+    } catch (error) {
+      console.error('Create appointment error:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * 更新预约
+   */
+  update: async (appointment: Appointment): Promise<HttpVO> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/book/update`, {
+        method: 'POST',
+        headers: createHeaders(),
+        body: JSON.stringify({
+          ...appointment,
+          updateTime: new Date().toISOString()
+        }),
+      });
+      
+      return handleResponse<HttpVO>(response);
+    } catch (error) {
+      console.error('Update appointment error:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * 删除预约
+   */
+  delete: async (id: string): Promise<HttpVO> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/book/delete`, {
+        method: 'POST',
+        headers: createHeaders(),
+        body: JSON.stringify({ id }),
+      });
+      
+      return handleResponse<HttpVO>(response);
+    } catch (error) {
+      console.error('Delete appointment error:', error);
+      throw error;
+    }
+  },
+};
+
+// ==================== User Management API ====================
+
+export const usersAPI = {
+  /**
+   * 获取所有用户（需要 admin 权限）
+   */
+  getAll: async (adminId: string): Promise<HttpVO> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/users/get?adminId=${adminId}`, {
+        method: 'GET',
+        headers: createHeaders(),
+      });
+      
+      return handleResponse<HttpVO>(response);
+    } catch (error) {
+      console.error('Get users error:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * 创建用户（需要 admin 权限）
+   */
+  create: async (userData: CreateUserRequest): Promise<HttpVO> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/users/create`, {
+        method: 'POST',
+        headers: createHeaders(),
+        body: JSON.stringify(userData),
+      });
+      
+      return handleResponse<HttpVO>(response);
+    } catch (error) {
+      console.error('Create user error:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * 更新用户（需要 admin 权限）
+   */
+  update: async (adminId: string, users: User[]): Promise<HttpVO> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/users/update`, {
+        method: 'POST',
+        headers: createHeaders(),
+        body: JSON.stringify({
+          id: adminId,
+          Data: users
+        }),
+      });
+      
+      return handleResponse<HttpVO>(response);
+    } catch (error) {
+      console.error('Update user error:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * 删除用户（需要 admin 权限）
+   */
+  delete: async (id: string): Promise<HttpVO> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/users/delete`, {
+        method: 'POST',
+        headers: createHeaders(),
+        body: JSON.stringify({ id }),
       });
       
       return handleResponse<HttpVO>(response);

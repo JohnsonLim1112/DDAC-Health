@@ -84,13 +84,13 @@ const menuItems: MenuItem[] = [
   // Admin 专属
   {
     label: 'User Management',
-    href: '/dashboard/user-management',
+    href: '/dashboard/admin/user-management',
     icon: <UserCog className="w-5 h-5" />,
     roles: ['admin'],
   },
   {
     label: 'All Appointments',
-    href: '/dashboard/all-appointments',
+    href: '/dashboard/admin/appointments',
     icon: <ClipboardList className="w-5 h-5" />,
     roles: ['admin'],
   },

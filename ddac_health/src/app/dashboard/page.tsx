@@ -243,7 +243,7 @@ export default function DashboardPage() {
           title: 'Appointment',
           description: 'Manage your appointments',
           icon: <TrendingUp className="w-6 h-6 text-white" />,
-          href: '/dashboard/analytics',
+          href: '/dashboard/appointments',
           color: 'bg-green-500',
         },
 
