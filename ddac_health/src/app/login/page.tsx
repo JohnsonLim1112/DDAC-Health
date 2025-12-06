@@ -33,26 +33,37 @@ export default function LoginPage() {
     setIsLoading(true);
     setError('');
 
-    try {
-      // 调用后端 API
-      const result = await authAPI.login(formData.email, formData.password);
+     try {
+    // 调用后端 API
+    const result = await authAPI.login(formData.email, formData.password);
+    
+    // ✅ 添加调试信息
+    console.log('完整的返回结果:', result);
+    console.log('result.data:', result.data);
+    console.log('result.success:', result.success);
+    
+    if (result.success) {
+      // 登录成功
+      console.log('Login successful:', result.data);
       
-      if (result.success) {
-        // 登录成功
-        console.log('Login successful:', result.data);
-        
-        // 跳转到 dashboard
-        router.push('/dashboard');
-      } else {
-        // 登录失败，显示错误消息
-        setError(result.message || 'Login failed');
-      }
-    } catch (error: any) {
-      console.error('Login failed:', error);
-      setError(error.message || 'Login failed. Please check your credentials.');
-    } finally {
-      setIsLoading(false);
+      // ✅ 检查 userData
+      const userData = result.data;
+      console.log('userData:', userData);
+      console.log('userData.LoginRole:', userData?.LoginRole);
+      
+      // 跳转到 dashboard
+      router.push('/dashboard');
+    } else {
+      // 登录失败，显示错误消息
+      setError(result.message || 'Login failed');
     }
+  } catch (error: any) {
+    console.error('Login failed:', error);
+    setError(error.message || 'Login failed. Please check your credentials.');
+  } finally {
+    setIsLoading(false);
+  }
+
   };
 
   return (

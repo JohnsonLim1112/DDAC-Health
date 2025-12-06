@@ -23,6 +23,7 @@ export interface HttpVO {
   data?: any;
 }
 
+// 登录成功后的数据（前端使用大写）
 export interface LoginData {
   LoginId: string;
   LoginRole: string;
@@ -77,6 +78,9 @@ function createHeaders(): HeadersInit {
 // ==================== 认证 API ====================
 
 export const authAPI = {
+  /**
+   * 用户登录
+   */
   login: async (email: string, password: string): Promise<HttpVO> => {
     try {
       const response = await fetch(`${API_BASE_URL}/User/login`, {
@@ -90,8 +94,14 @@ export const authAPI = {
       
       const result = await handleResponse<HttpVO>(response);
       
+      // 保存用户数据
       if (result.success && result.data) {
-        setUserData(result.data);
+        // 转换后端返回的小写字段为大写
+        const transformedData: LoginData = {
+          LoginId: result.data.loginId,    
+          LoginRole: result.data.loginRole      
+        };
+        setUserData(transformedData);
       }
       
       return result;
@@ -101,6 +111,9 @@ export const authAPI = {
     }
   },
 
+  /**
+   * 用户注册
+   */
   register: async (
     username: string,
     password: string,
@@ -126,10 +139,97 @@ export const authAPI = {
     }
   },
 
+  /**
+   * 用户登出
+   */
   logout: (): void => {
     clearUserData();
   },
+
+  /**
+   * 验证邮箱
+   */
+  validateEmail: async (email: string): Promise<HttpVO> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/User/email`, {
+        method: 'POST',
+        headers: createHeaders(),
+        body: JSON.stringify({
+          Username: email,
+        }),
+      });
+      
+      return handleResponse<HttpVO>(response);
+    } catch (error) {
+      console.error('Email validation error:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * 验证安全密码
+   */
+  validateSecurityPassword: async (id: string, securityPassword: string): Promise<HttpVO> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/User/security`, {
+        method: 'POST',
+        headers: createHeaders(),
+        body: JSON.stringify({
+          id: id,
+          SecurityPassword: securityPassword,
+        }),
+      });
+      
+      return handleResponse<HttpVO>(response);
+    } catch (error) {
+      console.error('Security password validation error:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * 修改密码
+   */
+  changePassword: async (id: string, newPassword: string): Promise<HttpVO> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/User/change`, {
+        method: 'POST',
+        headers: createHeaders(),
+        body: JSON.stringify({
+          id: id,
+          password: newPassword,
+        }),
+      });
+      
+      return handleResponse<HttpVO>(response);
+    } catch (error) {
+      console.error('Change password error:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * 删除用户
+   */
+  deleteUser: async (id: string): Promise<HttpVO> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/User/delete`, {
+        method: 'POST',
+        headers: createHeaders(),
+        body: JSON.stringify({
+          id: id,
+        }),
+      });
+      
+      return handleResponse<HttpVO>(response);
+    } catch (error) {
+      console.error('Delete user error:', error);
+      throw error;
+    }
+  },
 };
+
+// ==================== 导出工具函数 ====================
 
 export const authUtils = {
   getUserData,
