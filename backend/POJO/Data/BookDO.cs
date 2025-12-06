@@ -1,6 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
-public record BookDO(
+public record BookDO
+(
     [property: Key] string Id,
     string UserId,
     string DoctorId,
@@ -8,7 +10,7 @@ public record BookDO(
     string IllnessTxt,
     string Medicine,
     double Price,
-    string Status，
-    DateTime CreatedTime,
-    DateTime UpdatedTime
+    string Status,
+    DateTime CreateTime,
+    DateTime UpdateTime
 );
