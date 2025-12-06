@@ -55,7 +55,6 @@ public static class BookMapper
         using var reader = cmd.ExecuteReader();
         while (reader.Read())
         {
-            // 直接读取值，数据库 NULL 由驱动自动处理（无需 IsDBNull 判断）
             list.Add(new BookDO
             (
                 reader.GetString(0),
