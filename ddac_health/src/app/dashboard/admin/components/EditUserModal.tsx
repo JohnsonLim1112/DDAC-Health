@@ -33,27 +33,37 @@ export default function EditUserModal({ isOpen, user, onClose, onSuccess }: Edit
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [doctorInfo, setDoctorInfo] = useState<DoctorInfo | null>(null);
   const [isLoadingDoctorInfo, setIsLoadingDoctorInfo] = useState(false);
+  const [doctorInfoExists, setDoctorInfoExists] = useState(false);
 
-  // 当用户改变时，加载医生资料
   useEffect(() => {
     if (user) {
       setEditingUser({ ...user });
       
-      // 如果是医生，加载医生资料
       if (user.role === 'doctor') {
         loadDoctorInfo(user.id);
       } else {
         setDoctorInfo(null);
+        setDoctorInfoExists(false);
       }
     }
   }, [user]);
 
   const loadDoctorInfo = async (userId: string) => {
     try {
+      console.log('=== LOADING DOCTOR INFO ===');
+      console.log('User ID:', userId);
+      
       setIsLoadingDoctorInfo(true);
       const result = await userInfoAPI.get(userId);
       
+      console.log('Get UserInfo Result:', result);
+      
       if (result.success && result.data) {
+        // ✅ 数据存在
+        console.log('Doctor info EXISTS in database');
+        console.log('Raw data from API:', result.data);
+        
+        setDoctorInfoExists(true);
         setDoctorInfo({
           userId: result.data.userId,
           name: result.data.name || '',
@@ -64,8 +74,18 @@ export default function EditUserModal({ isOpen, user, onClose, onSuccess }: Edit
           experienceYears: result.data.experienceYears || 0,
           bio: result.data.bio || ''
         });
+        
+        console.log('Loaded doctor info into state:', {
+          userId: result.data.userId,
+          name: result.data.name,
+          specialization: result.data.specialization
+        });
       } else {
-        // 如果没有医生资料，创建一个空的
+        // ✅ 数据不存在
+        console.log('Doctor info DOES NOT EXIST in database');
+        console.log('Creating empty doctor info form');
+        
+        setDoctorInfoExists(false);
         setDoctorInfo({
           userId: userId,
           name: '',
@@ -78,7 +98,10 @@ export default function EditUserModal({ isOpen, user, onClose, onSuccess }: Edit
         });
       }
     } catch (error) {
-      console.error('Error loading doctor info:', error);
+      console.error('=== ERROR LOADING DOCTOR INFO ===');
+      console.error('Error details:', error);
+      
+      setDoctorInfoExists(false);
       setDoctorInfo({
         userId: userId,
         name: '',
@@ -91,6 +114,7 @@ export default function EditUserModal({ isOpen, user, onClose, onSuccess }: Edit
       });
     } finally {
       setIsLoadingDoctorInfo(false);
+      console.log('=== DOCTOR INFO LOADING COMPLETE ===');
     }
   };
 
@@ -98,7 +122,12 @@ export default function EditUserModal({ isOpen, user, onClose, onSuccess }: Edit
     e.preventDefault();
     if (!editingUser) return;
 
-    // 验证：如果是医生，必须填写医生资料
+    console.log('=== EDIT USER MODAL - SUBMIT START ===');
+    console.log('1. Editing User:', editingUser);
+    console.log('2. Doctor Info Exists:', doctorInfoExists);
+    console.log('3. Doctor Info State:', doctorInfo);
+
+    // 验证医生信息
     if (editingUser.role === 'doctor' && doctorInfo) {
       if (!doctorInfo.name || !doctorInfo.specialization || !doctorInfo.address) {
         alert('Please fill in all required doctor information!');
@@ -108,16 +137,19 @@ export default function EditUserModal({ isOpen, user, onClose, onSuccess }: Edit
 
     try {
       const adminId = authUtils.getUserId();
+      console.log('4. Admin ID:', adminId);
       
       // 1. 更新用户账号
+      console.log('5. Updating Login Account with data:', [editingUser]);
       const updateUserResult = await usersAPI.update(adminId!, [editingUser]);
+      console.log('6. Update User Result:', updateUserResult);
       
       if (updateUserResult.message !== 'User updated') {
         alert(updateUserResult.message || 'Failed to update user');
         return;
       }
 
-      // 2. 如果是医生，更新/创建医生资料
+      // 2. 如果是医生，保存医生资料
       if (editingUser.role === 'doctor' && doctorInfo) {
         const doctorData = {
           userId: editingUser.id,
@@ -130,8 +162,19 @@ export default function EditUserModal({ isOpen, user, onClose, onSuccess }: Edit
           bio: doctorInfo.bio
         };
 
-        // UserInfo 用 userId 作主键，直接 insert 或 update
-        const doctorResult = await userInfoAPI.create(doctorData);
+        console.log('7. Doctor Data to Send:', doctorData);
+        console.log('8. Using method:', doctorInfoExists ? 'UPDATE' : 'CREATE');
+
+        let doctorResult;
+        if (doctorInfoExists) {
+          console.log('9. Calling userInfoAPI.update()...');
+          doctorResult = await userInfoAPI.update(doctorData);
+        } else {
+          console.log('9. Calling userInfoAPI.create()...');
+          doctorResult = await userInfoAPI.create(doctorData);
+        }
+
+        console.log('10. Doctor Info Result:', doctorResult);
 
         if (!doctorResult.success) {
           alert('User updated but failed to save doctor info: ' + doctorResult.message);
@@ -139,11 +182,13 @@ export default function EditUserModal({ isOpen, user, onClose, onSuccess }: Edit
         }
       }
 
+      console.log('=== EDIT USER MODAL - SUBMIT SUCCESS ===');
       alert('User updated successfully!');
       onClose();
       onSuccess();
     } catch (error) {
-      console.error('Error updating user:', error);
+      console.error('=== EDIT USER MODAL - ERROR ===');
+      console.error('Error details:', error);
       alert('Failed to update user');
     }
   };
@@ -203,7 +248,6 @@ export default function EditUserModal({ isOpen, user, onClose, onSuccess }: Edit
                 const newRole = e.target.value as 'customer' | 'doctor' | 'admin';
                 setEditingUser({ ...editingUser, role: newRole });
                 
-                // 如果改成医生，加载医生资料
                 if (newRole === 'doctor' && !doctorInfo) {
                   loadDoctorInfo(editingUser.id);
                 }
@@ -223,6 +267,12 @@ export default function EditUserModal({ isOpen, user, onClose, onSuccess }: Edit
               <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
                 <Stethoscope className="w-5 h-5 text-blue-600" />
                 Doctor Information (Required)
+                {doctorInfoExists && (
+                  <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">Existing</span>
+                )}
+                {!doctorInfoExists && doctorInfo && (
+                  <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded">New</span>
+                )}
               </h3>
               
               {isLoadingDoctorInfo ? (
