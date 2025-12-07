@@ -199,4 +199,119 @@ public static class BookMapper
         conn.Open();
         cmd.ExecuteNonQuery();
     }
+
+    // 管理员：每月总数统计
+    public static Dictionary<string, int> GetMonthlyAppointmentCount(int year)
+    {
+        var result = new Dictionary<string, int>();
+        string sql = $@"SELECT 
+                        TO_CHAR(create_time, 'YYYY-MM') as month,
+                        COUNT(*) as count
+                    FROM {TableName}
+                    WHERE EXTRACT(YEAR FROM create_time) = @year
+                    GROUP BY TO_CHAR(create_time, 'YYYY-MM')
+                    ORDER BY month";
+
+        using var conn = new NpgsqlConnection(_connectionString);
+        using var cmd = new NpgsqlCommand(sql, conn);
+        cmd.Parameters.AddWithValue("year", year);
+
+        conn.Open();
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            result[reader.GetString(0)] = reader.GetInt32(1);
+        }
+        return result;
+    }
+
+    // 特定用户的月度统计
+    public static Dictionary<string, int> GetUserMonthlyAppointmentCount(string userId, int year)
+    {
+        var result = new Dictionary<string, int>();
+        string sql = $@"SELECT 
+                        TO_CHAR(create_time, 'YYYY-MM') as month,
+                        COUNT(*) as count
+                    FROM {TableName}
+                    WHERE user_id = @user_id 
+                    AND EXTRACT(YEAR FROM create_time) = @year
+                    GROUP BY TO_CHAR(create_time, 'YYYY-MM')
+                    ORDER BY month";
+
+        using var conn = new NpgsqlConnection(_connectionString);
+        using var cmd = new NpgsqlCommand(sql, conn);
+        cmd.Parameters.AddWithValue("user_id", userId);
+        cmd.Parameters.AddWithValue("year", year);
+
+        conn.Open();
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            result[reader.GetString(0)] = reader.GetInt32(1);
+        }
+        return result;
+    }
+
+    // 特定医生的月度统计
+    public static Dictionary<string, int> GetDoctorMonthlyAppointmentCount(string doctorId, int year)
+    {
+        var result = new Dictionary<string, int>();
+        string sql = $@"SELECT 
+                        TO_CHAR(create_time, 'YYYY-MM') as month,
+                        COUNT(*) as count
+                    FROM {TableName}
+                    WHERE doctor_id = @doctor_id 
+                    AND EXTRACT(YEAR FROM create_time) = @year
+                    GROUP BY TO_CHAR(create_time, 'YYYY-MM')
+                    ORDER BY month";
+
+        using var conn = new NpgsqlConnection(_connectionString);
+        using var cmd = new NpgsqlCommand(sql, conn);
+        cmd.Parameters.AddWithValue("doctor_id", doctorId);
+        cmd.Parameters.AddWithValue("year", year);
+
+        conn.Open();
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            result[reader.GetString(0)] = reader.GetInt32(1);
+        }
+        return result;
+    }
+
+    // 医生查看指定月份的所有预约详情
+    public static List<BookDO> SelectByDoctorIdAndMonth(string doctorId, int year, int month)
+    {
+        var list = new List<BookDO>();
+        string sql = $@"SELECT * FROM {TableName} 
+                    WHERE doctor_id = @doctor_id 
+                    AND EXTRACT(YEAR FROM create_time) = @year 
+                    AND EXTRACT(MONTH FROM create_time) = @month
+                    ORDER BY create_time DESC";
+
+        using var conn = new NpgsqlConnection(_connectionString);
+        using var cmd = new NpgsqlCommand(sql, conn);
+        cmd.Parameters.AddWithValue("doctor_id", doctorId);
+        cmd.Parameters.AddWithValue("year", year);
+        cmd.Parameters.AddWithValue("month", month);
+
+        conn.Open();
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            list.Add(new BookDO(
+                reader.GetString(0),      // id
+                reader.GetString(1),      // user_id
+                reader.GetString(2),      // doctor_id
+                reader.GetBoolean(3),     // is_accept
+                reader.GetString(4),      // illness_txt
+                reader.GetString(5),      // medicine
+                reader.GetDouble(6),      // price
+                reader.GetString(7),      // status
+                reader.GetDateTime(8),    // create_time
+                reader.GetDateTime(9)     // update_time
+            ));
+        }
+        return list;
+    }
 }
