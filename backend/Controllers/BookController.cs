@@ -27,18 +27,19 @@ namespace backend.Controllers
             return BookService.updateBook(bookDO);
         }
 
+        // ✅ 修改：使用 [FromQuery] 接受 query string
         [HttpGet("UserGet")]
-        public HttpVO UserGetBook(UsercheckVO usercheckVO)
+        public HttpVO UserGetBook([FromQuery] string UserId)
         {
-            return BookService.UserGetBook(usercheckVO.UserId);
+            return BookService.UserGetBook(UserId);
         }
 
+        // ✅ 修改：使用 [FromQuery] 接受 query string
         [HttpGet("DoctorGet")]
-        public HttpVO DoctorGetBook(DoctorcheckVO doctorCheckVO)
+        public HttpVO DoctorGetBook([FromQuery] string DoctorId)
         {
-            return BookService.DoctorGetBook(doctorCheckVO.DoctorId);
+            return BookService.DoctorGetBook(DoctorId);
         }
-
 
         [HttpGet("GetAll")]
         public HttpVO GetAllBooks()

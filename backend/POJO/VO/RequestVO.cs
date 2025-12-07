@@ -5,6 +5,7 @@
     public string Password2 { get; set; }
     public string SecurityPassword { get; set; }
 }
+
 public class LoginVO
 {
     public string Username { get; set; }
@@ -21,6 +22,7 @@ public class SafeCheckVO
     public string id { get; set; }
     public string SecurityPassword { get; set; }
 }
+
 public class ChangeVO
 {
     public string id { get; set; }
@@ -32,7 +34,7 @@ public class DeleteVO
     public string id { get; set; }
 }
 
-public class  AdminUpdateUsersVO
+public class AdminUpdateUsersVO
 {
     public string id { get; set; }
     public List<LoginDO>? Data { get; set; }
@@ -46,11 +48,11 @@ public class CreateUserVO
     public string role { get; set; }
 }
 
-public class  CreateBookVO
+public class CreateBookVO
 {
     public string UserId { get; set; }
     public string DoctorId { get; set; }
-    public Boolean IsAccept {  get; set; }
+    public Boolean IsAccept { get; set; }
     public string IllnessTxt { get; set; }
 }
 
@@ -64,6 +66,7 @@ public class DoctorcheckVO
     public string DoctorId { get; set; }
 }
 
+// ✅ 修改这个 - 添加医生字段
 public class CreateInfoVO
 {
     public string UserId { get; set; }
@@ -71,6 +74,11 @@ public class CreateInfoVO
     public string Gender { get; set; }
     public int Age { get; set; }
     public string Address { get; set; }
+
+    // ✅ 新增医生专属字段（可选）
+    public string? Specialization { get; set; }
+    public int? ExperienceYears { get; set; }
+    public string? Bio { get; set; }
 }
 
 public class getInfoVO

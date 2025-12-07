@@ -295,9 +295,13 @@ export const appointmentsAPI = {
         headers: createHeaders(),
       });
       
-      return handleResponse<HttpVO>(response);
+      const result = await handleResponse<HttpVO>(response);
+      console.log('User appointments result:', result);
+      return result;
     } catch (error) {
       console.error('Get user appointments error:', error);
+      console.error('UserId:', userId);
+      console.error('Full URL:', `${API_BASE_URL}/book/UserGet?UserId=${userId}`);
       throw error;
     }
   },
@@ -450,6 +454,109 @@ export const usersAPI = {
       return handleResponse<HttpVO>(response);
     } catch (error) {
       console.error('Delete user error:', error);
+      throw error;
+    }
+  },
+};
+
+// ==================== User Info API ====================
+
+export interface UserInfo {
+  userId: string;
+  name: string;
+  gender: string;
+  age: number;
+  address: string;
+  specialization?: string;
+  experienceYears?: number;
+  bio?: string;
+}
+
+export const userInfoAPI = {
+  /**
+   * 获取用户信息
+   */
+  get: async (userId: string): Promise<HttpVO> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/UserInfo/get?UserId=${userId}`, {
+        method: 'GET',
+        headers: createHeaders(),
+      });
+      
+      return handleResponse<HttpVO>(response);
+    } catch (error) {
+      console.error('Get user info error:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * 获取所有医生列表
+   */
+  getDoctors: async (): Promise<HttpVO> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/UserInfo/GetDoctors`, {
+        method: 'GET',
+        headers: createHeaders(),
+      });
+      
+      return handleResponse<HttpVO>(response);
+    } catch (error) {
+      console.error('Get doctors error:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * 创建用户信息
+   */
+  create: async (userInfo: Partial<UserInfo>): Promise<HttpVO> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/UserInfo/create`, {
+        method: 'POST',
+        headers: createHeaders(),
+        body: JSON.stringify(userInfo),
+      });
+      
+      return handleResponse<HttpVO>(response);
+    } catch (error) {
+      console.error('Create user info error:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * 更新用户信息
+   */
+  update: async (userInfo: UserInfo): Promise<HttpVO> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/UserInfo/update`, {
+        method: 'POST',
+        headers: createHeaders(),
+        body: JSON.stringify(userInfo),
+      });
+      
+      return handleResponse<HttpVO>(response);
+    } catch (error) {
+      console.error('Update user info error:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * 删除用户信息
+   */
+  delete: async (id: string): Promise<HttpVO> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/UserInfo/delete`, {
+        method: 'POST',
+        headers: createHeaders(),
+        body: JSON.stringify({ id }),
+      });
+      
+      return handleResponse<HttpVO>(response);
+    } catch (error) {
+      console.error('Delete user info error:', error);
       throw error;
     }
   },

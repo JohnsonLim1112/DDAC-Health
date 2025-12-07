@@ -7,14 +7,18 @@ namespace Service
         public static HttpVO createInfo(CreateInfoVO createInfoVO)
         {
             HttpVO httpVO = new HttpVO();
+
             var userInfoDO = new UserInfoDO(
-                Id: Guid.NewGuid().ToString(),
                 UserId: createInfoVO.UserId,
                 Name: createInfoVO.Name,
                 Gender: createInfoVO.Gender,
                 Age: createInfoVO.Age,
-                Address: createInfoVO.Address
-                );
+                Address: createInfoVO.Address,
+                Specialization: createInfoVO.Specialization,
+                ExperienceYears: createInfoVO.ExperienceYears,
+                Bio: createInfoVO.Bio
+            );
+
             UserInfoMapper.Insert(userInfoDO);
             httpVO.success = true;
             httpVO.message = "create successfully";

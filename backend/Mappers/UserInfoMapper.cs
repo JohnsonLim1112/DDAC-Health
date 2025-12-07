@@ -7,7 +7,7 @@ namespace Mapper;
 
 public static class UserInfoMapper
 {
-    private const string TableName = "user_info";
+    private const string TableName = "\"UserInfo\"";
     private static readonly string _connectionString;
 
     static UserInfoMapper()
@@ -24,17 +24,22 @@ public static class UserInfoMapper
 
     public static void Insert(UserInfoDO userInfo)
     {
-        string sql = $"INSERT INTO {TableName} (id, user_id, name, gender, age, address) VALUES (@id, @user_id, @name, @gender, @age, @address)";
+        // ✅ UserId 大写，其他小写
+        string sql = $@"INSERT INTO {TableName} 
+            (""UserId"", name, gender, age, address, specialization, experience_years, bio) 
+            VALUES (@userid, @name, @gender, @age, @address, @specialization, @experience_years, @bio)";
+
         using var conn = new NpgsqlConnection(_connectionString);
         using var cmd = new NpgsqlCommand(sql, conn);
 
-        // 直接传值，空值自动映射为数据库 NULL
-        cmd.Parameters.AddWithValue("id", userInfo.Id);
-        cmd.Parameters.AddWithValue("user_id", userInfo.UserId);
+        cmd.Parameters.AddWithValue("userid", userInfo.UserId);
         cmd.Parameters.AddWithValue("name", userInfo.Name);
         cmd.Parameters.AddWithValue("gender", userInfo.Gender);
         cmd.Parameters.AddWithValue("age", userInfo.Age);
         cmd.Parameters.AddWithValue("address", userInfo.Address);
+        cmd.Parameters.AddWithValue("specialization", (object?)userInfo.Specialization ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("experience_years", (object?)userInfo.ExperienceYears ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("bio", (object?)userInfo.Bio ?? DBNull.Value);
 
         conn.Open();
         cmd.ExecuteNonQuery();
@@ -52,27 +57,28 @@ public static class UserInfoMapper
         using var reader = cmd.ExecuteReader();
         while (reader.Read())
         {
-            // 直接读取值，无任何空值判断
             list.Add(new UserInfoDO
             (
-                reader.GetString(0),
-                reader.GetString(1),
-                reader.GetString(2),
-                reader.GetString(3),
-                reader.GetInt32(4),
-                reader.GetString(5)
+                UserId: reader.GetString(0),                            // UserId
+                Name: reader.GetString(1),                              // name
+                Gender: reader.GetString(2),                            // gender
+                Age: reader.GetInt32(3),                                // age
+                Address: reader.GetString(4),                           // address
+                Specialization: reader.IsDBNull(5) ? null : reader.GetString(5),    // specialization
+                ExperienceYears: reader.IsDBNull(6) ? null : reader.GetInt32(6),    // experience_years
+                Bio: reader.IsDBNull(7) ? null : reader.GetString(7)    // bio
             ));
         }
         return list;
     }
 
-    public static UserInfoDO? SelectById(string id)
+    public static UserInfoDO? SelectByUserId(string userId)
     {
-        string sql = $"SELECT * FROM {TableName} WHERE id = @id";
+        string sql = $"SELECT * FROM {TableName} WHERE \"UserId\" = @userid";
 
         using var conn = new NpgsqlConnection(_connectionString);
         using var cmd = new NpgsqlCommand(sql, conn);
-        cmd.Parameters.AddWithValue("id", id);
+        cmd.Parameters.AddWithValue("userid", userId);
 
         conn.Open();
         using var reader = cmd.ExecuteReader();
@@ -80,68 +86,78 @@ public static class UserInfoMapper
         {
             return new UserInfoDO
             (
-                reader.GetString(0),
-                reader.GetString(1),
-                reader.GetString(2),
-                reader.GetString(3),
-                reader.GetInt32(4),
-                reader.GetString(5)
+                UserId: reader.GetString(0),
+                Name: reader.GetString(1),
+                Gender: reader.GetString(2),
+                Age: reader.GetInt32(3),
+                Address: reader.GetString(4),
+                Specialization: reader.IsDBNull(5) ? null : reader.GetString(5),
+                ExperienceYears: reader.IsDBNull(6) ? null : reader.GetInt32(6),
+                Bio: reader.IsDBNull(7) ? null : reader.GetString(7)
             );
         }
         return null;
     }
 
-    // 根据用户ID查询用户信息
-    public static UserInfoDO? SelectByUserId(string userId)
+    public static List<UserInfoDO> GetAllDoctors()
     {
-        string sql = $"SELECT * FROM {TableName} WHERE user_id = @user_id";
+        var list = new List<UserInfoDO>();
+        string sql = $"SELECT * FROM {TableName} WHERE specialization IS NOT NULL";
 
         using var conn = new NpgsqlConnection(_connectionString);
         using var cmd = new NpgsqlCommand(sql, conn);
-        cmd.Parameters.AddWithValue("user_id", userId);
 
         conn.Open();
         using var reader = cmd.ExecuteReader();
-        if (reader.Read())
+        while (reader.Read())
         {
-            return new UserInfoDO
+            list.Add(new UserInfoDO
             (
-                reader.GetString(0),
-                reader.GetString(1),
-                reader.GetString(2),
-                reader.GetString(3),
-                reader.GetInt32(4),
-                reader.GetString(5)
-            );
+                UserId: reader.GetString(0),
+                Name: reader.GetString(1),
+                Gender: reader.GetString(2),
+                Age: reader.GetInt32(3),
+                Address: reader.GetString(4),
+                Specialization: reader.IsDBNull(5) ? null : reader.GetString(5),
+                ExperienceYears: reader.IsDBNull(6) ? null : reader.GetInt32(6),
+                Bio: reader.IsDBNull(7) ? null : reader.GetString(7)
+            ));
         }
-        return null;
+        return list;
     }
 
     public static void Update(UserInfoDO userInfo)
     {
-        string sql = $"UPDATE {TableName} SET user_id=@user_id, name=@name, gender=@gender, age=@age, address=@address WHERE id=@id";
+        // ✅ UserId 大写，其他小写
+        string sql = $@"UPDATE {TableName} 
+            SET name=@name, gender=@gender, age=@age, 
+                address=@address, specialization=@specialization, 
+                experience_years=@experience_years, bio=@bio 
+            WHERE ""UserId""=@userid";
 
         using var conn = new NpgsqlConnection(_connectionString);
         using var cmd = new NpgsqlCommand(sql, conn);
 
-        cmd.Parameters.AddWithValue("id", userInfo.Id);
-        cmd.Parameters.AddWithValue("user_id", userInfo.UserId);
+        cmd.Parameters.AddWithValue("userid", userInfo.UserId);
         cmd.Parameters.AddWithValue("name", userInfo.Name);
         cmd.Parameters.AddWithValue("gender", userInfo.Gender);
         cmd.Parameters.AddWithValue("age", userInfo.Age);
         cmd.Parameters.AddWithValue("address", userInfo.Address);
+        cmd.Parameters.AddWithValue("specialization", (object?)userInfo.Specialization ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("experience_years", (object?)userInfo.ExperienceYears ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("bio", (object?)userInfo.Bio ?? DBNull.Value);
 
         conn.Open();
         cmd.ExecuteNonQuery();
     }
 
-    public static void Delete(string id)
+    public static void Delete(string userId)
     {
-        string sql = $"DELETE FROM {TableName} WHERE id=@id";
+        string sql = $"DELETE FROM {TableName} WHERE \"UserId\"=@userid";
 
         using var conn = new NpgsqlConnection(_connectionString);
         using var cmd = new NpgsqlCommand(sql, conn);
-        cmd.Parameters.AddWithValue("id", id);
+        cmd.Parameters.AddWithValue("userid", userId);
 
         conn.Open();
         cmd.ExecuteNonQuery();

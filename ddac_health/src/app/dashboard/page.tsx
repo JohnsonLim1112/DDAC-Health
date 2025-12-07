@@ -1,13 +1,11 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-
-// import DashboardLayout from './layout';
 import { authUtils } from '../../lib/api';
+import CustomerDashboard from '../../components/dashboard_component/CustomerDashboard';
 import {
   Calendar,
   Users,
-  Activity,
   TrendingUp,
   Clock,
   CheckCircle,
@@ -23,13 +21,6 @@ interface StatCardProps {
   trendUp?: boolean;
   color: string;
 }
-
-const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-console.log('userData:', userData);
-console.log('LoginId:', userData.LoginId);
-console.log('LoginRole:', userData.LoginRole);
-console.log('LoginRole type:', typeof userData.LoginRole);
-console.log('LoginRole === "customer":', userData.LoginRole === "customer");
 
 function StatCard({ title, value, icon, trend, trendUp, color }: StatCardProps) {
   return (
@@ -77,226 +68,164 @@ function QuickAction({ title, description, icon, href, color }: QuickActionProps
   );
 }
 
-export default function DashboardPage() {
-  const [userRole, setUserRole] = useState<string>('');
-
-  useEffect(() => {
-    const role = authUtils.getUserRole();
-    setUserRole(role || 'customer');
-  }, []);
-
-  // 根据角色显示不同的欢迎信息
-  const getWelcomeMessage = () => {
-    const messages: Record<string, { title: string; subtitle: string }> = {
-      customer: {
-        title: 'Welcome Back!',
-        subtitle: 'Manage your health and appointments',
-      },
-      doctor: {
-        title: 'Welcome, Doctor!',
-        subtitle: 'Your patients are waiting',
-      },
-      admin: {
-        title: 'Admin Dashboard',
-        subtitle: 'System overview and management',
-      },
-    };
-    return messages[userRole] || messages.customer;
-  };
-
-  // 根据角色显示不同的统计数据
-  const getStatsForRole = () => {
-    if (userRole === 'customer') {
-      return [
-        {
-          title: 'Upcoming Appointments',
-          value: '3',
-          icon: <Calendar className="w-6 h-6 text-white" />,
-          trend: '+2 this week',
-          trendUp: true,
-          color: 'bg-blue-500',
-        },
-        {
-          title: 'Health Records',
-          value: '12',
-          icon: <Activity className="w-6 h-6 text-white" />,
-          trend: '+1 new',
-          trendUp: true,
-          color: 'bg-green-500',
-        },
-        {
-          title: 'Active Doctors',
-          value: '2',
-          icon: <Users className="w-6 h-6 text-white" />,
-          color: 'bg-purple-500',
-        },
-      ];
-    } else if (userRole === 'doctor') {
-      return [
-        {
-          title: 'Today\'s Appointments',
-          value: '8',
-          icon: <Calendar className="w-6 h-6 text-white" />,
-          trend: '+3 from yesterday',
-          trendUp: true,
-          color: 'bg-blue-500',
-        },
-        {
-          title: 'Total Patients',
-          value: '45',
-          icon: <Users className="w-6 h-6 text-white" />,
-          trend: '+5 this month',
-          trendUp: true,
-          color: 'bg-green-500',
-        },
-        {
-          title: 'Pending Reviews',
-          value: '6',
-          icon: <Clock className="w-6 h-6 text-white" />,
-          color: 'bg-orange-500',
-        },
-      ];
-    } else if (userRole === 'admin') {
-      return [
-        {
-          title: 'Total Users',
-          value: '1,234',
-          icon: <Users className="w-6 h-6 text-white" />,
-          trend: '+12% this month',
-          trendUp: true,
-          color: 'bg-blue-500',
-        },
-        {
-          title: 'Total Appointments',
-          value: '89',
-          icon: <Calendar className="w-6 h-6 text-white" />,
-          trend: '+8% this week',
-          trendUp: true,
-          color: 'bg-green-500',
-        },
-      
-      ];
-    }
-    return [];
-  };
-
-  // 根据角色显示不同的快捷操作
-  const getQuickActionsForRole = () => {
-    if (userRole === 'customer') {
-      return [
-        {
-          title: 'Book Appointment',
-          description: 'Schedule a visit with your doctor',
-          icon: <Calendar className="w-6 h-6 text-white" />,
-          href: '/dashboard/appointments/new',
-          color: 'bg-blue-500',
-        },
-        {
-          title: 'View Records',
-          description: 'Check your health history',
-          icon: <Activity className="w-6 h-6 text-white" />,
-          href: '/dashboard/health-records',
-          color: 'bg-green-500',
-        },
-        {
-          title: 'Personal health',
-          description: 'Manage your health profile',
-          icon: <Users className="w-6 h-6 text-white" />,
-          href: '/dashboard/health',
-          color: 'bg-purple-500',
-        },
-      ];
-    } else if (userRole === 'doctor') {
-      return [
-        {
-          title: 'Manage Appointments',
-          description: 'Check today\'s appointments',
-          icon: <Calendar className="w-6 h-6 text-white" />,
-          href: '/dashboard/doctor-appointments',
-          color: 'bg-blue-500',
-        },
-        {
-          title: 'Pending Appointments',
-          description: 'Manage your patients',
-          icon: <Users className="w-6 h-6 text-white" />,
-          href: '/dashboard/patients',
-          color: 'bg-green-500',
-        },
-        {
-          title: 'Appointments History',
-          description: 'Write new prescriptions',
-          icon: <AlertCircle className="w-6 h-6 text-white" />,
-          href: '/dashboard/prescriptions',
-          color: 'bg-orange-500',
-        },
-      ];
-    } else if (userRole === 'admin') {
-      return [
-       {
-      title: 'User Management',
-      description: 'Manage system users',
-      icon: <Users className="w-6 h-6 text-white" />,
-      href: '/dashboard/user-management',  // ✅ 正确路径
-      color: 'bg-blue-500',
-    },
-        {
-          title: 'Appointment',
-          description: 'Manage your appointments',
-          icon: <TrendingUp className="w-6 h-6 text-white" />,
-          href: '/dashboard/appointments',
-          color: 'bg-green-500',
-        },
-
-        {
-          title: 'Summary Reports',
-          description: 'System performance metrics',
-          icon: <TrendingUp className="w-6 h-6 text-white" />,
-          href: '/dashboard/analytics',
-          color: 'bg-green-500',
-        },
-
-
-        
-      ];
-    }
-    return [];
-  };
-
-  const welcomeMessage = getWelcomeMessage();
-  const stats = getStatsForRole();
-  const quickActions = getQuickActionsForRole();
-
+// Doctor Dashboard Component
+function DoctorDashboard() {
   return (
-   
     <div className="space-y-6">
-      {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-xl shadow-lg p-8 text-white">
-        <h1 className="text-3xl font-bold mb-2">{welcomeMessage.title}</h1>
-        <p className="text-blue-100">{welcomeMessage.subtitle}</p>
+      <div className="bg-gradient-to-r from-green-600 to-green-800 rounded-xl shadow-lg p-8 text-white">
+        <h1 className="text-3xl font-bold mb-2">Welcome, Doctor!</h1>
+        <p className="text-green-100">Your patients are waiting</p>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {stats.map((stat, index) => (
-          <StatCard key={index} {...stat} />
-        ))}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <StatCard
+          title="Today's Appointments"
+          value="8"
+          icon={<Calendar className="w-6 h-6 text-white" />}
+          trend="+3 from yesterday"
+          trendUp={true}
+          color="bg-blue-500"
+        />
+        <StatCard
+          title="Total Patients"
+          value="45"
+          icon={<Users className="w-6 h-6 text-white" />}
+          trend="+5 this month"
+          trendUp={true}
+          color="bg-green-500"
+        />
+        <StatCard
+          title="Pending Reviews"
+          value="6"
+          icon={<Clock className="w-6 h-6 text-white" />}
+          color="bg-orange-500"
+        />
       </div>
 
-      {/* Quick Actions */}
       <div>
         <h2 className="text-xl font-bold text-gray-800 mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {quickActions.map((action, index) => (
-            <QuickAction key={index} {...action} />
-          ))}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <QuickAction
+            title="Manage Appointments"
+            description="Check today's appointments"
+            icon={<Calendar className="w-6 h-6 text-white" />}
+            href="/dashboard/doctor-appointments"
+            color="bg-blue-500"
+          />
+          <QuickAction
+            title="Pending Appointments"
+            description="Manage your patients"
+            icon={<Users className="w-6 h-6 text-white" />}
+            href="/dashboard/patients"
+            color="bg-green-500"
+          />
+          <QuickAction
+            title="Appointments History"
+            description="View appointment history"
+            icon={<AlertCircle className="w-6 h-6 text-white" />}
+            href="/dashboard/prescriptions"
+            color="bg-orange-500"
+          />
         </div>
       </div>
 
-      {/* Recent Activity (placeholder) */}
       <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
         <h2 className="text-xl font-bold text-gray-800 mb-4">Recent Activity</h2>
         <p className="text-gray-600">No recent activity to display.</p>
       </div>
     </div>
   );
+}
+
+// Admin Dashboard Component
+function AdminDashboard() {
+  return (
+    <div className="space-y-6">
+      <div className="bg-gradient-to-r from-purple-600 to-purple-800 rounded-xl shadow-lg p-8 text-white">
+        <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
+        <p className="text-purple-100">System overview and management</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <StatCard
+          title="Total Users"
+          value="1,234"
+          icon={<Users className="w-6 h-6 text-white" />}
+          trend="+12% this month"
+          trendUp={true}
+          color="bg-blue-500"
+        />
+        <StatCard
+          title="Total Appointments"
+          value="89"
+          icon={<Calendar className="w-6 h-6 text-white" />}
+          trend="+8% this week"
+          trendUp={true}
+          color="bg-green-500"
+        />
+      </div>
+
+      <div>
+        <h2 className="text-xl font-bold text-gray-800 mb-4">Quick Actions</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <QuickAction
+            title="User Management"
+            description="Manage system users"
+            icon={<Users className="w-6 h-6 text-white" />}
+            href="/dashboard/user-management"
+            color="bg-blue-500"
+          />
+          <QuickAction
+            title="Appointments"
+            description="Manage all appointments"
+            icon={<Calendar className="w-6 h-6 text-white" />}
+            href="/dashboard/appointments"
+            color="bg-green-500"
+          />
+          <QuickAction
+            title="Summary Reports"
+            description="System performance metrics"
+            icon={<TrendingUp className="w-6 h-6 text-white" />}
+            href="/dashboard/analytics"
+            color="bg-purple-500"
+          />
+        </div>
+      </div>
+
+      <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <h2 className="text-xl font-bold text-gray-800 mb-4">System Status</h2>
+        <p className="text-gray-600">All systems operational.</p>
+      </div>
+    </div>
+  );
+}
+
+export default function DashboardPage() {
+  const [userRole, setUserRole] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const role = authUtils.getUserRole();
+    setUserRole(role || 'customer');
+    setIsLoading(false);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  // 根据角色渲染不同的 Dashboard
+  if (userRole === 'customer') {
+    return <CustomerDashboard />;
+  } else if (userRole === 'doctor') {
+    return <DoctorDashboard />;
+  } else if (userRole === 'admin') {
+    return <AdminDashboard />;
+  }
+
+  return <CustomerDashboard />; // 默认显示 customer
 }

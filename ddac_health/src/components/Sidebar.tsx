@@ -43,7 +43,7 @@ const menuItems: MenuItem[] = [
   // Customer 专属
   {
     label: 'My Appointments',
-    href: '/dashboard/appointments',
+    href: '/dashboard/book-appointments',
     icon: <Calendar className="w-5 h-5" />,
     roles: ['customer'],
   },
