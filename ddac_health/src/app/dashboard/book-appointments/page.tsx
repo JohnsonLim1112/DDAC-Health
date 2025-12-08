@@ -25,10 +25,12 @@ export default function BookAppointmentPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [selectedDoctor, setSelectedDoctor] = useState<DoctorInfo | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // 预约表单
+  // ✅ 新的预约表单字段
   const [appointmentDate, setAppointmentDate] = useState('');
-  const [appointmentTime, setAppointmentTime] = useState('');
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
   const [symptoms, setSymptoms] = useState('');
 
   useEffect(() => {
@@ -79,33 +81,106 @@ export default function BookAppointmentPage() {
     setShowBookingModal(true);
   };
 
-  // 提交预约
+  // ✅ 自动计算结束时间（默认1小时后）
+  const handleStartTimeChange = (time: string) => {
+    setStartTime(time);
+    
+    if (time) {
+      const [hours, minutes] = time.split(':');
+      const endHour = (parseInt(hours) + 1).toString().padStart(2, '0');
+      setEndTime(`${endHour}:${minutes}`);
+    }
+  };
+
+  // ✅ 验证时间间隔（最多1小时）
+  const validateTimeDuration = (start: string, end: string): boolean => {
+    if (!start || !end) return true;
+    
+    const startDate = new Date(`2000-01-01T${start}:00`);
+    const endDate = new Date(`2000-01-01T${end}:00`);
+    const durationMinutes = (endDate.getTime() - startDate.getTime()) / 60000;
+    
+    return durationMinutes > 0 && durationMinutes <= 60;
+  };
+
+  // ✅ 验证工作时间（8:00-18:00）
+  const validateWorkingHours = (time: string): boolean => {
+    if (!time) return true;
+    
+    const [hours] = time.split(':').map(Number);
+    return hours >= 8 && hours < 18;
+  };
+
+  // ✅ 提交预约
   const handleSubmitBooking = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!selectedDoctor) return;
 
     try {
+      setIsSubmitting(true);
+
       const userId = authUtils.getUserId();
       if (!userId) {
         alert('Please login first');
         return;
       }
 
-      const appointmentDateTime = `${appointmentDate} ${appointmentTime}`;
-      const illnessText = `${symptoms}\n\nScheduled for: ${appointmentDateTime}`;
+      // ✅ 验证时间
+      if (!appointmentDate || !startTime || !endTime) {
+        alert('Please fill in all time fields');
+        return;
+      }
 
+      // ✅ 验证工作时间
+      if (!validateWorkingHours(startTime)) {
+        alert('Start time must be between 8:00 AM and 6:00 PM (doctor\'s working hours)');
+        return;
+      }
+
+      if (!validateWorkingHours(endTime)) {
+        alert('End time must be within doctor\'s working hours (8:00 AM - 6:00 PM)');
+        return;
+      }
+
+      // ✅ 验证时间间隔
+      if (!validateTimeDuration(startTime, endTime)) {
+        alert('Appointment duration must be between 1 minute and 1 hour');
+        return;
+      }
+
+      // ✅ 组合成完整的 DateTime
+      const startDateTime = new Date(`${appointmentDate}T${startTime}:00`);
+      const endDateTime = new Date(`${appointmentDate}T${endTime}:00`);
+
+      // 验证结束时间必须在开始时间之后
+      if (endDateTime <= startDateTime) {
+        alert('End time must be after start time');
+        return;
+      }
+
+      // 验证时间不能是过去
+      const now = new Date();
+      if (startDateTime < now) {
+        alert('Appointment time cannot be in the past');
+        return;
+      }
+
+      // ✅ 使用新的 API 结构
       const result = await appointmentsAPI.create({
         UserId: userId,
         DoctorId: selectedDoctor.userId,
-        IllnessTxt: illnessText
+        IllnessTxt: symptoms,
+        StartTime: startDateTime.toISOString(),
+        EndTime: endDateTime.toISOString()
       });
 
       if (result.success) {
-        alert('Appointment request submitted successfully!');
+        alert('Appointment request submitted successfully! Please wait for doctor confirmation.');
         setShowBookingModal(false);
         setAppointmentDate('');
-        setAppointmentTime('');
+        setStartTime('');
+        setEndTime('');
         setSymptoms('');
         setSelectedDoctor(null);
       } else {
@@ -114,6 +189,8 @@ export default function BookAppointmentPage() {
     } catch (error) {
       console.error('Booking error:', error);
       alert('Failed to submit appointment request');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -219,51 +296,115 @@ export default function BookAppointmentPage() {
       {/* Booking Modal */}
       {showBookingModal && selectedDoctor && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
-            <div className="p-6 border-b border-gray-200">
-              <h2 className="text-2xl font-bold text-gray-800">Book Appointment</h2>
-              <p className="text-gray-600 mt-1">with Dr. {selectedDoctor.name}</p>
-              <p className="text-sm text-blue-600">{selectedDoctor.specialization}</p>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-2xl">
+              <h2 className="text-2xl font-bold">Book Appointment</h2>
+              <p className="mt-1">with Dr. {selectedDoctor.name}</p>
+              <p className="text-sm text-blue-100">{selectedDoctor.specialization}</p>
             </div>
 
             <form onSubmit={handleSubmitBooking} className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Preferred Date
-                </label>
-                <input
-                  type="date"
-                  value={appointmentDate}
-                  onChange={(e) => setAppointmentDate(e.target.value)}
-                  min={new Date().toISOString().split('T')[0]}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                  required
-                />
+              {/* ✅ 工作时间说明 */}
+              <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                <p className="text-sm font-medium text-blue-800 mb-1">⏰ Working Hours</p>
+                <p className="text-sm text-blue-700">
+                  Appointments available: <strong>8:00 AM - 6:00 PM</strong>
+                </p>
+                <p className="text-xs text-blue-600 mt-1">
+                  Maximum appointment duration: 1 hour
+                </p>
               </div>
 
+              {/* ✅ 预约日期 */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Preferred Time
+                  Appointment Date *
                 </label>
-                <select
-                  value={appointmentTime}
-                  onChange={(e) => setAppointmentTime(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                  required
-                >
-                  <option value="">Select time</option>
-                  <option value="09:00">09:00 AM</option>
-                  <option value="10:00">10:00 AM</option>
-                  <option value="11:00">11:00 AM</option>
-                  <option value="14:00">02:00 PM</option>
-                  <option value="15:00">03:00 PM</option>
-                  <option value="16:00">04:00 PM</option>
-                </select>
+                <div className="relative">
+                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <input
+                    type="date"
+                    value={appointmentDate}
+                    onChange={(e) => setAppointmentDate(e.target.value)}
+                    min={new Date().toISOString().split('T')[0]}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    required
+                  />
+                </div>
               </div>
 
+              {/* ✅ 开始时间 */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Symptoms / Reason for Visit
+                  Start Time *
+                </label>
+                <div className="relative">
+                  <Clock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <input
+                    type="time"
+                    value={startTime}
+                    onChange={(e) => handleStartTimeChange(e.target.value)}
+                    min="08:00"
+                    max="18:00"
+                    className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none ${
+                      startTime && !validateWorkingHours(startTime) ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                    required
+                  />
+                </div>
+                {startTime && !validateWorkingHours(startTime) && (
+                  <p className="text-xs text-red-600 mt-1">⚠️ Must be between 8:00 AM and 6:00 PM</p>
+                )}
+                {startTime && validateWorkingHours(startTime) && (
+                  <p className="text-xs text-green-600 mt-1">✓ Valid working hours</p>
+                )}
+              </div>
+
+              {/* ✅ 结束时间 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  End Time *
+                </label>
+                <div className="relative">
+                  <Clock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <input
+                    type="time"
+                    value={endTime}
+                    onChange={(e) => setEndTime(e.target.value)}
+                    min="08:00"
+                    max="18:00"
+                    className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none ${
+                      endTime && (!validateWorkingHours(endTime) || !validateTimeDuration(startTime, endTime)) 
+                        ? 'border-red-500' 
+                        : 'border-gray-300'
+                    }`}
+                    required
+                  />
+                </div>
+                {startTime && endTime && (
+                  <>
+                    {!validateWorkingHours(endTime) && (
+                      <p className="text-xs text-red-600 mt-1">⚠️ Must be within working hours (8:00 AM - 6:00 PM)</p>
+                    )}
+                    {validateWorkingHours(endTime) && !validateTimeDuration(startTime, endTime) && (
+                      <p className="text-xs text-red-600 mt-1">⚠️ Duration must be max 1 hour</p>
+                    )}
+                    {validateWorkingHours(endTime) && validateTimeDuration(startTime, endTime) && (
+                      <p className="text-xs text-green-600 mt-1">
+                        ✓ Duration: {Math.abs(
+                          (new Date(`2000-01-01T${endTime}:00`).getTime() - 
+                           new Date(`2000-01-01T${startTime}:00`).getTime()) / 60000
+                        )} minutes
+                      </p>
+                    )}
+                  </>
+                )}
+              </div>
+
+              {/* ✅ 症状描述 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Symptoms / Reason for Visit *
                 </label>
                 <textarea
                   value={symptoms}
@@ -275,6 +416,19 @@ export default function BookAppointmentPage() {
                 />
               </div>
 
+              {/* 预约摘要 */}
+              {appointmentDate && startTime && endTime && (
+                <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                  <p className="text-sm font-medium text-blue-800 mb-2">Appointment Summary:</p>
+                  <div className="space-y-1 text-sm text-blue-700">
+                    <p>📅 Date: {new Date(appointmentDate).toLocaleDateString()}</p>
+                    <p>🕐 Time: {startTime} - {endTime}</p>
+                    <p>👨‍⚕️ Doctor: Dr. {selectedDoctor.name}</p>
+                    <p>🏥 Specialization: {selectedDoctor.specialization}</p>
+                  </div>
+                </div>
+              )}
+
               <div className="flex gap-3 pt-4">
                 <button
                   type="button"
@@ -282,18 +436,21 @@ export default function BookAppointmentPage() {
                     setShowBookingModal(false);
                     setSelectedDoctor(null);
                     setAppointmentDate('');
-                    setAppointmentTime('');
+                    setStartTime('');
+                    setEndTime('');
                     setSymptoms('');
                   }}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                  disabled={isSubmitting}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  disabled={isSubmitting}
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
-                  Submit Request
+                  {isSubmitting ? 'Submitting...' : 'Submit Request'}
                 </button>
               </div>
             </form>

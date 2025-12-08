@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Calendar, Plus, Trash2, Edit, Search, Clock, User, Stethoscope, CheckCircle } from 'lucide-react';
+import { Calendar, Plus, Trash2, Edit, Search, Clock, User, Stethoscope, CheckCircle, FileText } from 'lucide-react';
 import { appointmentsAPI, usersAPI, authUtils } from '../../../../lib/api';
 import AppointmentModals from '../components/AppointmentModals';
+import AppointmentViewModal from '../components/AppointmentViewModal';
 
 interface Appointment {
   id: string;
@@ -18,8 +19,6 @@ interface Appointment {
   date: string;        // 创建日期
   startTime: string;   // 预约开始时间（包含日期）
   endTime: string;     // 预约结束时间（包含日期）
-  createTime?: string;
-  updateTime?: string;
 }
 
 interface CreateAppointmentData {
@@ -46,7 +45,9 @@ export default function AppointmentsManagementPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
   const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   
   // ✅ 更新 newAppointment 初始化
   const [newAppointment, setNewAppointment] = useState<CreateAppointmentData>({
@@ -211,6 +212,8 @@ export default function AppointmentsManagementPage() {
     if (status === '1') return { color: 'bg-green-100 text-green-800', label: 'Accepted' };
     if (status === '2') return { color: 'bg-red-100 text-red-800', label: 'Rejected' };
     if (status === '3') return { color: 'bg-blue-100 text-blue-800', label: 'Completed' };
+    if (status === '4') return { color: 'bg-gray-100 text-gray-800', label: 'Cancelled' };
+    if (status === '5') return { color: 'bg-emerald-100 text-emerald-800', label: 'Paid' };
     return { color: 'bg-gray-100 text-gray-800', label: 'Unknown' };
   };
 
@@ -248,7 +251,7 @@ export default function AppointmentsManagementPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
         <div className="bg-white rounded-xl p-6 shadow-sm border">
           <div className="flex items-center justify-between">
             <div>
@@ -285,6 +288,24 @@ export default function AppointmentsManagementPage() {
             <CheckCircle className="w-10 h-10 text-blue-500" />
           </div>
         </div>
+        <div className="bg-white rounded-xl p-6 shadow-sm border">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">Cancelled</p>
+              <p className="text-2xl font-bold">{appointments.filter(a => a.status === '4').length}</p>
+            </div>
+            <Calendar className="w-10 h-10 text-gray-500" />
+          </div>
+        </div>
+        <div className="bg-white rounded-xl p-6 shadow-sm border">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">Paid</p>
+              <p className="text-2xl font-bold">{appointments.filter(a => a.status === '5').length}</p>
+            </div>
+            <CheckCircle className="w-10 h-10 text-emerald-500" />
+          </div>
+        </div>
       </div>
 
       {/* Filters */}
@@ -310,6 +331,8 @@ export default function AppointmentsManagementPage() {
             <option value="1">Accepted</option>
             <option value="2">Rejected</option>
             <option value="3">Completed</option>
+            <option value="4">Cancelled</option>
+            <option value="5">Paid</option>
           </select>
         </div>
       </div>
@@ -375,16 +398,28 @@ export default function AppointmentsManagementPage() {
                         <div className="flex items-center justify-end gap-2">
                           <button 
                             onClick={() => { 
+                              setSelectedAppointment(apt);
+                              setShowViewModal(true);
+                            }}
+                            className="text-gray-600 hover:text-gray-900"
+                            title="View Details"
+                          >
+                            <FileText className="w-5 h-5" />
+                          </button>
+                          <button 
+                            onClick={() => { 
                               setEditingAppointment(apt); 
                               setShowEditModal(true); 
                             }}
                             className="text-blue-600 hover:text-blue-900"
+                            title="Edit"
                           >
                             <Edit className="w-5 h-5" />
                           </button>
                           <button 
                             onClick={() => handleDeleteAppointment(apt.id)}
                             className="text-red-600 hover:text-red-900"
+                            title="Delete"
                           >
                             <Trash2 className="w-5 h-5" />
                           </button>
@@ -410,6 +445,16 @@ export default function AppointmentsManagementPage() {
         editingAppointment={editingAppointment}
         setEditingAppointment={setEditingAppointment}
         handleUpdateAppointment={handleUpdateAppointment}
+      />
+
+      <AppointmentViewModal
+        show={showViewModal}
+        appointment={selectedAppointment}
+        users={users}
+        onClose={() => {
+          setShowViewModal(false);
+          setSelectedAppointment(null);
+        }}
       />
     </div>
   );

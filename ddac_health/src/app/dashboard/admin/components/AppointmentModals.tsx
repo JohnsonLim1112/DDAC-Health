@@ -424,8 +424,44 @@ export default function AppointmentModals({
                   <option value="1">Accepted</option>
                   <option value="2">Rejected</option>
                   <option value="3">Completed</option>
+                  <option value="4">Cancelled</option>
+                  <option value="5">Paid</option>
                 </select>
               </div>
+
+              {/* ✅ Rejection Reason - 只在状态为 Rejected 时显示 */}
+              {editingAppointment.status === '2' && (
+                <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4">
+                  <label className="block text-sm font-medium text-red-800 mb-2">
+                    Rejection Reason *
+                  </label>
+                  <textarea
+                    value={editingAppointment.comment}
+                    onChange={(e) => setEditingAppointment({ ...editingAppointment, comment: e.target.value })}
+                    className="w-full px-4 py-2 border border-red-300 rounded-lg focus:ring-2 focus:ring-red-500 outline-none"
+                    rows={3}
+                    placeholder="Please provide a reason for rejection..."
+                    required
+                  />
+                  <p className="text-xs text-red-600 mt-1">This will be visible to the patient</p>
+                </div>
+              )}
+
+              {/* ✅ Comment/Notes - 只在非 Rejected 状态显示 */}
+              {editingAppointment.status !== '2' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Comment / Notes
+                  </label>
+                  <textarea
+                    value={editingAppointment.comment}
+                    onChange={(e) => setEditingAppointment({ ...editingAppointment, comment: e.target.value })}
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    rows={3}
+                    placeholder="Add any notes or comments..."
+                  />
+                </div>
+              )}
 
               <div className="flex items-center">
                 <input
