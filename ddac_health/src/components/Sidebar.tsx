@@ -55,7 +55,7 @@ const menuItems: MenuItem[] = [
   },
   {
     label: 'Appoint History',
-    href: '/dashboard/history',
+    href: '/dashboard/appointment_history',
     icon: <Users className="w-5 h-5" />,
     roles: ['customer'],
   },
@@ -69,7 +69,7 @@ const menuItems: MenuItem[] = [
   },
   {
     label: 'Appointments HIstory',
-    href: '/dashboard/history-appointments',
+    href: '/dashboard/doctor/appointment_history',
     icon: <Calendar className="w-5 h-5" />,
     roles: ['doctor'],
   },
@@ -109,12 +109,7 @@ const menuItems: MenuItem[] = [
     icon: <User className="w-5 h-5" />,
     roles: ['customer', 'doctor', 'admin'],
   },
-  {
-    label: 'Settings',
-    href: '/dashboard/settings',
-    icon: <Settings className="w-5 h-5" />,
-    roles: ['customer', 'doctor'],
-  },
+
 ];
 
 interface SidebarProps {
