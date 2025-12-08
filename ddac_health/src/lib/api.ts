@@ -27,6 +27,7 @@ export interface HttpVO {
 export interface LoginData {
   LoginId: string;
   LoginRole: string;
+  LoginUsername: string;  // ✅ 添加 username
 }
 
 export interface ApiError {
@@ -135,7 +136,8 @@ export const authAPI = {
         // 转换后端返回的小写字段为大写
         const transformedData: LoginData = {
           LoginId: result.data.loginId,    
-          LoginRole: result.data.loginRole      
+          LoginRole: result.data.loginRole,
+          LoginUsername: email  // ✅ 保存 email
         };
         setUserData(transformedData);
       }
@@ -578,5 +580,16 @@ export const authUtils = {
   getUserRole: (): string | null => {
     const userData = getUserData();
     return userData?.LoginRole || null;
+  },
+  getRole: (): string | null => {  // ✅ 别名方法
+    const userData = getUserData();
+    return userData?.LoginRole || null;
+  },
+  getUserEmail: (): string | null => {  // ✅ 新增获取 email 方法
+    const userData = getUserData();
+    return userData?.LoginUsername || null;
+  },
+  logout: (): void => {  // ✅ 添加 logout 方法
+    clearUserData();
   },
 };
