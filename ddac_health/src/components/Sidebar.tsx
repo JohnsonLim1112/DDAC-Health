@@ -63,7 +63,7 @@ const menuItems: MenuItem[] = [
   // Doctor 专属
   {
     label: 'Pending Appointments',
-    href: '/dashboard/pending-appointments',
+    href: '/dashboard/doctor/pending_appointment',
     icon: <Users className="w-5 h-5" />,
     roles: ['doctor'],
   },

@@ -1,10 +1,11 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Users, UserPlus, Trash2, Edit, Search, Shield, Stethoscope } from 'lucide-react';
+import { Users, UserPlus, Trash2, Edit, Search, Shield, Stethoscope, Eye } from 'lucide-react';
 import { authUtils, usersAPI } from '../../../../lib/api';
 import CreateUserModal from '../components/CreateUserModal';
 import EditUserModal from '../components/EditUserModal';
+import ViewUserInfoModal from '../components/ViewUserInfoModal';
 
 interface User {
   id: string;
@@ -22,7 +23,9 @@ export default function UserManagementPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [viewingUser, setViewingUser] = useState<User | null>(null);
 
   const fetchUsers = async () => {
     try {
@@ -40,6 +43,11 @@ export default function UserManagementPage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleViewClick = (user: User) => {
+    setViewingUser(user);
+    setShowViewModal(true);
   };
 
   const handleEditClick = (user: User) => {
@@ -214,13 +222,30 @@ export default function UserManagementPage() {
                       {user.role}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-500">{user.id.substring(0, 8)}...</td>
+                  <td className="px-6 py-4">
+                    <p className="text-sm font-mono text-gray-600">{user.id}</p>
+                  </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <button onClick={() => handleEditClick(user)} className="text-blue-600 hover:text-blue-900">
+                      <button 
+                        onClick={() => handleViewClick(user)} 
+                        className="text-purple-600 hover:text-purple-900"
+                        title="View Info"
+                      >
+                        <Eye className="w-5 h-5" />
+                      </button>
+                      <button 
+                        onClick={() => handleEditClick(user)} 
+                        className="text-blue-600 hover:text-blue-900"
+                        title="Edit"
+                      >
                         <Edit className="w-5 h-5" />
                       </button>
-                      <button onClick={() => handleDeleteUser(user.id)} className="text-red-600 hover:text-red-900">
+                      <button 
+                        onClick={() => handleDeleteUser(user.id)} 
+                        className="text-red-600 hover:text-red-900"
+                        title="Delete"
+                      >
                         <Trash2 className="w-5 h-5" />
                       </button>
                     </div>
@@ -248,6 +273,16 @@ export default function UserManagementPage() {
           setEditingUser(null);
         }}
         onSuccess={fetchUsers}
+      />
+
+      {/* View User Info Modal */}
+      <ViewUserInfoModal 
+        isOpen={showViewModal}
+        user={viewingUser}
+        onClose={() => {
+          setShowViewModal(false);
+          setViewingUser(null);
+        }}
       />
     </div>
   );
