@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Eye, EyeOff, Stethoscope } from 'lucide-react';
+import { Eye, EyeOff, Stethoscope, User } from 'lucide-react';
 import { authUtils, userInfoAPI, usersAPI } from '../../../../lib/api';
 
 interface EditUserModalProps {
@@ -17,7 +17,7 @@ interface User {
   role: 'customer' | 'doctor' | 'admin';
 }
 
-interface DoctorInfo {
+interface UserInfo {
   userId: string;
   name: string;
   gender: string;
@@ -31,66 +31,41 @@ interface DoctorInfo {
 export default function EditUserModal({ isOpen, user, onClose, onSuccess }: EditUserModalProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
-  const [doctorInfo, setDoctorInfo] = useState<DoctorInfo | null>(null);
-  const [isLoadingDoctorInfo, setIsLoadingDoctorInfo] = useState(false);
-  const [doctorInfoExists, setDoctorInfoExists] = useState(false);
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+  const [isLoadingUserInfo, setIsLoadingUserInfo] = useState(false);
+  const [userInfoExists, setUserInfoExists] = useState(false);
 
   useEffect(() => {
     if (user) {
       setEditingUser({ ...user });
-      
-      if (user.role === 'doctor') {
-        loadDoctorInfo(user.id);
-      } else {
-        setDoctorInfo(null);
-        setDoctorInfoExists(false);
-      }
+      loadUserInfo(user.id);
     }
   }, [user]);
 
-  const loadDoctorInfo = async (userId: string) => {
+  const loadUserInfo = async (userId: string) => {
     try {
-      console.log('=== LOADING DOCTOR INFO ===');
-      console.log('User ID:', userId);
-      
-      setIsLoadingDoctorInfo(true);
+      setIsLoadingUserInfo(true);
       const result = await userInfoAPI.get(userId);
       
-      console.log('Get UserInfo Result:', result);
-      
       if (result.success && result.data) {
-        // ✅ 数据存在
-        console.log('Doctor info EXISTS in database');
-        console.log('Raw data from API:', result.data);
-        
-        setDoctorInfoExists(true);
-        setDoctorInfo({
+        setUserInfoExists(true);
+        setUserInfo({
           userId: result.data.userId,
           name: result.data.name || '',
           gender: result.data.gender || 'Male',
-          age: result.data.age || 30,
+          age: result.data.age || 25,
           address: result.data.address || '',
           specialization: result.data.specialization || '',
           experienceYears: result.data.experienceYears || 0,
           bio: result.data.bio || ''
         });
-        
-        console.log('Loaded doctor info into state:', {
-          userId: result.data.userId,
-          name: result.data.name,
-          specialization: result.data.specialization
-        });
       } else {
-        // ✅ 数据不存在
-        console.log('Doctor info DOES NOT EXIST in database');
-        console.log('Creating empty doctor info form');
-        
-        setDoctorInfoExists(false);
-        setDoctorInfo({
+        setUserInfoExists(false);
+        setUserInfo({
           userId: userId,
           name: '',
           gender: 'Male',
-          age: 30,
+          age: 25,
           address: '',
           specialization: '',
           experienceYears: 0,
@@ -98,97 +73,84 @@ export default function EditUserModal({ isOpen, user, onClose, onSuccess }: Edit
         });
       }
     } catch (error) {
-      console.error('=== ERROR LOADING DOCTOR INFO ===');
-      console.error('Error details:', error);
-      
-      setDoctorInfoExists(false);
-      setDoctorInfo({
+      console.error('Error loading user info:', error);
+      setUserInfoExists(false);
+      setUserInfo({
         userId: userId,
         name: '',
         gender: 'Male',
-        age: 30,
+        age: 25,
         address: '',
         specialization: '',
         experienceYears: 0,
         bio: ''
       });
     } finally {
-      setIsLoadingDoctorInfo(false);
-      console.log('=== DOCTOR INFO LOADING COMPLETE ===');
+      setIsLoadingUserInfo(false);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editingUser) return;
+    if (!editingUser || !userInfo) return;
 
-    console.log('=== EDIT USER MODAL - SUBMIT START ===');
-    console.log('1. Editing User:', editingUser);
-    console.log('2. Doctor Info Exists:', doctorInfoExists);
-    console.log('3. Doctor Info State:', doctorInfo);
-
-    // 验证医生信息
-    if (editingUser.role === 'doctor' && doctorInfo) {
-      if (!doctorInfo.name || !doctorInfo.specialization || !doctorInfo.address) {
-        alert('Please fill in all required doctor information!');
+    // ✅ 只有医生需要验证基本信息
+    if (editingUser.role === 'doctor') {
+      if (!userInfo.name || !userInfo.address) {
+        alert('Please fill in Name and Address for doctor!');
+        return;
+      }
+      if (!userInfo.specialization) {
+        alert('Please fill in Specialization for doctor!');
         return;
       }
     }
 
+    // ✅ Customer 和 Admin 的基本信息是可选的，但如果填了就保存
+    const shouldSaveUserInfo = userInfo.name || userInfo.address || editingUser.role === 'doctor';
+
     try {
       const adminId = authUtils.getUserId();
-      console.log('4. Admin ID:', adminId);
       
       // 1. 更新用户账号
-      console.log('5. Updating Login Account with data:', [editingUser]);
       const updateUserResult = await usersAPI.update(adminId!, [editingUser]);
-      console.log('6. Update User Result:', updateUserResult);
       
       if (updateUserResult.message !== 'User updated') {
         alert(updateUserResult.message || 'Failed to update user');
         return;
       }
 
-      // 2. 如果是医生，保存医生资料
-      if (editingUser.role === 'doctor' && doctorInfo) {
-        const doctorData = {
+      // 2. 更新用户信息（如果需要保存）
+      if (shouldSaveUserInfo) {
+        const userData: UserInfo = {
           userId: editingUser.id,
-          name: doctorInfo.name,
-          gender: doctorInfo.gender,
-          age: doctorInfo.age,
-          address: doctorInfo.address,
-          specialization: doctorInfo.specialization,
-          experienceYears: doctorInfo.experienceYears,
-          bio: doctorInfo.bio
+          name: userInfo.name || '',
+          gender: userInfo.gender || 'Male',
+          age: userInfo.age || 25,
+          address: userInfo.address || '',
+          specialization: editingUser.role === 'doctor' ? userInfo.specialization : '',
+          experienceYears: editingUser.role === 'doctor' ? userInfo.experienceYears : 0,
+          bio: editingUser.role === 'doctor' ? userInfo.bio : ''
         };
 
-        console.log('7. Doctor Data to Send:', doctorData);
-        console.log('8. Using method:', doctorInfoExists ? 'UPDATE' : 'CREATE');
-
-        let doctorResult;
-        if (doctorInfoExists) {
-          console.log('9. Calling userInfoAPI.update()...');
-          doctorResult = await userInfoAPI.update(doctorData);
+        let userResult;
+        if (userInfoExists) {
+          userResult = await userInfoAPI.update(userData);
         } else {
-          console.log('9. Calling userInfoAPI.create()...');
-          doctorResult = await userInfoAPI.create(doctorData);
+          userResult = await userInfoAPI.create(userData);
         }
 
-        console.log('10. Doctor Info Result:', doctorResult);
-
-        if (!doctorResult.success) {
-          alert('User updated but failed to save doctor info: ' + doctorResult.message);
+        if (!userResult.success) {
+          alert('User updated but failed to save user info: ' + userResult.message);
           return;
         }
       }
 
-      console.log('=== EDIT USER MODAL - SUBMIT SUCCESS ===');
       alert('User updated successfully!');
       onClose();
       onSuccess();
     } catch (error) {
-      console.error('=== EDIT USER MODAL - ERROR ===');
-      console.error('Error details:', error);
+      console.error('Error updating user:', error);
       alert('Failed to update user');
     }
   };
@@ -247,10 +209,6 @@ export default function EditUserModal({ isOpen, user, onClose, onSuccess }: Edit
               onChange={(e) => {
                 const newRole = e.target.value as 'customer' | 'doctor' | 'admin';
                 setEditingUser({ ...editingUser, role: newRole });
-                
-                if (newRole === 'doctor' && !doctorInfo) {
-                  loadDoctorInfo(editingUser.id);
-                }
               }}
               className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
               required
@@ -261,120 +219,133 @@ export default function EditUserModal({ isOpen, user, onClose, onSuccess }: Edit
             </select>
           </div>
 
-          {/* Doctor Info - Only show when role is doctor */}
-          {editingUser.role === 'doctor' && (
+          {/* Basic User Info - For ALL roles */}
+          <div className="border-t pt-4 mt-4">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+              <User className="w-5 h-5 text-blue-600" />
+              Basic Information {editingUser.role === 'doctor' ? '(Required)' : '(Optional)'}
+              {userInfoExists && (
+                <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">Existing</span>
+              )}
+              {!userInfoExists && userInfo && (
+                <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded">New</span>
+              )}
+            </h3>
+            
+            {isLoadingUserInfo ? (
+              <div className="text-center py-8">
+                <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                <p className="text-sm text-gray-600">Loading user info...</p>
+              </div>
+            ) : userInfo ? (
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Name {editingUser.role === 'doctor' && '*'}
+                  </label>
+                  <input
+                    type="text"
+                    value={userInfo.name}
+                    onChange={(e) => setUserInfo({ ...userInfo, name: e.target.value })}
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    placeholder="John Doe"
+                    required={editingUser.role === 'doctor'}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Gender</label>
+                  <select
+                    value={userInfo.gender}
+                    onChange={(e) => setUserInfo({ ...userInfo, gender: e.target.value })}
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  >
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Age</label>
+                  <input
+                    type="number"
+                    value={userInfo.age}
+                    onChange={(e) => setUserInfo({ ...userInfo, age: parseInt(e.target.value) || 0 })}
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    min="1"
+                    max="150"
+                  />
+                </div>
+
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Address {editingUser.role === 'doctor' && '*'}
+                  </label>
+                  <input
+                    type="text"
+                    value={userInfo.address}
+                    onChange={(e) => setUserInfo({ ...userInfo, address: e.target.value })}
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    placeholder="123 Main Street, City"
+                    required={editingUser.role === 'doctor'}
+                  />
+                </div>
+              </div>
+            ) : null}
+          </div>
+
+          {/* Doctor-specific Info - Only for doctors */}
+          {editingUser.role === 'doctor' && userInfo && (
             <div className="border-t pt-4 mt-4">
               <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                <Stethoscope className="w-5 h-5 text-blue-600" />
-                Doctor Information (Required)
-                {doctorInfoExists && (
-                  <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">Existing</span>
-                )}
-                {!doctorInfoExists && doctorInfo && (
-                  <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded">New</span>
-                )}
+                <Stethoscope className="w-5 h-5 text-green-600" />
+                Doctor Specialization (Required)
               </h3>
               
-              {isLoadingDoctorInfo ? (
-                <div className="text-center py-8">
-                  <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-                  <p className="text-sm text-gray-600">Loading doctor info...</p>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Experience (years) *
+                  </label>
+                  <input
+                    type="number"
+                    value={userInfo.experienceYears}
+                    onChange={(e) => setUserInfo({ ...userInfo, experienceYears: parseInt(e.target.value) || 0 })}
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    min="0"
+                    max="50"
+                    required
+                  />
                 </div>
-              ) : doctorInfo ? (
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Name *</label>
-                    <input
-                      type="text"
-                      value={doctorInfo.name}
-                      onChange={(e) => setDoctorInfo({ ...doctorInfo, name: e.target.value })}
-                      className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                      placeholder="Dr. John Doe"
-                      required
-                    />
-                  </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Gender *</label>
-                    <select
-                      value={doctorInfo.gender}
-                      onChange={(e) => setDoctorInfo({ ...doctorInfo, gender: e.target.value })}
-                      className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                      required
-                    >
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Age *</label>
-                    <input
-                      type="number"
-                      value={doctorInfo.age}
-                      onChange={(e) => setDoctorInfo({ ...doctorInfo, age: parseInt(e.target.value) })}
-                      className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                      min="25"
-                      max="80"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Experience (years) *
-                    </label>
-                    <input
-                      type="number"
-                      value={doctorInfo.experienceYears}
-                      onChange={(e) => setDoctorInfo({ ...doctorInfo, experienceYears: parseInt(e.target.value) })}
-                      className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                      min="0"
-                      max="50"
-                      required
-                    />
-                  </div>
-
-                  <div className="col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Specialization *
-                    </label>
-                    <input
-                      type="text"
-                      value={doctorInfo.specialization}
-                      onChange={(e) => setDoctorInfo({ ...doctorInfo, specialization: e.target.value })}
-                      className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                      placeholder="e.g., Cardiology, Pediatrics, General Practice"
-                      required
-                    />
-                  </div>
-
-                  <div className="col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Address *</label>
-                    <input
-                      type="text"
-                      value={doctorInfo.address}
-                      onChange={(e) => setDoctorInfo({ ...doctorInfo, address: e.target.value })}
-                      className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                      placeholder="Clinic/Hospital address"
-                      required
-                    />
-                  </div>
-
-                  <div className="col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Bio (Optional)
-                    </label>
-                    <textarea
-                      value={doctorInfo.bio}
-                      onChange={(e) => setDoctorInfo({ ...doctorInfo, bio: e.target.value })}
-                      className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                      rows={3}
-                      placeholder="Brief description about the doctor..."
-                    />
-                  </div>
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Specialization *
+                  </label>
+                  <input
+                    type="text"
+                    value={userInfo.specialization}
+                    onChange={(e) => setUserInfo({ ...userInfo, specialization: e.target.value })}
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    placeholder="e.g., Cardiology, Pediatrics, General Practice"
+                    required
+                  />
                 </div>
-              ) : null}
+
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Bio (Optional)
+                  </label>
+                  <textarea
+                    value={userInfo.bio}
+                    onChange={(e) => setUserInfo({ ...userInfo, bio: e.target.value })}
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    rows={3}
+                    placeholder="Brief description about the doctor..."
+                  />
+                </div>
+              </div>
             </div>
           )}
 

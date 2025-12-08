@@ -1,8 +1,8 @@
-// File: C:\Users\User\Desktop\Hlife\DDAC-Health\ddac_health\src\app\dashboard\book-appointments\page.tsx
-import * as entry from '../../../../../src/app/dashboard/book-appointments/page.js'
+// File: C:\Users\User\Desktop\Hlife\DDAC-Health\ddac_health\src\app\dashboard\doctor\pending_appointment\page.tsx
+import * as entry from '../../../../../../src/app/dashboard/doctor/pending_appointment/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
-type TEntry = typeof import('../../../../../src/app/dashboard/book-appointments/page.js')
+type TEntry = typeof import('../../../../../../src/app/dashboard/doctor/pending_appointment/page.js')
 
 type SegmentParams<T extends Object = any> = T extends Record<string, any>
   ? { [K in keyof T]: T[K] extends string ? string | string[] | undefined : never }

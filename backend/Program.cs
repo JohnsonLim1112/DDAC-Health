@@ -1,6 +1,17 @@
 var builder = WebApplication.CreateBuilder(args);
-
 builder.Services.AddControllers();
+
+// ?? CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000") // Next.js ????
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
 
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
@@ -22,9 +33,15 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+// ?? CORS(??? UseAuthorization ??)
+app.UseCors("AllowFrontend");
+
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 
 Console.WriteLine("Login API start...");
+Console.WriteLine("API running on: http://localhost:5089");
+Console.WriteLine("Swagger UI: http://localhost:5089/swagger");
+
 app.Run(); // start the app
