@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search } from 'lucide-react';
+import { Search, Calendar, Clock } from 'lucide-react';
 import { usersAPI } from '../../../../lib/api';
 
 interface Appointment {
@@ -10,15 +10,20 @@ interface Appointment {
   illnessTxt: string;
   medicine: string;
   price: number;
+  comment: string;
   status: string;
-  createTime: string;
-  updateTime: string;
+  date: string;
+  startTime: string;
+  endTime: string;
 }
 
 interface CreateAppointmentData {
   UserId: string;
   DoctorId: string;
   IllnessTxt: string;
+  Date: string;        // ✅ 预约日期
+  StartTime: string;   // ✅ 开始时间
+  EndTime: string;     // ✅ 结束时间
 }
 
 interface User {
@@ -121,6 +126,16 @@ export default function AppointmentModals({
   React.useEffect(() => {
     if (showCreateModal) {
       loadUsers();
+      // ✅ 设置默认日期和时间
+      const today = new Date().toISOString().split('T')[0];
+      if (!newAppointment.Date) {
+        setNewAppointment({
+          ...newAppointment,
+          Date: today,
+          StartTime: '09:00',
+          EndTime: '10:00'
+        });
+      }
     }
   }, [showCreateModal]);
 
@@ -138,7 +153,7 @@ export default function AppointmentModals({
             <form onSubmit={handleCreateAppointment} className="p-6 space-y-4">
               {/* Patient Search */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Patient Email</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Patient Email *</label>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <input
@@ -171,7 +186,7 @@ export default function AppointmentModals({
 
               {/* Doctor Search */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Doctor Email</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Doctor Email *</label>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <input
@@ -202,9 +217,56 @@ export default function AppointmentModals({
                 )}
               </div>
 
+              {/* ✅ Appointment Date */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <Calendar className="w-4 h-4 inline mr-2" />
+                  Appointment Date *
+                </label>
+                <input
+                  type="date"
+                  value={newAppointment.Date}
+                  onChange={(e) => setNewAppointment({ ...newAppointment, Date: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  min={new Date().toISOString().split('T')[0]}
+                  required
+                />
+              </div>
+
+              {/* ✅ Time Slots */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <Clock className="w-4 h-4 inline mr-2" />
+                    Start Time *
+                  </label>
+                  <input
+                    type="time"
+                    value={newAppointment.StartTime}
+                    onChange={(e) => setNewAppointment({ ...newAppointment, StartTime: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <Clock className="w-4 h-4 inline mr-2" />
+                    End Time *
+                  </label>
+                  <input
+                    type="time"
+                    value={newAppointment.EndTime}
+                    onChange={(e) => setNewAppointment({ ...newAppointment, EndTime: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    required
+                  />
+                </div>
+              </div>
+
               {/* Illness Description */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Illness Description</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Illness Description *</label>
                 <textarea
                   value={newAppointment.IllnessTxt}
                   onChange={(e) => setNewAppointment({ ...newAppointment, IllnessTxt: e.target.value })}
@@ -221,7 +283,14 @@ export default function AppointmentModals({
                   type="button"
                   onClick={() => {
                     setShowCreateModal(false);
-                    setNewAppointment({ UserId: '', DoctorId: '', IllnessTxt: '' });
+                    setNewAppointment({ 
+                      UserId: '', 
+                      DoctorId: '', 
+                      IllnessTxt: '',
+                      Date: '',
+                      StartTime: '',
+                      EndTime: ''
+                    });
                     setPatientEmail('');
                     setDoctorEmail('');
                     setPatientSearchResults([]);
@@ -244,7 +313,7 @@ export default function AppointmentModals({
         </div>
       )}
 
-      {/* Edit Modal - 保持不变 */}
+      {/* Edit Modal */}
       {showEditModal && editingAppointment && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
@@ -264,6 +333,49 @@ export default function AppointmentModals({
                 <label className="block text-sm font-medium text-gray-700 mb-2">Doctor ID</label>
                 <input type="text" value={editingAppointment.doctorId} disabled
                   className="w-full px-4 py-2 border rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed" />
+              </div>
+
+              {/* ✅ Appointment Date */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <Calendar className="w-4 h-4 inline mr-2" />
+                  Appointment Date
+                </label>
+                <input
+                  type="date"
+                  value={editingAppointment.date?.split('T')[0] || ''}
+                  onChange={(e) => setEditingAppointment({ ...editingAppointment, date: e.target.value })}
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+              </div>
+
+              {/* ✅ Time Slots */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <Clock className="w-4 h-4 inline mr-2" />
+                    Start Time
+                  </label>
+                  <input
+                    type="time"
+                    value={editingAppointment.startTime?.substring(11, 16) || ''}
+                    onChange={(e) => setEditingAppointment({ ...editingAppointment, startTime: e.target.value })}
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <Clock className="w-4 h-4 inline mr-2" />
+                    End Time
+                  </label>
+                  <input
+                    type="time"
+                    value={editingAppointment.endTime?.substring(11, 16) || ''}
+                    onChange={(e) => setEditingAppointment({ ...editingAppointment, endTime: e.target.value })}
+                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  />
+                </div>
               </div>
 
               <div>
@@ -288,7 +400,7 @@ export default function AppointmentModals({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Price ($)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Price (RM)</label>
                 <input
                   type="number" step="0.01"
                   value={editingAppointment.price}
@@ -305,8 +417,9 @@ export default function AppointmentModals({
                   className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                 >
                   <option value="0">Pending</option>
-                  <option value="1">Processed</option>
-                  <option value="2">Completed</option>
+                  <option value="1">Accepted</option>
+                  <option value="2">Rejected</option>
+                  <option value="3">Completed</option>
                 </select>
               </div>
 
