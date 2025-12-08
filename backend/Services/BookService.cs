@@ -16,9 +16,11 @@ namespace Service
                 IllnessTxt: createBookVO.IllnessTxt,
                 Medicine: "",
                 Price: 0.0,
-                Status: "0",
-                CreateTime: DateTime.Now,
-                UpdateTime: DateTime.Now
+                Comment:"",
+                Status: " ",
+                Date: DateTime.Now,
+                StartTime: createBookVO.StartTime,
+                EndTime: createBookVO.EndTime
                 );
             BookMapper.Insert(bookDO);
             httpVO.success = true;
@@ -40,13 +42,7 @@ namespace Service
         {
             HttpVO httpVO = new HttpVO();
 
-            // ✅ 更新 UpdateTime
-            var updatedBookDO = bookDO with
-            {
-                UpdateTime = DateTime.Now
-            };
-
-            BookMapper.Update(updatedBookDO);
+            BookMapper.Update(bookDO);
             httpVO.success = true;
             httpVO.message = "update successfully";
             return httpVO;

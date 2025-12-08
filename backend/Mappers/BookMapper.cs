@@ -25,7 +25,7 @@ public static class BookMapper
     public static void Insert(BookDO book)
     {
         // ✅ 数据库字段用下划线：create_time, update_time, price (不是 prices)
-        string sql = $"INSERT INTO {TableName} (id, user_id, doctor_id, is_accept, illness_txt, medicine, price, status, create_time, update_time) VALUES (@id, @user_id, @doctor_id, @is_accept, @illness_txt, @medicine, @price, @status, @create_time, @update_time)";
+        string sql = $"INSERT INTO {TableName} (id, user_id, doctor_id, is_accept, illness_txt, medicine, price, status, create_time, update_time) VALUES (@id, @user_id, @doctor_id, @is_accept, @illness_txt, @medicine, @price,@comment, @status, @date, @start_time, @end_time)";
         using var conn = new NpgsqlConnection(_connectionString);
         using var cmd = new NpgsqlCommand(sql, conn);
 
@@ -36,9 +36,11 @@ public static class BookMapper
         cmd.Parameters.AddWithValue("illness_txt", book.IllnessTxt);
         cmd.Parameters.AddWithValue("medicine", book.Medicine);
         cmd.Parameters.AddWithValue("price", book.Price);
+        cmd.Parameters.AddWithValue("cooment", book.Comment);
         cmd.Parameters.AddWithValue("status", book.Status);
-        cmd.Parameters.AddWithValue("create_time", book.CreateTime);
-        cmd.Parameters.AddWithValue("update_time", book.UpdateTime);
+        cmd.Parameters.AddWithValue("date", book.Date);
+        cmd.Parameters.AddWithValue("start_time", book.StartTime);
+        cmd.Parameters.AddWithValue("end_time", book.EndTime);
 
         conn.Open();
         cmd.ExecuteNonQuery();
@@ -64,10 +66,12 @@ public static class BookMapper
                 reader.GetBoolean(3),     // is_accept
                 reader.GetString(4),      // illness_txt
                 reader.GetString(5),      // medicine
-                reader.GetDouble(6),      // price (不是 prices)
-                reader.GetString(7),      // status
-                reader.GetDateTime(8),    // create_time
-                reader.GetDateTime(9)     // update_time
+                reader.GetDouble(6),      // price
+                reader.GetString(7),      // comment
+                reader.GetString(8),      // status
+                reader.GetDateTime(9),    // date
+                reader.GetDateTime(10),    // start_time
+                reader.GetDateTime(11)    // end_time
             ));
         }
         return list;
@@ -93,10 +97,12 @@ public static class BookMapper
                 reader.GetBoolean(3),     // is_accept
                 reader.GetString(4),      // illness_txt
                 reader.GetString(5),      // medicine
-                reader.GetDouble(6),      // prices
-                reader.GetString(7),      // status
-                reader.GetDateTime(8),    // create_time
-                reader.GetDateTime(9)     // update_time
+                reader.GetDouble(6),      // price
+                reader.GetString(7),      // comment
+                reader.GetString(8),      // status
+                reader.GetDateTime(9),    // date
+                reader.GetDateTime(10),    // start_time
+                reader.GetDateTime(11)    // end_time
             );
         }
         return null;
@@ -125,10 +131,12 @@ public static class BookMapper
                 reader.GetBoolean(3),     // is_accept
                 reader.GetString(4),      // illness_txt
                 reader.GetString(5),      // medicine
-                reader.GetDouble(6),      // prices
-                reader.GetString(7),      // status
-                reader.GetDateTime(8),    // create_time
-                reader.GetDateTime(9)     // update_time
+                reader.GetDouble(6),      // price
+                reader.GetString(7),      // comment
+                reader.GetString(8),      // status
+                reader.GetDateTime(9),    // date
+                reader.GetDateTime(10),    // start_time
+                reader.GetDateTime(11)    // end_time
             ));
         }
         return list;
@@ -156,10 +164,12 @@ public static class BookMapper
                 reader.GetBoolean(3),     // is_accept
                 reader.GetString(4),      // illness_txt
                 reader.GetString(5),      // medicine
-                reader.GetDouble(6),      // prices
-                reader.GetString(7),      // status
-                reader.GetDateTime(8),    // create_time
-                reader.GetDateTime(9)     // update_time
+                reader.GetDouble(6),      // price
+                reader.GetString(7),      // comment
+                reader.GetString(8),      // status
+                reader.GetDateTime(9),    // date
+                reader.GetDateTime(10),    // start_time
+                reader.GetDateTime(11)    // end_time
             ));
         }
         return list;
@@ -180,9 +190,11 @@ public static class BookMapper
         cmd.Parameters.AddWithValue("illness_txt", book.IllnessTxt);
         cmd.Parameters.AddWithValue("medicine", book.Medicine);
         cmd.Parameters.AddWithValue("price", book.Price);
+        cmd.Parameters.AddWithValue("cooment", book.Comment);
         cmd.Parameters.AddWithValue("status", book.Status);
-        cmd.Parameters.AddWithValue("create_time", book.CreateTime);
-        cmd.Parameters.AddWithValue("update_time", book.UpdateTime);
+        cmd.Parameters.AddWithValue("date", book.Date);
+        cmd.Parameters.AddWithValue("start_time", book.StartTime);
+        cmd.Parameters.AddWithValue("end_time", book.EndTime);
 
         conn.Open();
         cmd.ExecuteNonQuery();
@@ -205,11 +217,11 @@ public static class BookMapper
     {
         var result = new Dictionary<string, int>();
         string sql = $@"SELECT 
-                        TO_CHAR(create_time, 'YYYY-MM') as month,
+                        TO_CHAR(end_time, 'YYYY-MM') as month,
                         COUNT(*) as count
                     FROM {TableName}
-                    WHERE EXTRACT(YEAR FROM create_time) = @year
-                    GROUP BY TO_CHAR(create_time, 'YYYY-MM')
+                    WHERE EXTRACT(YEAR FROM end_time) = @year
+                    GROUP BY TO_CHAR(end_time, 'YYYY-MM')
                     ORDER BY month";
 
         using var conn = new NpgsqlConnection(_connectionString);
@@ -230,12 +242,12 @@ public static class BookMapper
     {
         var result = new Dictionary<string, int>();
         string sql = $@"SELECT 
-                        TO_CHAR(create_time, 'YYYY-MM') as month,
+                        TO_CHAR(end_time, 'YYYY-MM') as month,
                         COUNT(*) as count
                     FROM {TableName}
                     WHERE user_id = @user_id 
-                    AND EXTRACT(YEAR FROM create_time) = @year
-                    GROUP BY TO_CHAR(create_time, 'YYYY-MM')
+                    AND EXTRACT(YEAR FROM end_time) = @year
+                    GROUP BY TO_CHAR(end_time, 'YYYY-MM')
                     ORDER BY month";
 
         using var conn = new NpgsqlConnection(_connectionString);
@@ -257,12 +269,12 @@ public static class BookMapper
     {
         var result = new Dictionary<string, int>();
         string sql = $@"SELECT 
-                        TO_CHAR(create_time, 'YYYY-MM') as month,
+                        TO_CHAR(end_time, 'YYYY-MM') as month,
                         COUNT(*) as count
                     FROM {TableName}
                     WHERE doctor_id = @doctor_id 
-                    AND EXTRACT(YEAR FROM create_time) = @year
-                    GROUP BY TO_CHAR(create_time, 'YYYY-MM')
+                    AND EXTRACT(YEAR FROM end_time) = @year
+                    GROUP BY TO_CHAR(end_time, 'YYYY-MM')
                     ORDER BY month";
 
         using var conn = new NpgsqlConnection(_connectionString);
@@ -285,9 +297,9 @@ public static class BookMapper
         var list = new List<BookDO>();
         string sql = $@"SELECT * FROM {TableName} 
                     WHERE doctor_id = @doctor_id 
-                    AND EXTRACT(YEAR FROM create_time) = @year 
-                    AND EXTRACT(MONTH FROM create_time) = @month
-                    ORDER BY create_time DESC";
+                    AND EXTRACT(YEAR FROM end_time) = @year 
+                    AND EXTRACT(MONTH FROM end_time) = @month
+                    ORDER BY end_time DESC";
 
         using var conn = new NpgsqlConnection(_connectionString);
         using var cmd = new NpgsqlCommand(sql, conn);
@@ -307,9 +319,11 @@ public static class BookMapper
                 reader.GetString(4),      // illness_txt
                 reader.GetString(5),      // medicine
                 reader.GetDouble(6),      // price
-                reader.GetString(7),      // status
-                reader.GetDateTime(8),    // create_time
-                reader.GetDateTime(9)     // update_time
+                reader.GetString(7),      // comment
+                reader.GetString(8),      // status
+                reader.GetDateTime(9),    // date
+                reader.GetDateTime(10),    // start_time
+                reader.GetDateTime(11)    // end_time
             ));
         }
         return list;
