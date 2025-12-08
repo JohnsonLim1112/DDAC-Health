@@ -17,7 +17,7 @@ namespace Service
                 Medicine: "",
                 Price: 0.0,
                 Comment:"",
-                Status: " ",
+                Status: "0",
                 Date: DateTime.Now,
                 StartTime: createBookVO.StartTime,
                 EndTime: createBookVO.EndTime

@@ -12,18 +12,18 @@ interface Appointment {
   price: number;
   comment: string;
   status: string;
-  date: string;
-  startTime: string;
-  endTime: string;
+  date: string;        // 创建日期（后端自动生成）
+  startTime: string;   // 预约开始时间（包含日期）
+  endTime: string;     // 预约结束时间（包含日期）
 }
 
 interface CreateAppointmentData {
   UserId: string;
   DoctorId: string;
   IllnessTxt: string;
-  Date: string;        // ✅ 预约日期
-  StartTime: string;   // ✅ 开始时间
-  EndTime: string;     // ✅ 结束时间
+  AppointmentDate: string;  // 用户选择的预约日期 YYYY-MM-DD
+  StartTime: string;        // 开始时间 HH:mm
+  EndTime: string;          // 结束时间 HH:mm
 }
 
 interface User {
@@ -126,12 +126,15 @@ export default function AppointmentModals({
   React.useEffect(() => {
     if (showCreateModal) {
       loadUsers();
-      // ✅ 设置默认日期和时间
-      const today = new Date().toISOString().split('T')[0];
-      if (!newAppointment.Date) {
+      // ✅ 设置默认值
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const tomorrowStr = tomorrow.toISOString().split('T')[0];
+      
+      if (!newAppointment.AppointmentDate) {
         setNewAppointment({
           ...newAppointment,
-          Date: today,
+          AppointmentDate: tomorrowStr,
           StartTime: '09:00',
           EndTime: '10:00'
         });
@@ -217,7 +220,7 @@ export default function AppointmentModals({
                 )}
               </div>
 
-              {/* ✅ Appointment Date */}
+              {/* ✅ Appointment Date (用户选择的预约日期) */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   <Calendar className="w-4 h-4 inline mr-2" />
@@ -225,12 +228,13 @@ export default function AppointmentModals({
                 </label>
                 <input
                   type="date"
-                  value={newAppointment.Date}
-                  onChange={(e) => setNewAppointment({ ...newAppointment, Date: e.target.value })}
+                  value={newAppointment.AppointmentDate}
+                  onChange={(e) => setNewAppointment({ ...newAppointment, AppointmentDate: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                   min={new Date().toISOString().split('T')[0]}
                   required
                 />
+                <p className="text-xs text-gray-500 mt-1">Select the date for your appointment</p>
               </div>
 
               {/* ✅ Time Slots */}
@@ -287,7 +291,7 @@ export default function AppointmentModals({
                       UserId: '', 
                       DoctorId: '', 
                       IllnessTxt: '',
-                      Date: '',
+                      AppointmentDate: '',
                       StartTime: '',
                       EndTime: ''
                     });
@@ -325,57 +329,55 @@ export default function AppointmentModals({
             <form onSubmit={handleUpdateAppointment} className="p-6 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Patient ID</label>
-                <input type="text" value={editingAppointment.userId} disabled
-                  className="w-full px-4 py-2 border rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed" />
+                <input 
+                  type="text" 
+                  value={editingAppointment.userId} 
+                  disabled
+                  className="w-full px-4 py-2 border rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed" 
+                />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Doctor ID</label>
-                <input type="text" value={editingAppointment.doctorId} disabled
-                  className="w-full px-4 py-2 border rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed" />
+                <input 
+                  type="text" 
+                  value={editingAppointment.doctorId} 
+                  disabled
+                  className="w-full px-4 py-2 border rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed" 
+                />
               </div>
 
-              {/* ✅ Appointment Date */}
+              {/* ✅ Appointment Date & Time */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   <Calendar className="w-4 h-4 inline mr-2" />
-                  Appointment Date
+                  Appointment Date & Time
                 </label>
                 <input
-                  type="date"
-                  value={editingAppointment.date?.split('T')[0] || ''}
-                  onChange={(e) => setEditingAppointment({ ...editingAppointment, date: e.target.value })}
+                  type="datetime-local"
+                  value={editingAppointment.startTime?.substring(0, 16) || ''}
+                  onChange={(e) => setEditingAppointment({ 
+                    ...editingAppointment, 
+                    startTime: new Date(e.target.value).toISOString() 
+                  })}
                   className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                 />
               </div>
 
-              {/* ✅ Time Slots */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <Clock className="w-4 h-4 inline mr-2" />
-                    Start Time
-                  </label>
-                  <input
-                    type="time"
-                    value={editingAppointment.startTime?.substring(11, 16) || ''}
-                    onChange={(e) => setEditingAppointment({ ...editingAppointment, startTime: e.target.value })}
-                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <Clock className="w-4 h-4 inline mr-2" />
-                    End Time
-                  </label>
-                  <input
-                    type="time"
-                    value={editingAppointment.endTime?.substring(11, 16) || ''}
-                    onChange={(e) => setEditingAppointment({ ...editingAppointment, endTime: e.target.value })}
-                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                  />
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <Clock className="w-4 h-4 inline mr-2" />
+                  End Date & Time
+                </label>
+                <input
+                  type="datetime-local"
+                  value={editingAppointment.endTime?.substring(0, 16) || ''}
+                  onChange={(e) => setEditingAppointment({ 
+                    ...editingAppointment, 
+                    endTime: new Date(e.target.value).toISOString() 
+                  })}
+                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                />
               </div>
 
               <div>
@@ -384,7 +386,8 @@ export default function AppointmentModals({
                   value={editingAppointment.illnessTxt}
                   onChange={(e) => setEditingAppointment({ ...editingAppointment, illnessTxt: e.target.value })}
                   className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                  rows={4} required
+                  rows={4} 
+                  required
                 />
               </div>
 
@@ -402,7 +405,8 @@ export default function AppointmentModals({
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Price (RM)</label>
                 <input
-                  type="number" step="0.01"
+                  type="number" 
+                  step="0.01"
                   value={editingAppointment.price}
                   onChange={(e) => setEditingAppointment({ ...editingAppointment, price: parseFloat(e.target.value) })}
                   className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"

@@ -24,8 +24,11 @@ public static class BookMapper
 
     public static void Insert(BookDO book)
     {
-        // ✅ 数据库字段用下划线：create_time, update_time, price (不是 prices)
-        string sql = $"INSERT INTO {TableName} (id, user_id, doctor_id, is_accept, illness_txt, medicine, price, status, create_time, update_time) VALUES (@id, @user_id, @doctor_id, @is_accept, @illness_txt, @medicine, @price,@comment, @status, @date, @start_time, @end_time)";
+        // ✅ 正确的字段名：date, start_time, end_time, comment
+        string sql = $@"INSERT INTO {TableName} 
+            (id, user_id, doctor_id, is_accept, illness_txt, medicine, price, comment, status, date, start_time, end_time) 
+            VALUES (@id, @user_id, @doctor_id, @is_accept, @illness_txt, @medicine, @price, @comment, @status, @date, @start_time, @end_time)";
+
         using var conn = new NpgsqlConnection(_connectionString);
         using var cmd = new NpgsqlCommand(sql, conn);
 
@@ -34,9 +37,9 @@ public static class BookMapper
         cmd.Parameters.AddWithValue("doctor_id", book.DoctorId);
         cmd.Parameters.AddWithValue("is_accept", book.IsAccept);
         cmd.Parameters.AddWithValue("illness_txt", book.IllnessTxt);
-        cmd.Parameters.AddWithValue("medicine", book.Medicine);
+        cmd.Parameters.AddWithValue("medicine", book.Medicine ?? "");
         cmd.Parameters.AddWithValue("price", book.Price);
-        cmd.Parameters.AddWithValue("cooment", book.Comment);
+        cmd.Parameters.AddWithValue("comment", book.Comment ?? "");  // ✅ 正确拼写
         cmd.Parameters.AddWithValue("status", book.Status);
         cmd.Parameters.AddWithValue("date", book.Date);
         cmd.Parameters.AddWithValue("start_time", book.StartTime);
@@ -70,7 +73,7 @@ public static class BookMapper
                 reader.GetString(7),      // comment
                 reader.GetString(8),      // status
                 reader.GetDateTime(9),    // date
-                reader.GetDateTime(10),    // start_time
+                reader.GetDateTime(10),   // start_time
                 reader.GetDateTime(11)    // end_time
             ));
         }
@@ -101,15 +104,13 @@ public static class BookMapper
                 reader.GetString(7),      // comment
                 reader.GetString(8),      // status
                 reader.GetDateTime(9),    // date
-                reader.GetDateTime(10),    // start_time
+                reader.GetDateTime(10),   // start_time
                 reader.GetDateTime(11)    // end_time
             );
         }
         return null;
     }
 
-
-    // 根据用户ID查询预约记录
     public static List<BookDO> SelectByUserId(string userId)
     {
         var list = new List<BookDO>();
@@ -135,14 +136,13 @@ public static class BookMapper
                 reader.GetString(7),      // comment
                 reader.GetString(8),      // status
                 reader.GetDateTime(9),    // date
-                reader.GetDateTime(10),    // start_time
+                reader.GetDateTime(10),   // start_time
                 reader.GetDateTime(11)    // end_time
             ));
         }
         return list;
     }
 
-    // 根据医生ID查询预约记录
     public static List<BookDO> SelectByDoctorId(string doctorId)
     {
         var list = new List<BookDO>();
@@ -168,7 +168,7 @@ public static class BookMapper
                 reader.GetString(7),      // comment
                 reader.GetString(8),      // status
                 reader.GetDateTime(9),    // date
-                reader.GetDateTime(10),    // start_time
+                reader.GetDateTime(10),   // start_time
                 reader.GetDateTime(11)    // end_time
             ));
         }
@@ -177,8 +177,20 @@ public static class BookMapper
 
     public static void Update(BookDO book)
     {
-     
-        string sql = $"UPDATE {TableName} SET user_id=@user_id, doctor_id=@doctor_id, is_accept=@is_accept, illness_txt=@illness_txt, medicine=@medicine, price=@price, status=@status, create_time=@create_time, update_time=@update_time WHERE id=@id";
+        // ✅ 正确的字段名
+        string sql = $@"UPDATE {TableName} 
+            SET user_id=@user_id, 
+                doctor_id=@doctor_id, 
+                is_accept=@is_accept, 
+                illness_txt=@illness_txt, 
+                medicine=@medicine, 
+                price=@price, 
+                comment=@comment, 
+                status=@status, 
+                date=@date, 
+                start_time=@start_time, 
+                end_time=@end_time 
+            WHERE id=@id";
 
         using var conn = new NpgsqlConnection(_connectionString);
         using var cmd = new NpgsqlCommand(sql, conn);
@@ -188,9 +200,9 @@ public static class BookMapper
         cmd.Parameters.AddWithValue("doctor_id", book.DoctorId);
         cmd.Parameters.AddWithValue("is_accept", book.IsAccept);
         cmd.Parameters.AddWithValue("illness_txt", book.IllnessTxt);
-        cmd.Parameters.AddWithValue("medicine", book.Medicine);
+        cmd.Parameters.AddWithValue("medicine", book.Medicine ?? "");
         cmd.Parameters.AddWithValue("price", book.Price);
-        cmd.Parameters.AddWithValue("cooment", book.Comment);
+        cmd.Parameters.AddWithValue("comment", book.Comment ?? "");  // ✅ 正确拼写
         cmd.Parameters.AddWithValue("status", book.Status);
         cmd.Parameters.AddWithValue("date", book.Date);
         cmd.Parameters.AddWithValue("start_time", book.StartTime);
@@ -322,7 +334,7 @@ public static class BookMapper
                 reader.GetString(7),      // comment
                 reader.GetString(8),      // status
                 reader.GetDateTime(9),    // date
-                reader.GetDateTime(10),    // start_time
+                reader.GetDateTime(10),   // start_time
                 reader.GetDateTime(11)    // end_time
             ));
         }
