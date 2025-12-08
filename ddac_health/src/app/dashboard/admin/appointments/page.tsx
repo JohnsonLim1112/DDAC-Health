@@ -13,15 +13,22 @@ interface Appointment {
   illnessTxt: string;
   medicine: string;
   price: number;
+  comment: string;
   status: string;
-  createTime: string;
-  updateTime: string;
+  date: string;        // 创建日期
+  startTime: string;   // 预约开始时间（包含日期）
+  endTime: string;     // 预约结束时间（包含日期）
+  createTime?: string;
+  updateTime?: string;
 }
 
 interface CreateAppointmentData {
   UserId: string;
   DoctorId: string;
   IllnessTxt: string;
+  AppointmentDate: string;  // YYYY-MM-DD
+  StartTime: string;        // HH:mm
+  EndTime: string;          // HH:mm
 }
 
 interface UserInfo {
@@ -40,10 +47,15 @@ export default function AppointmentsManagementPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
+  
+  // ✅ 更新 newAppointment 初始化
   const [newAppointment, setNewAppointment] = useState<CreateAppointmentData>({
     UserId: '',
     DoctorId: '',
-    IllnessTxt: ''
+    IllnessTxt: '',
+    AppointmentDate: '',
+    StartTime: '',
+    EndTime: ''
   });
 
   // 获取用户邮箱
@@ -79,47 +91,98 @@ export default function AppointmentsManagementPage() {
     }
   };
 
+  // ✅ 更新创建预约处理函数
   const handleCreateAppointment = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     try {
-      const result = await appointmentsAPI.create(newAppointment);
+      // ✅ 组合日期和时间成 ISO DateTime
+      const startDateTime = new Date(`${newAppointment.AppointmentDate}T${newAppointment.StartTime}:00`);
+      const endDateTime = new Date(`${newAppointment.AppointmentDate}T${newAppointment.EndTime}:00`);
+
+      // 验证时间
+      if (endDateTime <= startDateTime) {
+        alert('End time must be after start time');
+        return;
+      }
+
+      // 验证日期不能是过去
+      const now = new Date();
+      if (startDateTime < now) {
+        alert('Appointment time cannot be in the past');
+        return;
+      }
+
+      const appointmentData = {
+        UserId: newAppointment.UserId,
+        DoctorId: newAppointment.DoctorId,
+        IllnessTxt: newAppointment.IllnessTxt,
+        StartTime: startDateTime.toISOString(),  // ✅ 完整的 DateTime
+        EndTime: endDateTime.toISOString()        // ✅ 完整的 DateTime
+        // Date 字段由后端自动生成（创建日期）
+      };
+
+      console.log('Creating appointment with data:', appointmentData);
+
+      const result = await appointmentsAPI.create(appointmentData);
+      
       if (result.success) {
-        alert('Appointment created!');
+        alert('Appointment created successfully!');
         setShowCreateModal(false);
-        setNewAppointment({ UserId: '', DoctorId: '', IllnessTxt: '' });
+        setNewAppointment({
+          UserId: '',
+          DoctorId: '',
+          IllnessTxt: '',
+          AppointmentDate: '',
+          StartTime: '',
+          EndTime: ''
+        });
         fetchAppointments();
+      } else {
+        alert(result.message || 'Failed to create appointment');
       }
     } catch (error) {
-      alert('Failed to create');
+      console.error('Error creating appointment:', error);
+      alert('Failed to create appointment');
     }
   };
 
   const handleUpdateAppointment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingAppointment) return;
+    
     try {
       const result = await appointmentsAPI.update(editingAppointment);
+      
       if (result.success) {
-        alert('Updated!');
+        alert('Appointment updated successfully!');
         setShowEditModal(false);
         setEditingAppointment(null);
         fetchAppointments();
+      } else {
+        alert(result.message || 'Failed to update appointment');
       }
     } catch (error) {
-      alert('Failed to update');
+      console.error('Error updating appointment:', error);
+      alert('Failed to update appointment');
     }
   };
 
   const handleDeleteAppointment = async (id: string) => {
-    if (!confirm('Delete?')) return;
+    if (!confirm('Are you sure you want to delete this appointment?')) return;
+    
     try {
       const result = await appointmentsAPI.delete(id);
+      
       if (result.success) {
-        alert('Deleted!');
+        alert('Appointment deleted successfully!');
         fetchAppointments();
+      } else {
+        alert(result.message || 'Failed to delete appointment');
       }
     } catch (error) {
-      alert('Failed to delete');
+      console.error('Error deleting appointment:', error);
+      alert('Failed to delete appointment');
     }
   };
 
@@ -145,15 +208,26 @@ export default function AppointmentsManagementPage() {
 
   const getStatusBadge = (status: string, isAccept: boolean) => {
     if (status === '0') return { color: 'bg-yellow-100 text-yellow-800', label: 'Pending' };
-    if (status === '1' && isAccept) return { color: 'bg-green-100 text-green-800', label: 'Accepted' };
-    if (status === '1' && !isAccept) return { color: 'bg-red-100 text-red-800', label: 'Rejected' };
-    if (status === '2') return { color: 'bg-blue-100 text-blue-800', label: 'Completed' };
+    if (status === '1') return { color: 'bg-green-100 text-green-800', label: 'Accepted' };
+    if (status === '2') return { color: 'bg-red-100 text-red-800', label: 'Rejected' };
+    if (status === '3') return { color: 'bg-blue-100 text-blue-800', label: 'Completed' };
     return { color: 'bg-gray-100 text-gray-800', label: 'Unknown' };
   };
 
-  const formatDate = (dateString: string) => {
+  // ✅ 格式化创建日期
+  const formatCreatedDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
+  // ✅ 格式化预约时间
+  const formatAppointmentTime = (startTime: string, endTime: string) => {
+    const start = new Date(startTime);
+    const end = new Date(endTime);
+    const dateStr = start.toLocaleDateString();
+    const startTimeStr = start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const endTimeStr = end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return `${dateStr} ${startTimeStr} - ${endTimeStr}`;
   };
 
   return (
@@ -197,7 +271,7 @@ export default function AppointmentsManagementPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Accepted</p>
-              <p className="text-2xl font-bold">{appointments.filter(a => a.status === '1' && a.isAccept).length}</p>
+              <p className="text-2xl font-bold">{appointments.filter(a => a.status === '1').length}</p>
             </div>
             <CheckCircle className="w-10 h-10 text-green-500" />
           </div>
@@ -206,7 +280,7 @@ export default function AppointmentsManagementPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600">Completed</p>
-              <p className="text-2xl font-bold">{appointments.filter(a => a.status === '2').length}</p>
+              <p className="text-2xl font-bold">{appointments.filter(a => a.status === '3').length}</p>
             </div>
             <CheckCircle className="w-10 h-10 text-blue-500" />
           </div>
@@ -233,8 +307,9 @@ export default function AppointmentsManagementPage() {
           >
             <option value="all">All Status</option>
             <option value="0">Pending</option>
-            <option value="1">Processed</option>
-            <option value="2">Completed</option>
+            <option value="1">Accepted</option>
+            <option value="2">Rejected</option>
+            <option value="3">Completed</option>
           </select>
         </div>
       </div>
@@ -258,8 +333,8 @@ export default function AppointmentsManagementPage() {
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Patient</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Doctor</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Appointment Time</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Illness</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Medicine</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created</th>
@@ -283,19 +358,36 @@ export default function AppointmentsManagementPage() {
                           <span className="text-sm">{getUserEmail(apt.doctorId)}</span>
                         </div>
                       </td>
+                      {/* ✅ 显示预约时间 */}
+                      <td className="px-6 py-4">
+                        <div className="text-sm text-gray-900">
+                          {formatAppointmentTime(apt.startTime, apt.endTime)}
+                        </div>
+                      </td>
                       <td className="px-6 py-4"><div className="text-sm max-w-xs truncate">{apt.illnessTxt}</div></td>
-                      <td className="px-6 py-4"><div className="text-sm max-w-xs truncate">{apt.medicine || '-'}</div></td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-3 py-1 text-xs font-semibold rounded-full ${badge.color}`}>{badge.label}</span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">${apt.price.toFixed(2)}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(apt.createTime)}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">RM {apt.price.toFixed(2)}</td>
+                      {/* ✅ 显示创建日期 */}
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatCreatedDate(apt.date)}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <button onClick={() => { setEditingAppointment(apt); setShowEditModal(true); }}
-                            className="text-blue-600 hover:text-blue-900"><Edit className="w-5 h-5" /></button>
-                          <button onClick={() => handleDeleteAppointment(apt.id)}
-                            className="text-red-600 hover:text-red-900"><Trash2 className="w-5 h-5" /></button>
+                          <button 
+                            onClick={() => { 
+                              setEditingAppointment(apt); 
+                              setShowEditModal(true); 
+                            }}
+                            className="text-blue-600 hover:text-blue-900"
+                          >
+                            <Edit className="w-5 h-5" />
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteAppointment(apt.id)}
+                            className="text-red-600 hover:text-red-900"
+                          >
+                            <Trash2 className="w-5 h-5" />
+                          </button>
                         </div>
                       </td>
                     </tr>

@@ -44,15 +44,19 @@ export interface Appointment {
   illnessTxt: string;
   medicine: string;
   price: number;
+  comment: string;
   status: string;
-  createTime: string;
-  updateTime: string;
+  date: string;        // 创建日期
+  startTime: string;   // 预约开始时间（包含日期）
+  endTime: string;     // 预约结束时间（包含日期）
 }
 
 export interface CreateAppointmentRequest {
   UserId: string;
   DoctorId: string;
   IllnessTxt: string;
+  StartTime: string;   // ✅ 预约开始时间（包含日期）ISO format
+  EndTime: string;     // ✅ 预约结束时间（包含日期）ISO format
 }
 
 // User Management 相关
@@ -351,10 +355,7 @@ export const appointmentsAPI = {
       const response = await fetch(`${API_BASE_URL}/book/update`, {
         method: 'POST',
         headers: createHeaders(),
-        body: JSON.stringify({
-          ...appointment,
-          updateTime: new Date().toISOString()
-        }),
+        body: JSON.stringify(appointment),
       });
       
       return handleResponse<HttpVO>(response);

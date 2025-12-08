@@ -18,11 +18,13 @@ interface Appointment {
   doctorId: string;
   isAccept: boolean;
   illnessTxt: string;
-  medicine?: string;
+  medicine: string;
   price: number;
+  comment: string;
   status: string;
-  createTime: string;
-  updateTime: string;
+  date: string;        // 创建日期
+  startTime: string;   // 预约开始时间
+  endTime: string;     // 预约结束时间
 }
 
 export default function DoctorPendingAppointmentsPage() {
@@ -64,13 +66,12 @@ export default function DoctorPendingAppointmentsPage() {
     try {
       setIsProcessing(true);
       
-      // ✅ 使用 update API，只修改 status 和 isAccept
+      // ✅ Accept: status=1, isAccept=true, comment 保持为空
       const updatedAppointment = {
         ...appointment,
-        medicine: appointment.medicine || '',
         status: '1',      // 1 = Accepted
         isAccept: true,
-        updateTime: new Date().toISOString()
+        comment: ''       // ✅ Accept 时不需要 comment
       };
       
       const result = await appointmentsAPI.update(updatedAppointment);
@@ -105,22 +106,19 @@ export default function DoctorPendingAppointmentsPage() {
 
     try {
       setIsProcessing(true);
-      // ✅ 使用 update API，只修改 status
-      // 注意：rejection reason 暂时无法保存（数据库没有这个字段）
+      
+      // ✅ Reject: status=2, isAccept=false, comment=拒绝原因
       const updatedAppointment = {
         ...selectedAppointment,
-        medicine: selectedAppointment.medicine || '',
-        status: '2',      // 2 = Rejected
+        status: '2',              // 2 = Rejected
         isAccept: false,
-        updateTime: new Date().toISOString()
-        // TODO: 需要在数据库添加 rejection_reason 字段才能保存原因
+        comment: rejectReason     // ✅ 保存拒绝原因到 comment
       };
       
       const result = await appointmentsAPI.update(updatedAppointment);
       
       if (result.success) {
         alert('Appointment rejected successfully!');
-        console.log('Rejection reason (not saved to DB):', rejectReason);
         setShowRejectModal(false);
         setSelectedAppointment(null);
         setRejectReason('');
@@ -134,6 +132,16 @@ export default function DoctorPendingAppointmentsPage() {
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  // ✅ 格式化预约时间
+  const formatAppointmentTime = (startTime: string, endTime: string) => {
+    const start = new Date(startTime);
+    const end = new Date(endTime);
+    const dateStr = start.toLocaleDateString();
+    const startTimeStr = start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const endTimeStr = end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return `${dateStr} ${startTimeStr} - ${endTimeStr}`;
   };
 
   if (isLoading) {
@@ -222,7 +230,7 @@ export default function DoctorPendingAppointmentsPage() {
                       <h3 className="font-semibold text-lg text-gray-800">Patient ID: {appointment.userId.substring(0, 8)}...</h3>
                       <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
                         <Calendar className="w-4 h-4" />
-                        <span>{new Date(appointment.createTime).toLocaleString()}</span>
+                        <span>{formatAppointmentTime(appointment.startTime, appointment.endTime)}</span>
                       </div>
                     </div>
                   </div>
@@ -306,6 +314,15 @@ export default function DoctorPendingAppointmentsPage() {
 
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Appointment Time
+                </label>
+                <p className="text-gray-800 bg-gray-50 p-2 rounded">
+                  {formatAppointmentTime(selectedAppointment.startTime, selectedAppointment.endTime)}
+                </p>
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Symptoms
                 </label>
                 <p className="text-gray-800 bg-gray-50 p-3 rounded">
@@ -326,7 +343,7 @@ export default function DoctorPendingAppointmentsPage() {
                   required
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  This will be sent to the patient
+                  This will be saved as a comment for the patient
                 </p>
               </div>
 
