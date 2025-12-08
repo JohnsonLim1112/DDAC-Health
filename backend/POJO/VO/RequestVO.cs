@@ -54,6 +54,9 @@ public class CreateBookVO
     public string DoctorId { get; set; }
     public Boolean IsAccept { get; set; }
     public string IllnessTxt { get; set; }
+    public DateTime StartTime { get; set; }
+    public DateTime EndTime { get; set; }
+
 }
 
 public class UsercheckVO
