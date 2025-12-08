@@ -85,3 +85,23 @@ public class getInfoVO
 {
     public string UserId { get; set; }
 }
+
+//for health
+public class CreateHealthVO
+{
+    public string UserId { get; set; }
+    public double? Height { get; set; }
+    public double? Weight { get; set; }
+    public int? BloodPressureSystolic { get; set; }
+    public int? BloodPressureDiastolic { get; set; }
+    public string? MedicalHistory { get; set; }
+    public DateTime RecordDate { get; set; }
+    public string? Notes { get; set; }
+}
+
+public class HealthFilterVO
+{
+    public string UserId { get; set; }
+    public DateTime? StartDate { get; set; }
+    public DateTime? EndDate { get; set; }
+}
