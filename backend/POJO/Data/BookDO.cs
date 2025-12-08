@@ -10,7 +10,9 @@ public record BookDO
     string IllnessTxt,
     string Medicine,
     double Price,
+    string Comment,
     string Status,
-    DateTime CreateTime,
-    DateTime UpdateTime
+    DateTime Date,
+    DateTime StartTime,
+    DateTime EndTime
 );
