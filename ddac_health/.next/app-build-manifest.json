@@ -26,15 +26,10 @@
       "static/chunks/main-app.js",
       "static/chunks/app/dashboard/page.js"
     ],
-    "/dashboard/doctor/pending_appointment/page": [
+    "/dashboard/admin/summary/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/dashboard/doctor/pending_appointment/page.js"
-    ],
-    "/dashboard/doctor/appointment_history/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/dashboard/doctor/appointment_history/page.js"
+      "static/chunks/app/dashboard/admin/summary/page.js"
     ]
   }
 }

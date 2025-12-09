@@ -75,7 +75,7 @@ const menuItems: MenuItem[] = [
   },
   {
     label: 'Summary Prescriptions',
-    href: '/dashboard/prescriptions',
+    href: '/dashboard/doctor/summary',
     icon: <Pill className="w-5 h-5" />,
     roles: ['doctor'],
   },
@@ -96,7 +96,7 @@ const menuItems: MenuItem[] = [
   },
   {
     label: 'Summary Reports',
-    href: '/dashboard/analytics',
+    href: '/dashboard/admin/summary',
     icon: <BarChart3 className="w-5 h-5" />,
     roles: ['admin'],
   },
