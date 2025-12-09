@@ -156,30 +156,21 @@ export default function CustomerDashboard() {
       <div>
         <h2 className="text-xl font-bold text-gray-800 mb-4">Quick Actions</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <a href="/dashboard/book-appointment" 
+          <a href="/dashboard/book-appointments" 
              className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-lg transition-all hover:scale-105">
             <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center mb-4">
               <Calendar className="w-6 h-6 text-white" />
             </div>
-            <h3 className="font-semibold text-gray-800 mb-1">Book Appointment</h3>
+            <h3 className="font-semibold text-gray-800 mb-1">Appointment</h3>
             <p className="text-sm text-gray-600">Schedule a visit with a doctor</p>
           </a>
 
-          <a href="/dashboard/my-appointments" 
-             className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-lg transition-all hover:scale-105">
-            <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center mb-4">
-              <FileText className="w-6 h-6 text-white" />
-            </div>
-            <h3 className="font-semibold text-gray-800 mb-1">My Appointments</h3>
-            <p className="text-sm text-gray-600">View all your appointments</p>
-          </a>
-
-          <a href="/dashboard/health-profile" 
+          <a href="/dashboard/health" 
              className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-lg transition-all hover:scale-105">
             <div className="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center mb-4">
               <User className="w-6 h-6 text-white" />
             </div>
-            <h3 className="font-semibold text-gray-800 mb-1">Health Profile</h3>
+            <h3 className="font-semibold text-gray-800 mb-1">Health records</h3>
             <p className="text-sm text-gray-600">Manage your health information</p>
           </a>
         </div>
