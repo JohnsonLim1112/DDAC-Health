@@ -100,40 +100,23 @@ namespace Service
             }
             return admin;
         }
-        
+
         public static HttpVO CheckUsername(string id)
-
-{
-
-    HttpVO httpVO = new HttpVO();
-
-    LoginDO user = LoginMapper.SelectById(id);
-
-    if (user != null)
-
-    {
-
-        httpVO.success = true;
-
-        httpVO.message = "User found";
-
-        httpVO.data = user.Username;
-
-    }
-
-    else
-
-    {
-
-        httpVO.success= false;
-
-        httpVO.message = "User not found";
-
-    }
-
-    return httpVO;
-
-}
- 
+        {
+            HttpVO httpVO = new HttpVO();
+            LoginDO user = LoginMapper.SelectById(id);
+            if (user != null)
+            {
+                httpVO.success = true;
+                httpVO.message = "User found";
+                httpVO.data = user.Username;
+            }
+            else
+            {
+                httpVO.success= false;
+                httpVO.message = "User not found";
+            }
+            return httpVO;
+        }
     }
 }
