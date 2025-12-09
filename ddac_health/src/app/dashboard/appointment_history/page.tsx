@@ -9,7 +9,7 @@ import {
   Ban,
   CreditCard
 } from 'lucide-react';
-import { appointmentsAPI, authUtils } from '../../../lib/api';
+import { appointmentsAPI, authUtils, authAPI } from '../../../lib/api';
 import CustomerAppointmentCard from '../../../components/CustomerAppointmentCard';
 import PaymentModal from '../../../components/PaymentModal';
 
@@ -30,6 +30,7 @@ interface Appointment {
 
 export default function CustomerAppointmentHistoryPage() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [doctorEmails, setDoctorEmails] = useState<{ [key: string]: string }>({});
   const [isLoading, setIsLoading] = useState(true);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
@@ -49,11 +50,14 @@ export default function CustomerAppointmentHistoryPage() {
       const result = await appointmentsAPI.getByUserId(userId);
       
       if (result.success && result.data) {
-   
+        // 按时间排序
         const sorted = result.data.sort((a: Appointment, b: Appointment) => 
           new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
         );
         setAppointments(sorted);
+
+        // ✅ 获取所有医生的 email
+        await loadDoctorEmails(sorted);
       }
     } catch (error) {
       console.error('Error loading appointment history:', error);
@@ -63,13 +67,50 @@ export default function CustomerAppointmentHistoryPage() {
     }
   };
 
- 
+  // ✅ 使用新 API 获取医生 email
+  const loadDoctorEmails = async (appointments: Appointment[]) => {
+    try {
+      // 获取所有唯一的 doctorId
+      const doctorIds = Array.from(new Set(appointments.map(apt => apt.doctorId)));
+      
+      // 并行获取所有医生的 email
+      const emailPromises = doctorIds.map(async (doctorId) => {
+        try {
+          const result = await authAPI.checkUsername(doctorId);
+          
+          if (result.success && result.data) {
+            return { doctorId, email: result.data };
+          }
+          return { doctorId, email: '' };
+        } catch (error) {
+          console.error(`Failed to fetch email for doctor ${doctorId}:`, error);
+          return { doctorId, email: '' };
+        }
+      });
+
+      const emailResults = await Promise.all(emailPromises);
+      
+      // 构建 doctorId -> email 映射
+      const emailMap: { [key: string]: string } = {};
+      emailResults.forEach(({ doctorId, email }) => {
+        emailMap[doctorId] = email;
+      });
+
+      setDoctorEmails(emailMap);
+    } catch (error) {
+      console.error('Error loading doctor emails:', error);
+    }
+  };
+
+  const getDoctorEmail = (doctorId: string): string => {
+    return doctorEmails[doctorId] || '';
+  };
+
   const handlePayClick = (appointment: Appointment) => {
     setSelectedAppointment(appointment);
     setShowPaymentModal(true);
   };
 
- 
   const handleConfirmPayment = async () => {
     if (!selectedAppointment) return;
 
@@ -98,7 +139,6 @@ export default function CustomerAppointmentHistoryPage() {
       setIsProcessing(false);
     }
   };
-
 
   const handleCancelAppointment = async (appointment: Appointment) => {
     if (!confirm('Are you sure you want to cancel this appointment?')) return;
@@ -253,6 +293,7 @@ export default function CustomerAppointmentHistoryPage() {
             <CustomerAppointmentCard
               key={appointment.id}
               appointment={appointment}
+              doctorEmail={getDoctorEmail(appointment.doctorId)}
               onPay={handlePayClick}
               onCancel={handleCancelAppointment}
               isProcessing={isProcessing}

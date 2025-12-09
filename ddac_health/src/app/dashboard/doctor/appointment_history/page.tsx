@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { History, Activity } from 'lucide-react';
-import { appointmentsAPI, authUtils, usersAPI } from '../../../../lib/api';
+import { History } from 'lucide-react';
+import { appointmentsAPI, authAPI, authUtils } from '../../../../lib/api';
 import AppointmentCard from '../doctor_components/AppointmentCard';
 import CommentModal from '../doctor_components/CommentModal';
 import PriceModal from '../doctor_components/PriceModal';
@@ -23,15 +23,9 @@ interface Appointment {
   endTime: string;
 }
 
-interface User {
-  id: string;
-  username: string;
-  role: string;
-}
-
 export default function DoctorAppointmentHistoryPage() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
+  const [userEmails, setUserEmails] = useState<{ [key: string]: string }>({});
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showCommentModal, setShowCommentModal] = useState(false);
@@ -50,22 +44,17 @@ export default function DoctorAppointmentHistoryPage() {
       const doctorId = authUtils.getUserId();
       if (!doctorId) return;
 
-   
-      const [appointmentsResult, usersResult] = await Promise.all([
-        appointmentsAPI.getByDoctorId(doctorId),
-        usersAPI.getAll(doctorId) 
-      ]);
+      // 1. 加载预约数据
+      const appointmentsResult = await appointmentsAPI.getByDoctorId(doctorId);
 
       if (appointmentsResult.success && appointmentsResult.data) {
-      
         const filteredData = appointmentsResult.data.filter(
           (apt: Appointment) => apt.status === '1' || apt.status === '2' || apt.status === '3' || apt.status === '5'
         );
         setAppointments(filteredData);
-      }
 
-      if (usersResult.success && usersResult.data) {
-        setUsers(usersResult.data);
+        // 2. ✅ 获取所有患者的 email
+        await loadUserEmails(filteredData);
       }
     } catch (error) {
       console.error('Error loading data:', error);
@@ -75,12 +64,45 @@ export default function DoctorAppointmentHistoryPage() {
     }
   };
 
-  const getUserEmail = (userId: string): string => {
-    const user = users.find(u => u.id === userId);
-    return user?.username || '';
+  // ✅ 使用新 API 获取用户 email
+  const loadUserEmails = async (appointments: Appointment[]) => {
+    try {
+      // 获取所有唯一的 userId
+      const userIds = Array.from(new Set(appointments.map(apt => apt.userId)));
+      
+      // 并行获取所有用户的 email
+      const emailPromises = userIds.map(async (userId) => {
+        try {
+          const result = await authAPI.checkUsername(userId);
+          
+          if (result.success && result.data) {
+            return { userId, email: result.data };
+          }
+          return { userId, email: '' };
+        } catch (error) {
+          console.error(`Failed to fetch email for user ${userId}:`, error);
+          return { userId, email: '' };
+        }
+      });
+
+      const emailResults = await Promise.all(emailPromises);
+      
+      // 构建 userId -> email 映射
+      const emailMap: { [key: string]: string } = {};
+      emailResults.forEach(({ userId, email }) => {
+        emailMap[userId] = email;
+      });
+
+      setUserEmails(emailMap);
+    } catch (error) {
+      console.error('Error loading user emails:', error);
+    }
   };
 
-  
+  const getUserEmail = (userId: string): string => {
+    return userEmails[userId] || '';
+  };
+
   const handleMarkCompleted = async (appointment: Appointment) => {
     if (!confirm('Mark this appointment as completed?')) return;
 
@@ -106,7 +128,6 @@ export default function DoctorAppointmentHistoryPage() {
     }
   };
 
- 
   const handleSetPrice = (appointment: Appointment) => {
     setSelectedAppointment(appointment);
     setShowPriceModal(true);
@@ -139,7 +160,6 @@ export default function DoctorAppointmentHistoryPage() {
     }
   };
 
-
   const handleAddComment = (appointment: Appointment) => {
     setSelectedAppointment(appointment);
     setShowCommentModal(true);
@@ -171,7 +191,6 @@ export default function DoctorAppointmentHistoryPage() {
       setIsProcessing(false);
     }
   };
-
 
   const handleViewHealthData = (appointment: Appointment) => {
     setSelectedAppointment(appointment);
@@ -304,7 +323,6 @@ export default function DoctorAppointmentHistoryPage() {
         isProcessing={isProcessing}
       />
 
-      {/* ✅ Patient Health Data Modal */}
       <PatientHealthView
         show={showHealthModal}
         patientId={selectedAppointment?.userId || ''}

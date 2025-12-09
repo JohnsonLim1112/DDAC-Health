@@ -30,6 +30,31 @@
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/dashboard/admin/summary/page.js"
+    ],
+    "/dashboard/doctor/appointment_history/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/dashboard/doctor/appointment_history/page.js"
+    ],
+    "/dashboard/admin/user-management/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/dashboard/admin/user-management/page.js"
+    ],
+    "/dashboard/doctor/pending_appointment/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/dashboard/doctor/pending_appointment/page.js"
+    ],
+    "/dashboard/appointment_history/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/dashboard/appointment_history/page.js"
+    ],
+    "/dashboard/book-appointments/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/dashboard/book-appointments/page.js"
     ]
   }
 }
