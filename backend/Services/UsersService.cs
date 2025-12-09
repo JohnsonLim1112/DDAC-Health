@@ -27,7 +27,7 @@ namespace Service
         }
 
         // admin reset user's password
-        public static string UpdateUser(string id, List<LoginDO> data)
+        public static string UpdateUser(string id, bool changepassword, bool changeSecurity, List<LoginDO> data)
         {
             string mes = "";
             if (data is List<LoginDO>)
@@ -35,43 +35,30 @@ namespace Service
                 foreach (var item in data)
                 {
                     LoginDO originalUser = LoginMapper.SelectById(item.Id);
-                    if (originalUser.Password != item.Password)
+                    if (originalUser == null)
+                        continue;
+                    string newPassword = originalUser.Password;
+                    string newSecurityPassword = originalUser.SecurityPassword;
+
+                    if (changepassword && !string.IsNullOrEmpty(item.Password))
                     {
-                        string PasswordToken = Tools.Token(item.Password);
-                        var LoginDO = new LoginDO(
-                            Id: item.Id,
-                            Username: item.Username,
-                            Password: PasswordToken,
-                            SecurityPassword: item.SecurityPassword,
-                            Role: item.Role
-                        );
-                        LoginMapper.Update(LoginDO);
+                        newPassword = Tools.Token(item.Password);
                     }
-                    else if (originalUser.SecurityPassword != item.SecurityPassword)
+
+                    if (changeSecurity && !string.IsNullOrEmpty(item.SecurityPassword))
                     {
-                        string SafePasswordToken = Tools.Token(item.SecurityPassword);
-                        var LoginDO = new LoginDO(
-                            Id: item.Id,
-                            Username: item.Username,
-                            Password: item.Password,
-                            SecurityPassword: SafePasswordToken,
-                            Role: item.Role
-                        );
-                        LoginMapper.Update(LoginDO);
+                        newSecurityPassword = Tools.Token(item.SecurityPassword);
                     }
-                    else
-                    {
-                        string PasswordToken = Tools.Token(item.Password);
-                        string SafePasswordToken = Tools.Token(item.SecurityPassword);
-                        var LoginDO = new LoginDO(
-                            Id: item.Id,
-                            Username: item.Username,
-                            Password: PasswordToken,
-                            SecurityPassword: SafePasswordToken,
-                            Role: item.Role
-                        );
-                        LoginMapper.Update(LoginDO);
-                    }
+
+                    var updatedUser = new LoginDO(
+                        Id: item.Id,
+                        Username: item.Username,
+                        Password: newPassword,
+                        SecurityPassword: newSecurityPassword,
+                        Role: item.Role
+                    );
+
+                    LoginMapper.Update(updatedUser);
                 }
                 mes = "User updated";
             }

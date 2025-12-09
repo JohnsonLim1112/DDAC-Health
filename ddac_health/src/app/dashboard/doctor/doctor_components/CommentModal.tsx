@@ -19,9 +19,7 @@ interface Appointment {
 interface CommentModalProps {
   show: boolean;
   appointment: Appointment | null;
-  comment: string;
-  setComment: (comment: string) => void;
-  onSave: () => void;
+  onSave: (comment: string) => void;  // ✅ 修复：接收 comment 参数
   onClose: () => void;
   isProcessing: boolean;
 }
@@ -29,12 +27,22 @@ interface CommentModalProps {
 export default function CommentModal({
   show,
   appointment,
-  comment,
-  setComment,
   onSave,
   onClose,
   isProcessing
 }: CommentModalProps) {
+  const [comment, setComment] = React.useState('');  // ✅ 内部管理 comment 状态
+
+  React.useEffect(() => {
+    if (appointment) {
+      setComment(appointment.comment || '');
+    }
+  }, [appointment]);
+
+  const handleSave = () => {
+    onSave(comment);
+  };
+
   if (!show || !appointment) return null;
 
   const formatAppointmentTime = (startTime: string, endTime: string) => {
@@ -110,7 +118,7 @@ export default function CommentModal({
               Cancel
             </button>
             <button
-              onClick={onSave}
+              onClick={handleSave}
               disabled={isProcessing}
               className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
             >

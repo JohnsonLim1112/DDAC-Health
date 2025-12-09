@@ -14,7 +14,7 @@ import {
   Award,
   FileText
 } from 'lucide-react';
-import { authUtils, userInfoAPI, usersAPI } from '../../../lib/api';
+import { authUtils, userInfoAPI, authAPI } from '../../../lib/api';
 import { useRouter } from 'next/navigation';
 
 interface UserInfo {
@@ -44,7 +44,10 @@ export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showSecurityPassword, setShowSecurityPassword] = useState(false);
   const [newPassword, setNewPassword] = useState('');
+  const [securityPassword, setSecurityPassword] = useState('');
+  const [isSecurityVerified, setIsSecurityVerified] = useState(false);
 
   useEffect(() => {
     loadProfile();
@@ -107,8 +110,38 @@ export default function ProfilePage() {
     }
   };
 
+  // ✅ 验证安全密码
+  const handleVerifySecurityPassword = async () => {
+    if (!securityPassword.trim()) {
+      alert('Please enter your security password');
+      return;
+    }
+
+    try {
+      const userId = authUtils.getUserId();
+      const result = await authAPI.validateSecurityPassword(userId!, securityPassword);
+
+      if (result.success) {
+        setIsSecurityVerified(true);
+        alert('Security password verified! You can now change your password.');
+      } else {
+        setIsSecurityVerified(false);
+        alert(result.message || 'Invalid security password');
+      }
+    } catch (error) {
+      console.error('Error verifying security password:', error);
+      alert('Failed to verify security password');
+    }
+  };
+
   const handleSave = async () => {
     if (!userInfo || !loginInfo) return;
+
+    // ✅ 如果要修改密码，必须先验证安全密码
+    if (newPassword.trim() && !isSecurityVerified) {
+      alert('Please verify your security password before changing your password!');
+      return;
+    }
 
     // 验证医生必填字段
     if (loginInfo.role === 'doctor') {
@@ -125,17 +158,14 @@ export default function ProfilePage() {
     try {
       setIsSaving(true);
 
-      // 1. 如果修改了密码，更新登录信息
-      if (newPassword.trim()) {
+      // 1. ✅ 如果验证通过且修改了密码，使用 changePassword API
+      if (newPassword.trim() && isSecurityVerified) {
         const userId = authUtils.getUserId();
-        const updatedLogin = {
-          ...loginInfo,
-          password: newPassword
-        };
         
-        const loginResult = await usersAPI.update(userId!, [updatedLogin]);
+        const loginResult = await authAPI.changePassword(userId!, newPassword);
+        
         if (!loginResult.success) {
-          alert('Failed to update password: ' + loginResult.message);
+          alert('Failed to update password: ' + (loginResult.message || 'Unknown error'));
           return;
         }
       }
@@ -164,13 +194,15 @@ export default function ProfilePage() {
         }
 
         if (!userResult.success) {
-          alert('Failed to save profile: ' + userResult.message);
+          alert('Failed to save profile');
           return;
         }
       }
 
       alert('Profile updated successfully!');
       setNewPassword('');
+      setSecurityPassword('');
+      setIsSecurityVerified(false);
       loadProfile(); // 刷新数据
     } catch (error) {
       console.error('Error saving profile:', error);
@@ -262,17 +294,75 @@ export default function ProfilePage() {
                   type={showPassword ? 'text' : 'password'}
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none pr-10"
-                  placeholder="Leave empty to keep current password"
+                  disabled={!isSecurityVerified}
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none pr-10 ${
+                    !isSecurityVerified ? 'bg-gray-100 cursor-not-allowed' : ''
+                  }`}
+                  placeholder={isSecurityVerified ? "Enter new password" : "Verify security password first"}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
+                  disabled={!isSecurityVerified}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
+              {!isSecurityVerified && (
+                <p className="text-xs text-orange-600 mt-1">
+                  ⚠️ You must verify your security password before changing your password
+                </p>
+              )}
+            </div>
+
+            {/* Security Password Verification */}
+            <div className="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <Lock className="w-4 h-4 inline mr-2" />
+                Security Password
+              </label>
+              <div className="flex gap-3">
+                <div className="relative flex-1">
+                  <input
+                    type={showSecurityPassword ? 'text' : 'password'}
+                    value={securityPassword}
+                    onChange={(e) => setSecurityPassword(e.target.value)}
+                    disabled={isSecurityVerified}
+                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none pr-10 ${
+                      isSecurityVerified ? 'bg-green-50 border-green-500' : ''
+                    }`}
+                    placeholder="Enter security password to change password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowSecurityPassword(!showSecurityPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+                  >
+                    {showSecurityPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleVerifySecurityPassword}
+                  disabled={isSecurityVerified || !securityPassword.trim()}
+                  className={`px-6 py-2 rounded-lg font-medium whitespace-nowrap transition-colors ${
+                    isSecurityVerified 
+                      ? 'bg-green-500 text-white cursor-not-allowed'
+                      : 'bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed'
+                  }`}
+                >
+                  {isSecurityVerified ? '✓ Verified' : 'Verify'}
+                </button>
+              </div>
+              {isSecurityVerified && (
+                <p className="text-xs text-green-700 mt-2 flex items-center gap-1">
+                  <span className="font-semibold">✓</span> Security password verified. You can now change your password.
+                </p>
+              )}
+              <p className="text-xs text-gray-600 mt-2">
+                ℹ️ <strong>Forgot your security password?</strong> Please contact the administrator for assistance.
+              </p>
             </div>
           </div>
         </div>

@@ -8,9 +8,11 @@ import {
   AlertCircle,
   Calendar,
   User,
-  FileText
+  FileText,
+  Activity  // ✅ 添加健康数据图标
 } from 'lucide-react';
-import { appointmentsAPI, authUtils } from '../../../../lib/api';
+import { appointmentsAPI, authUtils, usersAPI } from '../../../../lib/api';
+import PatientHealthView from '../../../../components/PatientHealthView';
 
 interface Appointment {
   id: string;
@@ -22,42 +24,62 @@ interface Appointment {
   price: number;
   comment: string;
   status: string;
-  date: string;        // 创建日期
-  startTime: string;   // 预约开始时间
-  endTime: string;     // 预约结束时间
+  date: string;
+  startTime: string;
+  endTime: string;
+}
+
+interface User {
+  id: string;
+  username: string;
+  role: string;
 }
 
 export default function DoctorPendingAppointmentsPage() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showRejectModal, setShowRejectModal] = useState(false);
+  const [showHealthModal, setShowHealthModal] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [rejectReason, setRejectReason] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
-    loadPendingAppointments();
+    loadData();
   }, []);
 
-  const loadPendingAppointments = async () => {
+  const loadData = async () => {
     try {
       setIsLoading(true);
       const doctorId = authUtils.getUserId();
       if (!doctorId) return;
 
-      const result = await appointmentsAPI.getByDoctorId(doctorId);
-      
-      if (result.success && result.data) {
-        // ✅ 只显示 pending 的预约 (status = '0')
-        const pendingOnly = result.data.filter((apt: Appointment) => apt.status === '0');
+      const [appointmentsResult, usersResult] = await Promise.all([
+        appointmentsAPI.getByDoctorId(doctorId),
+        usersAPI.getAll(doctorId)
+      ]);
+
+      if (appointmentsResult.success && appointmentsResult.data) {
+        const pendingOnly = appointmentsResult.data.filter((apt: Appointment) => apt.status === '0');
         setAppointments(pendingOnly);
       }
+
+      if (usersResult.success && usersResult.data) {
+        setUsers(usersResult.data);
+      }
     } catch (error) {
-      console.error('Error loading appointments:', error);
+      console.error('Error loading data:', error);
       alert('Failed to load appointments');
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // ✅ 获取用户邮箱
+  const getUserEmail = (userId: string): string => {
+    const user = users.find(u => u.id === userId);
+    return user?.username || '';
   };
 
   const handleAccept = async (appointment: Appointment) => {
@@ -66,19 +88,18 @@ export default function DoctorPendingAppointmentsPage() {
     try {
       setIsProcessing(true);
       
-      // ✅ Accept: status=1, isAccept=true, comment 保持为空
       const updatedAppointment = {
         ...appointment,
-        status: '1',      // 1 = Accepted
+        status: '1',
         isAccept: true,
-        comment: ''       // ✅ Accept 时不需要 comment
+        comment: ''
       };
       
       const result = await appointmentsAPI.update(updatedAppointment);
       
       if (result.success) {
         alert('Appointment accepted successfully!');
-        loadPendingAppointments(); // 刷新列表
+        loadData();
       } else {
         alert(result.message || 'Failed to accept appointment');
       }
@@ -107,12 +128,11 @@ export default function DoctorPendingAppointmentsPage() {
     try {
       setIsProcessing(true);
       
-      // ✅ Reject: status=2, isAccept=false, comment=拒绝原因
       const updatedAppointment = {
         ...selectedAppointment,
-        status: '2',              // 2 = Rejected
+        status: '2',
         isAccept: false,
-        comment: rejectReason     // ✅ 保存拒绝原因到 comment
+        comment: rejectReason
       };
       
       const result = await appointmentsAPI.update(updatedAppointment);
@@ -122,7 +142,7 @@ export default function DoctorPendingAppointmentsPage() {
         setShowRejectModal(false);
         setSelectedAppointment(null);
         setRejectReason('');
-        loadPendingAppointments(); // 刷新列表
+        loadData();
       } else {
         alert(result.message || 'Failed to reject appointment');
       }
@@ -134,7 +154,12 @@ export default function DoctorPendingAppointmentsPage() {
     }
   };
 
-  // ✅ 格式化预约时间
+  // ✅ 查看健康数据
+  const handleViewHealthData = (appointment: Appointment) => {
+    setSelectedAppointment(appointment);
+    setShowHealthModal(true);
+  };
+
   const formatAppointmentTime = (startTime: string, endTime: string) => {
     const start = new Date(startTime);
     const end = new Date(endTime);
@@ -227,7 +252,9 @@ export default function DoctorPendingAppointmentsPage() {
                       <User className="w-6 h-6 text-yellow-600" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-lg text-gray-800">Patient ID: {appointment.userId.substring(0, 8)}...</h3>
+                      <h3 className="font-semibold text-lg text-gray-800">
+                        {getUserEmail(appointment.userId) || `Patient ID: ${appointment.userId.substring(0, 8)}...`}
+                      </h3>
                       <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
                         <Calendar className="w-4 h-4" />
                         <span>{formatAppointmentTime(appointment.startTime, appointment.endTime)}</span>
@@ -267,6 +294,16 @@ export default function DoctorPendingAppointmentsPage() {
 
                 {/* Right side - Action Buttons */}
                 <div className="flex flex-col gap-3 ml-6">
+                  {/* ✅ View Health Data */}
+                  <button
+                    onClick={() => handleViewHealthData(appointment)}
+                    disabled={isProcessing}
+                    className="flex items-center gap-2 bg-teal-600 text-white px-6 py-3 rounded-lg hover:bg-teal-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
+                  >
+                    <Activity className="w-5 h-5" />
+                    View Health Data
+                  </button>
+
                   <button
                     onClick={() => handleAccept(appointment)}
                     disabled={isProcessing}
@@ -305,10 +342,10 @@ export default function DoctorPendingAppointmentsPage() {
             <div className="p-6">
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Patient ID
+                  Patient
                 </label>
-                <p className="text-gray-800 font-mono bg-gray-50 p-2 rounded">
-                  {selectedAppointment.userId}
+                <p className="text-gray-800 bg-gray-50 p-2 rounded">
+                  {getUserEmail(selectedAppointment.userId) || selectedAppointment.userId}
                 </p>
               </div>
 
@@ -371,6 +408,17 @@ export default function DoctorPendingAppointmentsPage() {
           </div>
         </div>
       )}
+
+      {/* ✅ Patient Health Data Modal */}
+      <PatientHealthView
+        show={showHealthModal}
+        patientId={selectedAppointment?.userId || ''}
+        patientName={getUserEmail(selectedAppointment?.userId || '')}
+        onClose={() => {
+          setShowHealthModal(false);
+          setSelectedAppointment(null);
+        }}
+      />
     </div>
   );
 }
