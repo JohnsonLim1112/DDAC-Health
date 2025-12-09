@@ -1,7 +1,10 @@
 {
+  "/page": "app/page.js",
   "/login/page": "app/login/page.js",
-  "/dashboard/appointment_history/page": "app/dashboard/appointment_history/page.js",
   "/dashboard/page": "app/dashboard/page.js",
+  "/dashboard/admin/user-management/page": "app/dashboard/admin/user-management/page.js",
   "/dashboard/book-appointments/page": "app/dashboard/book-appointments/page.js",
-  "/dashboard/admin/appointments/page": "app/dashboard/admin/appointments/page.js"
+  "/dashboard/appointment_history/page": "app/dashboard/appointment_history/page.js",
+  "/dashboard/doctor/appointment_history/page": "app/dashboard/doctor/appointment_history/page.js",
+  "/dashboard/doctor/pending_appointment/page": "app/dashboard/doctor/pending_appointment/page.js"
 }

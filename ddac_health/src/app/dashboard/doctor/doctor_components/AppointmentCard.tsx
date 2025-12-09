@@ -8,7 +8,8 @@ import {
   MessageSquare,
   Edit,
   Clock,
-  Ban
+  Ban,
+  Activity  // ✅ 添加健康数据图标
 } from 'lucide-react';
 
 interface Appointment {
@@ -28,17 +29,21 @@ interface Appointment {
 
 interface AppointmentCardProps {
   appointment: Appointment;
+  patientEmail?: string;  // ✅ 添加患者邮箱
   onMarkCompleted: (appointment: Appointment) => void;
   onSetPrice: (appointment: Appointment) => void;
   onAddComment: (appointment: Appointment) => void;
+  onViewHealthData: (appointment: Appointment) => void;  // ✅ 添加查看健康数据回调
   isProcessing: boolean;
 }
 
 export default function AppointmentCard({ 
   appointment, 
+  patientEmail,  // ✅ 接收患者邮箱
   onMarkCompleted, 
   onSetPrice, 
   onAddComment,
+  onViewHealthData,  // ✅ 接收查看健康数据回调
   isProcessing 
 }: AppointmentCardProps) {
   
@@ -80,7 +85,7 @@ export default function AppointmentCard({
             <div className="flex-1">
               <div className="flex items-center gap-3">
                 <h3 className="font-semibold text-lg text-gray-800">
-                  Patient ID: {appointment.userId.substring(0, 8)}...
+                  {patientEmail || `Patient ID: ${appointment.userId.substring(0, 8)}...`}
                 </h3>
                 <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold ${badge.color}`}>
                   <StatusIcon className="w-4 h-4" />
@@ -144,6 +149,16 @@ export default function AppointmentCard({
 
         {/* Right side - Action Buttons */}
         <div className="ml-6 flex flex-col gap-2">
+          {/* ✅ View Health Data - 所有状态都可以查看 */}
+          <button
+            onClick={() => onViewHealthData(appointment)}
+            disabled={isProcessing}
+            className="flex items-center gap-2 bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 disabled:bg-gray-400 transition-colors whitespace-nowrap"
+          >
+            <Activity className="w-4 h-4" />
+            View Health Data
+          </button>
+
           {/* Mark as Completed - 只有 Accepted 可以标记为完成 */}
           {appointment.status === '1' && (
             <button

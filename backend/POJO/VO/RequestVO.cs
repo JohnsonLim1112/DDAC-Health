@@ -38,6 +38,8 @@ public class AdminUpdateUsersVO
 {
     public string id { get; set; }
     public List<LoginDO>? Data { get; set; }
+    public Boolean updatePassword { get; set; }
+    public Boolean updateSecurityPassword { get; set; }
 }
 
 public class CreateUserVO

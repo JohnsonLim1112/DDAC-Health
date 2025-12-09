@@ -23,7 +23,7 @@ namespace Controllers
             HttpVO user = new HttpVO();
             if (admin.Data != null)
             {
-                string mes = UsersService.UpdateUser(admin.id, admin.Data);
+                string mes = UsersService.UpdateUser(admin.id, admin.updatePassword, admin.updateSecurityPassword, admin.Data);
                 user.message = mes;
             }
             else

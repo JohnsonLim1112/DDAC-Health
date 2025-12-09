@@ -19,9 +19,7 @@ interface Appointment {
 interface PriceModalProps {
   show: boolean;
   appointment: Appointment | null;
-  price: string;
-  setPrice: (price: string) => void;
-  onSave: () => void;
+  onSave: (price: number) => void;  // ✅ 修复：接收 price 参数
   onClose: () => void;
   isProcessing: boolean;
 }
@@ -29,12 +27,27 @@ interface PriceModalProps {
 export default function PriceModal({
   show,
   appointment,
-  price,
-  setPrice,
   onSave,
   onClose,
   isProcessing
 }: PriceModalProps) {
+  const [price, setPrice] = React.useState('');  // ✅ 内部管理 price 状态
+
+  React.useEffect(() => {
+    if (appointment) {
+      setPrice(appointment.price.toString());
+    }
+  }, [appointment]);
+
+  const handleSave = () => {
+    const priceValue = parseFloat(price);
+    if (isNaN(priceValue) || priceValue < 0) {
+      alert('Please enter a valid price');
+      return;
+    }
+    onSave(priceValue);
+  };
+
   if (!show || !appointment) return null;
 
   const formatAppointmentTime = (startTime: string, endTime: string) => {
@@ -118,7 +131,7 @@ export default function PriceModal({
               Cancel
             </button>
             <button
-              onClick={onSave}
+              onClick={handleSave}
               disabled={isProcessing || !price}
               className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
             >

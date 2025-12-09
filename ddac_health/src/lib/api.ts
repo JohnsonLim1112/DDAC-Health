@@ -17,10 +17,10 @@ export interface RegisterRequest {
   SecurityPassword: string;
 }
 
-export interface HttpVO {
+export interface HttpVO<T = any> {
   success: boolean;
   message?: string;
-  data?: any;
+  data?: T;
 }
 
 // 登录成功后的数据
@@ -425,17 +425,23 @@ export const usersAPI = {
   /**
    * 更新用户（需要 admin 权限）
    */
-  update: async (adminId: string, users: User[]): Promise<HttpVO> => {
+ update: async (
+    adminId: string,
+    users: User[],
+    options?: { changePassword?: boolean }
+  ): Promise<HttpVO> => {
     try {
       const response = await fetch(`${API_BASE_URL}/users/update`, {
         method: 'POST',
         headers: createHeaders(),
         body: JSON.stringify({
           id: adminId,
+          updatePassword: options?.changePassword ?? false,     // 关键字段！
+          updateSecurityPassword: false,                        // 你没用到，传 false
           Data: users
         }),
       });
-      
+
       return handleResponse<HttpVO>(response);
     } catch (error) {
       console.error('Update user error:', error);
@@ -592,5 +598,115 @@ export const authUtils = {
   },
   logout: (): void => {  // ✅ 添加 logout 方法
     clearUserData();
+  },
+};
+
+
+// Health Records API
+export interface HealthRecord {
+  id: string;
+  userId: string;
+  height: number | null;
+  weight: number | null;
+  bloodPressureSystolic: number | null;
+  bloodPressureDiastolic: number | null;
+  medicalHistory: string | null;
+  recordDate: string;
+  notes: string | null;
+  createTime: string;
+  updateTime: string;
+}
+
+export interface CreateHealthRecordRequest {
+  UserId: string;
+  Height: number | null;
+  Weight: number | null;
+  BloodPressureSystolic: number | null;
+  BloodPressureDiastolic: number | null;
+  MedicalHistory: string | null;
+  RecordDate: string;
+  Notes: string | null;
+}
+
+export const healthAPI = {
+  create: async (data: CreateHealthRecordRequest): Promise<HttpVO<HealthRecord>> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/health/create`, {
+        method: 'POST',
+        headers: createHeaders(),
+        body: JSON.stringify(data),
+      });
+      return handleResponse<HttpVO<HealthRecord>>(response);
+    } catch (error) {
+      console.error('Create health record error:', error);
+      throw error;
+    }
+  },
+
+  getByUserId: async (userId: string): Promise<HttpVO<HealthRecord[]>> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/health/user?userId=${userId}`, {
+        method: 'GET',
+        headers: createHeaders(),
+      });
+      return handleResponse<HttpVO<HealthRecord[]>>(response);
+    } catch (error) {
+      console.error('Get health records error:', error);
+      throw error;
+    }
+  },
+
+  getByDateRange: async (userId: string, startDate: string, endDate: string): Promise<HttpVO<HealthRecord[]>> => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/health/filter?userId=${userId}&startDate=${startDate}&endDate=${endDate}`,
+        { method: 'GET', headers: createHeaders() }
+      );
+      return handleResponse<HttpVO<HealthRecord[]>>(response);
+    } catch (error) {
+      console.error('Get filtered health records error:', error);
+      throw error;
+    }
+  },
+
+  getById: async (id: string): Promise<HttpVO<HealthRecord>> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/health/get?id=${id}`, {
+        method: 'GET',
+        headers: createHeaders(),
+      });
+      return handleResponse<HttpVO<HealthRecord>>(response);
+    } catch (error) {
+      console.error('Get health record error:', error);
+      throw error;
+    }
+  },
+
+  update: async (record: HealthRecord): Promise<HttpVO> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/health/update`, {
+        method: 'POST',
+        headers: createHeaders(),
+        body: JSON.stringify(record),
+      });
+      return handleResponse<HttpVO>(response);
+    } catch (error) {
+      console.error('Update health record error:', error);
+      throw error;
+    }
+  },
+
+  delete: async (id: string): Promise<HttpVO> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/health/delete`, {
+        method: 'POST',
+        headers: createHeaders(),
+        body: JSON.stringify({ id }),
+      });
+      return handleResponse<HttpVO>(response);
+    } catch (error) {
+      console.error('Delete health record error:', error);
+      throw error;
+    }
   },
 };

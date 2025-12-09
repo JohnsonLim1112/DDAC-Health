@@ -49,7 +49,7 @@ const menuItems: MenuItem[] = [
   },
   {
     label: 'Health Records',
-    href: '/dashboard/health-records',
+    href: '/dashboard/health',
     icon: <Activity className="w-5 h-5" />,
     roles: ['customer'],
   },

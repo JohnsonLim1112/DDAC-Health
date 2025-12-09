@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Eye, EyeOff, Stethoscope, User } from 'lucide-react';
+import { Eye, EyeOff, Stethoscope, User, Lock, Edit } from 'lucide-react';
 import { authUtils, userInfoAPI, usersAPI } from '../../../../lib/api';
 
 interface EditUserModalProps {
@@ -34,11 +34,19 @@ export default function EditUserModal({ isOpen, user, onClose, onSuccess }: Edit
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [isLoadingUserInfo, setIsLoadingUserInfo] = useState(false);
   const [userInfoExists, setUserInfoExists] = useState(false);
+  const [showPasswordChange, setShowPasswordChange] = useState(false);  // ✅ 控制密码修改区域
+  const [newPassword, setNewPassword] = useState('');  // ✅ 新密码
 
   useEffect(() => {
     if (user) {
-      setEditingUser({ ...user });
+      
+      setEditingUser({ 
+        ...user, 
+        password: ''  // ✅ 始终为空，不从数据库获取
+      });
       loadUserInfo(user.id);
+      setShowPasswordChange(false);
+      setNewPassword('');
     }
   }, [user]);
 
@@ -91,69 +99,89 @@ export default function EditUserModal({ isOpen, user, onClose, onSuccess }: Edit
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingUser || !userInfo) return;
+  e.preventDefault();
+  if (!editingUser || !userInfo) return;
 
-    // ✅ 只有医生需要验证基本信息
-    if (editingUser.role === 'doctor') {
-      if (!userInfo.name || !userInfo.address) {
-        alert('Please fill in Name and Address for doctor!');
-        return;
-      }
-      if (!userInfo.specialization) {
-        alert('Please fill in Specialization for doctor!');
-        return;
+  // 医生必填校验
+  if (editingUser.role === 'doctor') {
+    if (!userInfo.name?.trim()) {
+      alert('Doctor name is required!');
+      return;
+    }
+    if (!userInfo.address?.trim()) {
+      alert('Doctor address is required!');
+      return;
+    }
+    if (!userInfo.specialization?.trim()) {
+      alert('Specialization is required for doctors!');
+      return;
+    }
+  }
+
+  const shouldSaveUserInfo = userInfo.name || userInfo.address || editingUser.role === 'doctor';
+
+  try {
+    const adminId = authUtils.getUserId();
+    if (!adminId) {
+      alert('Admin session expired');
+      return;
+    }
+
+    // 判断是否真的要修改密码
+    const isChangingPassword = showPasswordChange && newPassword.trim() !== '';
+
+    // 构造要发送的用户对象
+    const userToUpdate: User = {
+      id: editingUser.id,
+      username: editingUser.username,
+      password: isChangingPassword ? newPassword : user!.password, // 关键！
+      securityPassword: editingUser.securityPassword,
+      role: editingUser.role
+    };
+
+    // 调用更新接口，明确告诉后端是否要改密码
+    const updateUserResult = await usersAPI.update(
+      adminId,
+      [userToUpdate],
+      { changePassword: isChangingPassword }  // 这一行决定一切！
+    );
+
+    if (updateUserResult.message !== 'User updated') {
+      alert(updateUserResult.message || 'Failed to update user account');
+      return;
+    }
+
+    // 保存用户信息（UserInfo 表）
+    if (shouldSaveUserInfo) {
+      const userData: UserInfo = {
+        userId: editingUser.id,
+        name: userInfo.name || '',
+        gender: userInfo.gender || 'Male',
+        age: userInfo.age || 25,
+        address: userInfo.address || '',
+        specialization: editingUser.role === 'doctor' ? userInfo.specialization : '',
+        experienceYears: editingUser.role === 'doctor' ? userInfo.experienceYears : 0,
+        bio: editingUser.role === 'doctor' ? userInfo.bio : ''
+      };
+
+      const userInfoResult = userInfoExists
+        ? await userInfoAPI.update(userData)
+        : await userInfoAPI.create(userData);
+
+      if (!userInfoResult.success) {
+        alert('Account updated but failed to save profile info');
+        // 不 return，优先保证账号安全
       }
     }
 
-    // ✅ Customer 和 Admin 的基本信息是可选的，但如果填了就保存
-    const shouldSaveUserInfo = userInfo.name || userInfo.address || editingUser.role === 'doctor';
-
-    try {
-      const adminId = authUtils.getUserId();
-      
-      // 1. 更新用户账号
-      const updateUserResult = await usersAPI.update(adminId!, [editingUser]);
-      
-      if (updateUserResult.message !== 'User updated') {
-        alert(updateUserResult.message || 'Failed to update user');
-        return;
-      }
-
-      // 2. 更新用户信息（如果需要保存）
-      if (shouldSaveUserInfo) {
-        const userData: UserInfo = {
-          userId: editingUser.id,
-          name: userInfo.name || '',
-          gender: userInfo.gender || 'Male',
-          age: userInfo.age || 25,
-          address: userInfo.address || '',
-          specialization: editingUser.role === 'doctor' ? userInfo.specialization : '',
-          experienceYears: editingUser.role === 'doctor' ? userInfo.experienceYears : 0,
-          bio: editingUser.role === 'doctor' ? userInfo.bio : ''
-        };
-
-        let userResult;
-        if (userInfoExists) {
-          userResult = await userInfoAPI.update(userData);
-        } else {
-          userResult = await userInfoAPI.create(userData);
-        }
-
-        if (!userResult.success) {
-          alert('User updated but failed to save user info: ' + userResult.message);
-          return;
-        }
-      }
-
-      alert('User updated successfully!');
-      onClose();
-      onSuccess();
-    } catch (error) {
-      console.error('Error updating user:', error);
-      alert('Failed to update user');
-    }
-  };
+    alert('User updated successfully!');
+    onSuccess();
+    onClose();
+  } catch (error) {
+    console.error('Error updating user:', error);
+    alert('Update failed, please try again');
+  }
+};
 
   if (!isOpen || !editingUser) return null;
 
@@ -178,27 +206,65 @@ export default function EditUserModal({ isOpen, user, onClose, onSuccess }: Edit
             <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
           </div>
 
-          {/* Password */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              New Password (optional)
-            </label>
-            <div className="relative">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                value={editingUser.password}
-                onChange={(e) => setEditingUser({ ...editingUser, password: e.target.value })}
-                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none pr-10"
-                placeholder="Leave empty to keep current password"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
-              >
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-              </button>
-            </div>
+          {/* ✅ Password Change Button/Section */}
+          <div className="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4">
+            {!showPasswordChange ? (
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                    <Lock className="w-4 h-4" />
+                    Password
+                  </p>
+                  <p className="text-xs text-gray-600 mt-1">Current password is hidden for security</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowPasswordChange(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <Edit className="w-4 h-4" />
+                  Change Password
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                    <Lock className="w-4 h-4" />
+                    New Password
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowPasswordChange(false);
+                      setNewPassword('');
+                    }}
+                    className="text-sm text-red-600 hover:text-red-700"
+                  >
+                    Cancel Change
+                  </button>
+                </div>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="w-full px-4 py-2 border border-yellow-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none pr-10"
+                    placeholder="Enter new password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+                  >
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+                <p className="text-xs text-yellow-700">
+                  ⚠️ The user's password will be updated immediately after saving
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Role */}

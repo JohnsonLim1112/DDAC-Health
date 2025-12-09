@@ -27,7 +27,6 @@ export default function BookAppointmentPage() {
   const [selectedDoctor, setSelectedDoctor] = useState<DoctorInfo | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // ✅ 新的预约表单字段
   const [appointmentDate, setAppointmentDate] = useState('');
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
@@ -37,13 +36,24 @@ export default function BookAppointmentPage() {
     fetchDoctors();
   }, []);
 
+  // ✅ 简化版：只显示有 specialization 的用户
   const fetchDoctors = async () => {
     try {
       setIsLoading(true);
       const result = await userInfoAPI.getDoctors();
+      
       if (result.success && result.data) {
-        setDoctors(result.data);
-        setFilteredDoctors(result.data);
+        // ✅ 只显示有 specialization 的用户（医生必填项）
+        const validDoctors = result.data.filter((doctor: DoctorInfo) => 
+          doctor.specialization && 
+          doctor.specialization.trim() !== ''
+        );
+        
+        console.log('📋 Total userInfo entries:', result.data.length);
+        console.log('👨‍⚕️ Valid doctors with specialization:', validDoctors.length);
+        
+        setDoctors(validDoctors);
+        setFilteredDoctors(validDoctors);
       }
     } catch (error) {
       console.error('Failed to fetch doctors:', error);
@@ -81,7 +91,7 @@ export default function BookAppointmentPage() {
     setShowBookingModal(true);
   };
 
-  // ✅ 自动计算结束时间（默认1小时后）
+  // 自动计算结束时间（默认1小时后）
   const handleStartTimeChange = (time: string) => {
     setStartTime(time);
     
@@ -92,7 +102,7 @@ export default function BookAppointmentPage() {
     }
   };
 
-  // ✅ 验证时间间隔（最多1小时）
+  // 验证时间间隔（最多1小时）
   const validateTimeDuration = (start: string, end: string): boolean => {
     if (!start || !end) return true;
     
@@ -103,7 +113,7 @@ export default function BookAppointmentPage() {
     return durationMinutes > 0 && durationMinutes <= 60;
   };
 
-  // ✅ 验证工作时间（8:00-18:00）
+  // 验证工作时间（8:00-18:00）
   const validateWorkingHours = (time: string): boolean => {
     if (!time) return true;
     
@@ -111,7 +121,7 @@ export default function BookAppointmentPage() {
     return hours >= 8 && hours < 18;
   };
 
-  // ✅ 提交预约
+  // 提交预约
   const handleSubmitBooking = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -126,13 +136,11 @@ export default function BookAppointmentPage() {
         return;
       }
 
-      // ✅ 验证时间
       if (!appointmentDate || !startTime || !endTime) {
         alert('Please fill in all time fields');
         return;
       }
 
-      // ✅ 验证工作时间
       if (!validateWorkingHours(startTime)) {
         alert('Start time must be between 8:00 AM and 6:00 PM (doctor\'s working hours)');
         return;
@@ -143,30 +151,25 @@ export default function BookAppointmentPage() {
         return;
       }
 
-      // ✅ 验证时间间隔
       if (!validateTimeDuration(startTime, endTime)) {
         alert('Appointment duration must be between 1 minute and 1 hour');
         return;
       }
 
-      // ✅ 组合成完整的 DateTime
       const startDateTime = new Date(`${appointmentDate}T${startTime}:00`);
       const endDateTime = new Date(`${appointmentDate}T${endTime}:00`);
 
-      // 验证结束时间必须在开始时间之后
       if (endDateTime <= startDateTime) {
         alert('End time must be after start time');
         return;
       }
 
-      // 验证时间不能是过去
       const now = new Date();
       if (startDateTime < now) {
         alert('Appointment time cannot be in the past');
         return;
       }
 
-      // ✅ 使用新的 API 结构
       const result = await appointmentsAPI.create({
         UserId: userId,
         DoctorId: selectedDoctor.userId,
@@ -230,16 +233,21 @@ export default function BookAppointmentPage() {
 
       {/* Doctors List */}
       {isLoading ? (
-        <div className="bg-white rounded-xl shadow-sm border p-12 text-center">
-          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading doctors...</p>
-        </div>
-      ) : filteredDoctors.length === 0 ? (
-        <div className="bg-white rounded-xl shadow-sm border p-12 text-center">
-          <Stethoscope className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <p className="text-gray-600">No doctors found</p>
-        </div>
-      ) : (
+  <div className="bg-white rounded-xl shadow-sm border p-12 text-center">
+    <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+    <p className="text-gray-600">Loading doctors...</p>
+  </div>
+) : filteredDoctors.length === 0 ? (
+  <div className="bg-white rounded-xl shadow-sm border p-12 text-center">
+    <Stethoscope className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+    <h3 className="text-xl font-semibold text-gray-800 mb-2">No Doctors Found</h3>
+    <p className="text-gray-600">
+      {searchTerm || selectedSpecialization !== 'all' 
+        ? 'Try adjusting your search filters'
+        : 'No doctors are currently available in the system'}
+    </p>
+  </div>
+) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredDoctors.map((doctor) => (
             <div key={doctor.id} className="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-lg transition-all overflow-hidden">
@@ -248,7 +256,7 @@ export default function BookAppointmentPage() {
                   <Stethoscope className="w-8 h-8 text-blue-600" />
                 </div>
                 <h3 className="text-xl font-bold">{doctor.name}</h3>
-                <p className="text-blue-100 text-sm">{doctor.specialization || 'General Practice'}</p>
+                <p className="text-blue-100 text-sm">{doctor.specialization}</p>
               </div>
 
               <div className="p-6 space-y-3">
@@ -257,7 +265,7 @@ export default function BookAppointmentPage() {
                   <span>{doctor.gender}, {doctor.age} years</span>
                 </div>
 
-                {doctor.experienceYears && (
+                {doctor.experienceYears !== undefined && doctor.experienceYears > 0 && (
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <Briefcase className="w-4 h-4" />
                     <span>{doctor.experienceYears} years experience</span>
@@ -293,7 +301,7 @@ export default function BookAppointmentPage() {
         </div>
       )}
 
-      {/* Booking Modal */}
+      {/* Booking Modal - Same as before */}
       {showBookingModal && selectedDoctor && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
@@ -304,7 +312,6 @@ export default function BookAppointmentPage() {
             </div>
 
             <form onSubmit={handleSubmitBooking} className="p-6 space-y-4">
-              {/* ✅ 工作时间说明 */}
               <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
                 <p className="text-sm font-medium text-blue-800 mb-1">⏰ Working Hours</p>
                 <p className="text-sm text-blue-700">
@@ -315,7 +322,6 @@ export default function BookAppointmentPage() {
                 </p>
               </div>
 
-              {/* ✅ 预约日期 */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Appointment Date *
@@ -333,7 +339,6 @@ export default function BookAppointmentPage() {
                 </div>
               </div>
 
-              {/* ✅ 开始时间 */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Start Time *
@@ -360,7 +365,6 @@ export default function BookAppointmentPage() {
                 )}
               </div>
 
-              {/* ✅ 结束时间 */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   End Time *
@@ -401,7 +405,6 @@ export default function BookAppointmentPage() {
                 )}
               </div>
 
-              {/* ✅ 症状描述 */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Symptoms / Reason for Visit *
@@ -416,7 +419,6 @@ export default function BookAppointmentPage() {
                 />
               </div>
 
-              {/* 预约摘要 */}
               {appointmentDate && startTime && endTime && (
                 <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
                   <p className="text-sm font-medium text-blue-800 mb-2">Appointment Summary:</p>
