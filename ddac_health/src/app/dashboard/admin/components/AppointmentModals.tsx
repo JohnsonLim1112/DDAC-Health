@@ -12,18 +12,18 @@ interface Appointment {
   price: number;
   comment: string;
   status: string;
-  date: string;        // 创建日期（后端自动生成）
-  startTime: string;   // 预约开始时间（包含日期）
-  endTime: string;     // 预约结束时间（包含日期）
+  date: string;      
+  startTime: string;
+  endTime: string;   
 }
 
 interface CreateAppointmentData {
   UserId: string;
   DoctorId: string;
   IllnessTxt: string;
-  AppointmentDate: string;  // 用户选择的预约日期 YYYY-MM-DD
-  StartTime: string;        // 开始时间 HH:mm
-  EndTime: string;          // 结束时间 HH:mm
+  AppointmentDate: string;  
+  StartTime: string;       
+  EndTime: string;          
 }
 
 interface User {
@@ -63,7 +63,7 @@ export default function AppointmentModals({
   const [doctorSearchResults, setDoctorSearchResults] = useState<User[]>([]);
   const [allUsers, setAllUsers] = useState<User[]>([]);
 
-  // 加载所有用户
+
   const loadUsers = async () => {
     try {
       const adminId = localStorage.getItem('userData');
@@ -80,7 +80,7 @@ export default function AppointmentModals({
     }
   };
 
-  // 搜索患者
+ 
   const searchPatient = (email: string) => {
     setPatientEmail(email);
     if (email.length > 0) {
@@ -94,7 +94,7 @@ export default function AppointmentModals({
     }
   };
 
-  // 搜索医生
+
   const searchDoctor = (email: string) => {
     setDoctorEmail(email);
     if (email.length > 0) {
@@ -108,25 +108,25 @@ export default function AppointmentModals({
     }
   };
 
-  // 选择患者
+  
   const selectPatient = (user: User) => {
     setNewAppointment({ ...newAppointment, UserId: user.id });
     setPatientEmail(user.username);
     setPatientSearchResults([]);
   };
 
-  // 选择医生
+ 
   const selectDoctor = (user: User) => {
     setNewAppointment({ ...newAppointment, DoctorId: user.id });
     setDoctorEmail(user.username);
     setDoctorSearchResults([]);
   };
 
-  // 打开创建模态框时加载用户
+  
   React.useEffect(() => {
     if (showCreateModal) {
       loadUsers();
-      // ✅ 设置默认值
+     
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
       const tomorrowStr = tomorrow.toISOString().split('T')[0];
@@ -220,7 +220,7 @@ export default function AppointmentModals({
                 )}
               </div>
 
-              {/* ✅ Appointment Date (用户选择的预约日期) */}
+              {/* ✅ Appointment Date */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   <Calendar className="w-4 h-4 inline mr-2" />
@@ -429,7 +429,7 @@ export default function AppointmentModals({
                 </select>
               </div>
 
-              {/* ✅ Rejection Reason - 只在状态为 Rejected 时显示 */}
+              {/* ✅ Rejection Reason  */}
               {editingAppointment.status === '2' && (
                 <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4">
                   <label className="block text-sm font-medium text-red-800 mb-2">
@@ -447,7 +447,7 @@ export default function AppointmentModals({
                 </div>
               )}
 
-              {/* ✅ Comment/Notes - 只在非 Rejected 状态显示 */}
+              {/* ✅ Comment/Notes  */}
               {editingAppointment.status !== '2' && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">

@@ -27,7 +27,7 @@ export default function DashboardPage() {
     );
   }
 
-  // 根据角色渲染不同的 Dashboard
+
   if (userRole === 'customer') {
     return <CustomerDashboard />;
   } else if (userRole === 'doctor') {
@@ -36,5 +36,5 @@ export default function DashboardPage() {
     return <AdminDashboard />;
   }
 
-  return <CustomerDashboard />; // 默认显示 customer
+  return <CustomerDashboard />; 
 }

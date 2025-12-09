@@ -24,7 +24,7 @@ public static class UserInfoMapper
 
     public static void Insert(UserInfoDO userInfo)
     {
-        // ✅ UserId 大写，其他小写
+       
         string sql = $@"INSERT INTO {TableName} 
             (""UserId"", name, gender, age, address, specialization, experience_years, bio) 
             VALUES (@userid, @name, @gender, @age, @address, @specialization, @experience_years, @bio)";
@@ -128,7 +128,7 @@ public static class UserInfoMapper
 
     public static void Update(UserInfoDO userInfo)
     {
-        // ✅ UserId 大写，其他小写
+        
         string sql = $@"UPDATE {TableName} 
             SET name=@name, gender=@gender, age=@age, 
                 address=@address, specialization=@specialization, 

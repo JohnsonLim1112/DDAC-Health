@@ -66,7 +66,7 @@ public static class HealthMapper
         return null;
     }
 
-    // 根据用户ID和日期查询（用于判断是否已存在）
+    
     public static HealthDO? SelectByUserIdAndDate(string userId, DateTime date)
     {
         string sql = $"SELECT * FROM {TableName} WHERE user_id = @user_id AND record_date = @record_date";
@@ -85,7 +85,7 @@ public static class HealthMapper
         return null;
     }
 
-    // 获取用户所有健康记录
+
     public static List<HealthDO> SelectByUserId(string userId)
     {
         var list = new List<HealthDO>();
@@ -104,7 +104,7 @@ public static class HealthMapper
         return list;
     }
 
-    // 按日期范围过滤（用于趋势分析）
+
     public static List<HealthDO> SelectByUserIdAndDateRange(string userId, DateTime startDate, DateTime endDate)
     {
         var list = new List<HealthDO>();
@@ -168,7 +168,7 @@ public static class HealthMapper
         cmd.ExecuteNonQuery();
     }
 
-    // 辅助方法：从 DataReader 映射到 HealthDO
+  
     private static HealthDO MapToHealthDO(NpgsqlDataReader reader)
     {
         return new HealthDO(

@@ -24,7 +24,7 @@ public static class BookMapper
 
     public static void Insert(BookDO book)
     {
-        // ✅ 正确的字段名：date, start_time, end_time, comment
+        // date, start_time, end_time, comment
         string sql = $@"INSERT INTO {TableName} 
             (id, user_id, doctor_id, is_accept, illness_txt, medicine, price, comment, status, date, start_time, end_time) 
             VALUES (@id, @user_id, @doctor_id, @is_accept, @illness_txt, @medicine, @price, @comment, @status, @date, @start_time, @end_time)";
@@ -39,7 +39,7 @@ public static class BookMapper
         cmd.Parameters.AddWithValue("illness_txt", book.IllnessTxt);
         cmd.Parameters.AddWithValue("medicine", book.Medicine ?? "");
         cmd.Parameters.AddWithValue("price", book.Price);
-        cmd.Parameters.AddWithValue("comment", book.Comment ?? "");  // ✅ 正确拼写
+        cmd.Parameters.AddWithValue("comment", book.Comment ?? ""); 
         cmd.Parameters.AddWithValue("status", book.Status);
         cmd.Parameters.AddWithValue("date", book.Date);
         cmd.Parameters.AddWithValue("start_time", book.StartTime);
@@ -177,7 +177,7 @@ public static class BookMapper
 
     public static void Update(BookDO book)
     {
-        // ✅ 正确的字段名
+      
         string sql = $@"UPDATE {TableName} 
             SET user_id=@user_id, 
                 doctor_id=@doctor_id, 
@@ -202,7 +202,7 @@ public static class BookMapper
         cmd.Parameters.AddWithValue("illness_txt", book.IllnessTxt);
         cmd.Parameters.AddWithValue("medicine", book.Medicine ?? "");
         cmd.Parameters.AddWithValue("price", book.Price);
-        cmd.Parameters.AddWithValue("comment", book.Comment ?? "");  // ✅ 正确拼写
+        cmd.Parameters.AddWithValue("comment", book.Comment ?? "");  
         cmd.Parameters.AddWithValue("status", book.Status);
         cmd.Parameters.AddWithValue("date", book.Date);
         cmd.Parameters.AddWithValue("start_time", book.StartTime);
@@ -224,7 +224,7 @@ public static class BookMapper
         cmd.ExecuteNonQuery();
     }
 
-    // 管理员：每月总数统计
+  
     public static Dictionary<string, int> GetMonthlyAppointmentCount(int year)
     {
         var result = new Dictionary<string, int>();
@@ -249,7 +249,7 @@ public static class BookMapper
         return result;
     }
 
-    // 特定用户的月度统计
+
     public static Dictionary<string, int> GetUserMonthlyAppointmentCount(string userId, int year)
     {
         var result = new Dictionary<string, int>();
@@ -276,7 +276,7 @@ public static class BookMapper
         return result;
     }
 
-    // 特定医生的月度统计
+   
     public static Dictionary<string, int> GetDoctorMonthlyAppointmentCount(string doctorId, int year)
     {
         var result = new Dictionary<string, int>();
@@ -303,7 +303,7 @@ public static class BookMapper
         return result;
     }
 
-    // 医生查看指定月份的所有预约详情
+  
     public static List<BookDO> SelectByDoctorIdAndMonth(string doctorId, int year, int month)
     {
         var list = new List<BookDO>();

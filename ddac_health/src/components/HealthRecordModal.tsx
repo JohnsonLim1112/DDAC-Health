@@ -18,7 +18,7 @@ interface HealthRecord {
 interface HealthRecordModalProps {
   show: boolean;
   record: HealthRecord | null;
-  latestRecord: HealthRecord | null;  // ✅ 添加最新记录用于自动填充
+  latestRecord: HealthRecord | null; 
   onSave: (data: Partial<HealthRecord>) => void;
   onClose: () => void;
   isProcessing: boolean;
@@ -27,7 +27,7 @@ interface HealthRecordModalProps {
 export default function HealthRecordModal({
   show,
   record,
-  latestRecord,  // ✅ 接收最新记录
+  latestRecord, 
   onSave,
   onClose,
   isProcessing
@@ -44,7 +44,7 @@ export default function HealthRecordModal({
 
   useEffect(() => {
     if (record) {
-      // ✅ Edit mode - 填充当前记录的所有数据
+    
       setFormData({
         recordDate: record.recordDate.split('T')[0],
         height: record.height?.toString() || '',
@@ -55,18 +55,18 @@ export default function HealthRecordModal({
         notes: record.notes || ''
       });
     } else if (latestRecord) {
-      // ✅ Create mode - 自动填充上次的数据（身高、病史）和今天的日期
+     
       setFormData({
         recordDate: new Date().toISOString().split('T')[0],
-        height: latestRecord.height?.toString() || '',  // ✅ 自动填充上次的身高
-        weight: '',  // 体重留空，需要每次输入
-        bloodPressureSystolic: '',  // 血压留空，需要每次输入
+        height: latestRecord.height?.toString() || '',  
+        weight: '', 
+        bloodPressureSystolic: '',  
         bloodPressureDiastolic: '',
-        medicalHistory: latestRecord.medicalHistory || '',  // ✅ 自动填充病史
-        notes: ''  // 备注留空
+        medicalHistory: latestRecord.medicalHistory || '',  
+        notes: ''  
       });
     } else {
-      // ✅ Create mode - 没有历史记录，全部留空
+     
       setFormData({
         recordDate: new Date().toISOString().split('T')[0],
         height: '',

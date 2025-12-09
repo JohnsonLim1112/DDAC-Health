@@ -179,7 +179,7 @@ export default function CustomerHealthRecordsPage() {
     };
   };
 
-  // ✅ 获取最新记录用于自动填充
+
   const getLatestRecord = (): HealthRecord | null => {
     if (records.length === 0) return null;
     
@@ -328,7 +328,7 @@ export default function CustomerHealthRecordsPage() {
       <HealthRecordModal
         show={showModal}
         record={editingRecord}
-        latestRecord={latestRecord}  // ✅ 传递最新记录
+        latestRecord={latestRecord}  
         onSave={handleSaveRecord}
         onClose={() => {
           setShowModal(false);

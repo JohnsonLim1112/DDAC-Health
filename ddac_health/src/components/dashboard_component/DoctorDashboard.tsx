@@ -49,7 +49,7 @@ export default function DoctorDashboard() {
     }
   };
 
-  // 统计数据
+
   const stats = {
     total: appointments.length,
     pending: appointments.filter(a => a.status === '0').length,
@@ -58,13 +58,13 @@ export default function DoctorDashboard() {
     completed: appointments.filter(a => a.status === '3').length,
   };
 
-  // 今天的预约
+
   const today = new Date().toDateString();
   const todayAppointments = appointments.filter(a => 
     new Date(a.createTime).toDateString() === today
   );
 
-  // 待处理的预约
+
   const pendingAppointments = appointments.filter(a => a.status === '0');
 
   if (isLoading) {

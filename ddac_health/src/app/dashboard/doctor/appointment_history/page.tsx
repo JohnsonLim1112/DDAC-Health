@@ -50,14 +50,14 @@ export default function DoctorAppointmentHistoryPage() {
       const doctorId = authUtils.getUserId();
       if (!doctorId) return;
 
-      // 加载预约和用户列表
+   
       const [appointmentsResult, usersResult] = await Promise.all([
         appointmentsAPI.getByDoctorId(doctorId),
-        usersAPI.getAll(doctorId) // 假设医生也可以查看用户列表
+        usersAPI.getAll(doctorId) 
       ]);
 
       if (appointmentsResult.success && appointmentsResult.data) {
-        // 过滤出 Accepted, Completed 状态的预约
+      
         const filteredData = appointmentsResult.data.filter(
           (apt: Appointment) => apt.status === '1' || apt.status === '2' || apt.status === '3' || apt.status === '5'
         );
@@ -75,13 +75,12 @@ export default function DoctorAppointmentHistoryPage() {
     }
   };
 
-  // ✅ 获取用户邮箱
   const getUserEmail = (userId: string): string => {
     const user = users.find(u => u.id === userId);
     return user?.username || '';
   };
 
-  // ✅ 标记为完成
+  
   const handleMarkCompleted = async (appointment: Appointment) => {
     if (!confirm('Mark this appointment as completed?')) return;
 
@@ -107,7 +106,7 @@ export default function DoctorAppointmentHistoryPage() {
     }
   };
 
-  // ✅ 设置价格
+ 
   const handleSetPrice = (appointment: Appointment) => {
     setSelectedAppointment(appointment);
     setShowPriceModal(true);
@@ -140,7 +139,7 @@ export default function DoctorAppointmentHistoryPage() {
     }
   };
 
-  // ✅ 添加/编辑备注
+
   const handleAddComment = (appointment: Appointment) => {
     setSelectedAppointment(appointment);
     setShowCommentModal(true);
@@ -173,7 +172,7 @@ export default function DoctorAppointmentHistoryPage() {
     }
   };
 
-  // ✅ 查看健康数据
+
   const handleViewHealthData = (appointment: Appointment) => {
     setSelectedAppointment(appointment);
     setShowHealthModal(true);

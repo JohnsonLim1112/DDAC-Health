@@ -49,7 +49,7 @@ export default function CustomerAppointmentHistoryPage() {
       const result = await appointmentsAPI.getByUserId(userId);
       
       if (result.success && result.data) {
-        // 按时间倒序排列
+   
         const sorted = result.data.sort((a: Appointment, b: Appointment) => 
           new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
         );
@@ -63,13 +63,13 @@ export default function CustomerAppointmentHistoryPage() {
     }
   };
 
-  // ✅ 打开支付模态框
+ 
   const handlePayClick = (appointment: Appointment) => {
     setSelectedAppointment(appointment);
     setShowPaymentModal(true);
   };
 
-  // ✅ 确认支付
+ 
   const handleConfirmPayment = async () => {
     if (!selectedAppointment) return;
 
@@ -99,7 +99,7 @@ export default function CustomerAppointmentHistoryPage() {
     }
   };
 
-  // ✅ 取消预约
+
   const handleCancelAppointment = async (appointment: Appointment) => {
     if (!confirm('Are you sure you want to cancel this appointment?')) return;
 

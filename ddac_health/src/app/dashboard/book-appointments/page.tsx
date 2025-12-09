@@ -36,14 +36,14 @@ export default function BookAppointmentPage() {
     fetchDoctors();
   }, []);
 
-  // ✅ 简化版：只显示有 specialization 的用户
+
   const fetchDoctors = async () => {
     try {
       setIsLoading(true);
       const result = await userInfoAPI.getDoctors();
       
       if (result.success && result.data) {
-        // ✅ 只显示有 specialization 的用户（医生必填项）
+     
         const validDoctors = result.data.filter((doctor: DoctorInfo) => 
           doctor.specialization && 
           doctor.specialization.trim() !== ''
@@ -63,7 +63,7 @@ export default function BookAppointmentPage() {
     }
   };
 
-  // 搜索和筛选
+
   useEffect(() => {
     let filtered = doctors;
 
@@ -82,16 +82,16 @@ export default function BookAppointmentPage() {
     setFilteredDoctors(filtered);
   }, [searchTerm, selectedSpecialization, doctors]);
 
-  // 获取所有专业列表
+  
   const specializations = Array.from(new Set(doctors.map(d => d.specialization).filter(Boolean)));
 
-  // 打开预约模态框
+
   const handleBookClick = (doctor: DoctorInfo) => {
     setSelectedDoctor(doctor);
     setShowBookingModal(true);
   };
 
-  // 自动计算结束时间（默认1小时后）
+
   const handleStartTimeChange = (time: string) => {
     setStartTime(time);
     
@@ -102,7 +102,7 @@ export default function BookAppointmentPage() {
     }
   };
 
-  // 验证时间间隔（最多1小时）
+ 
   const validateTimeDuration = (start: string, end: string): boolean => {
     if (!start || !end) return true;
     
@@ -113,7 +113,7 @@ export default function BookAppointmentPage() {
     return durationMinutes > 0 && durationMinutes <= 60;
   };
 
-  // 验证工作时间（8:00-18:00）
+
   const validateWorkingHours = (time: string): boolean => {
     if (!time) return true;
     
@@ -121,7 +121,7 @@ export default function BookAppointmentPage() {
     return hours >= 8 && hours < 18;
   };
 
-  // 提交预约
+ 
   const handleSubmitBooking = async (e: React.FormEvent) => {
     e.preventDefault();
     

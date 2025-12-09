@@ -9,7 +9,7 @@ import {
   Edit,
   Clock,
   Ban,
-  Activity  // ✅ 添加健康数据图标
+  Activity 
 } from 'lucide-react';
 
 interface Appointment {
@@ -29,21 +29,21 @@ interface Appointment {
 
 interface AppointmentCardProps {
   appointment: Appointment;
-  patientEmail: string;  // ✅ 添加患者邮箱
+  patientEmail: string; 
   onMarkCompleted: (appointment: Appointment) => void;
   onSetPrice: (appointment: Appointment) => void;
   onAddComment: (appointment: Appointment) => void;
-  onViewHealthData: (appointment: Appointment) => void;  // ✅ 添加查看健康数据回调
+  onViewHealthData: (appointment: Appointment) => void; 
   isProcessing: boolean;
 }
 
 export default function AppointmentCard({ 
   appointment, 
-  patientEmail,  // ✅ 接收患者邮箱
+  patientEmail,  
   onMarkCompleted, 
   onSetPrice, 
   onAddComment,
-  onViewHealthData,  // ✅ 接收查看健康数据回调
+  onViewHealthData,  
   isProcessing 
 }: AppointmentCardProps) {
   

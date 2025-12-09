@@ -24,7 +24,7 @@ export default function LoginPage() {
       ...formData,
       [name]: type === 'checkbox' ? checked : value
     });
-    // 清除错误信息
+  
     setError('');
   };
 
@@ -34,27 +34,23 @@ export default function LoginPage() {
     setError('');
 
      try {
-    // 调用后端 API
+   
     const result = await authAPI.login(formData.email, formData.password);
     
-    // ✅ 添加调试信息
-    console.log('完整的返回结果:', result);
-    console.log('result.data:', result.data);
-    console.log('result.success:', result.success);
+
     
     if (result.success) {
-      // 登录成功
-      console.log('Login successful:', result.data);
       
-      // ✅ 检查 userData
+      
+
       const userData = result.data;
       console.log('userData:', userData);
       console.log('userData.LoginRole:', userData?.LoginRole);
       
-      // 跳转到 dashboard
+  
       router.push('/dashboard');
     } else {
-      // 登录失败，显示错误消息
+   
       setError(result.message || 'Login failed');
     }
   } catch (error: any) {
@@ -75,7 +71,7 @@ export default function LoginPage() {
         <h2 className="text-2xl font-bold text-gray-800 mb-6">Sign In</h2>
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* 错误提示 */}
+       
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl">
               {error}

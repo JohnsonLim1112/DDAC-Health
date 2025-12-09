@@ -25,14 +25,14 @@ export default function RegisterPage() {
       ...formData,
       [e.target.name]: e.target.value
     });
-    // 清除错误信息
+   
     setError('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // 前端验证
+    
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match!');
       return;
@@ -52,7 +52,7 @@ export default function RegisterPage() {
     setError('');
 
     try {
-      // 调用后端 API
+      
       const result = await authAPI.register(
         formData.email,
         formData.password,
@@ -61,11 +61,11 @@ export default function RegisterPage() {
       );
       
       if (result.success) {
-        // 注册成功，跳转到登录页
+       
         alert('Registration successful! Please login.');
         router.push('/login');
       } else {
-        // 注册失败，显示错误消息
+       
         setError(result.message || 'Registration failed');
       }
     } catch (error: any) {

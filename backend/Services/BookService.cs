@@ -69,9 +69,9 @@ namespace Service
             httpVO.data = bookDOs;
             return httpVO;
         }
-        // ========== 新增报告相关方法 ==========
+    
 
-        // 管理员：查看每月总 appointment 增长
+       
         public static HttpVO GetMonthlyReport(int year)
         {
             HttpVO httpVO = new HttpVO();
@@ -90,7 +90,7 @@ namespace Service
             return httpVO;
         }
 
-        // 查看特定用户的月度报告
+    
         public static HttpVO GetUserMonthlyReport(string userId, int year)
         {
             HttpVO httpVO = new HttpVO();
@@ -109,7 +109,7 @@ namespace Service
             return httpVO;
         }
 
-        // 医生：查看自己的月度报告
+      
         public static HttpVO GetDoctorMonthlyReport(string doctorId, int year)
         {
             HttpVO httpVO = new HttpVO();
@@ -128,7 +128,7 @@ namespace Service
             return httpVO;
         }
 
-        // 医生：查看指定月份的详细 appointments
+     
         public static HttpVO GetDoctorMonthlyDetails(string doctorId, int year, int month)
         {
             HttpVO httpVO = new HttpVO();

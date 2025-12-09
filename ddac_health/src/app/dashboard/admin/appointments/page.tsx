@@ -16,9 +16,9 @@ interface Appointment {
   price: number;
   comment: string;
   status: string;
-  date: string;        // 创建日期
-  startTime: string;   // 预约开始时间（包含日期）
-  endTime: string;     // 预约结束时间（包含日期）
+  date: string;        
+  startTime: string;  
+  endTime: string;   
 }
 
 interface CreateAppointmentData {
@@ -49,7 +49,7 @@ export default function AppointmentsManagementPage() {
   const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   
-  // ✅ 更新 newAppointment 初始化
+
   const [newAppointment, setNewAppointment] = useState<CreateAppointmentData>({
     UserId: '',
     DoctorId: '',
@@ -59,7 +59,6 @@ export default function AppointmentsManagementPage() {
     EndTime: ''
   });
 
-  // 获取用户邮箱
   const getUserEmail = (userId: string): string => {
     const user = users.find(u => u.id === userId);
     return user?.username || userId.substring(0, 8) + '...';
@@ -69,7 +68,7 @@ export default function AppointmentsManagementPage() {
     try {
       setIsLoading(true);
       
-      // 同时获取预约和用户信息
+     
       const adminId = authUtils.getUserId();
       const [appointmentsResult, usersResult] = await Promise.all([
         appointmentsAPI.getAll(),
@@ -92,22 +91,20 @@ export default function AppointmentsManagementPage() {
     }
   };
 
-  // ✅ 更新创建预约处理函数
+  
   const handleCreateAppointment = async (e: React.FormEvent) => {
     e.preventDefault();
     
     try {
-      // ✅ 组合日期和时间成 ISO DateTime
+     
       const startDateTime = new Date(`${newAppointment.AppointmentDate}T${newAppointment.StartTime}:00`);
       const endDateTime = new Date(`${newAppointment.AppointmentDate}T${newAppointment.EndTime}:00`);
 
-      // 验证时间
       if (endDateTime <= startDateTime) {
         alert('End time must be after start time');
         return;
       }
 
-      // 验证日期不能是过去
       const now = new Date();
       if (startDateTime < now) {
         alert('Appointment time cannot be in the past');
@@ -118,9 +115,9 @@ export default function AppointmentsManagementPage() {
         UserId: newAppointment.UserId,
         DoctorId: newAppointment.DoctorId,
         IllnessTxt: newAppointment.IllnessTxt,
-        StartTime: startDateTime.toISOString(),  // ✅ 完整的 DateTime
-        EndTime: endDateTime.toISOString()        // ✅ 完整的 DateTime
-        // Date 字段由后端自动生成（创建日期）
+        StartTime: startDateTime.toISOString(), 
+        EndTime: endDateTime.toISOString()       
+       
       };
 
       console.log('Creating appointment with data:', appointmentData);
@@ -217,13 +214,12 @@ export default function AppointmentsManagementPage() {
     return { color: 'bg-gray-100 text-gray-800', label: 'Unknown' };
   };
 
-  // ✅ 格式化创建日期
+
   const formatCreatedDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
-  // ✅ 格式化预约时间
   const formatAppointmentTime = (startTime: string, endTime: string) => {
     const start = new Date(startTime);
     const end = new Date(endTime);

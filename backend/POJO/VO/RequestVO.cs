@@ -71,7 +71,7 @@ public class DoctorcheckVO
     public string DoctorId { get; set; }
 }
 
-// ✅ 修改这个 - 添加医生字段
+
 public class CreateInfoVO
 {
     public string UserId { get; set; }
@@ -80,7 +80,7 @@ public class CreateInfoVO
     public int Age { get; set; }
     public string Address { get; set; }
 
-    // ✅ 新增医生专属字段（可选）
+  
     public string? Specialization { get; set; }
     public int? ExperienceYears { get; set; }
     public string? Bio { get; set; }
