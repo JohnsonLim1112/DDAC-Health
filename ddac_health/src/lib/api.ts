@@ -75,6 +75,18 @@ export interface CreateUserRequest {
   role: string;
 }
 
+interface MonthlyReportResponse {
+  success: boolean;
+  message: string;
+  data: { [key: string]: number };
+}
+
+interface AppointmentDetailsResponse {
+  success: boolean;
+  message: string;
+  data: any[];
+}
+
 
 
 async function handleResponse<T>(response: Response): Promise<T> {
@@ -694,3 +706,79 @@ export const healthAPI = {
     }
   },
 };
+
+
+export const appointmentsReportAPI = {
+  /**
+   * 获取医生的月度报告
+   * @param doctorId 医生ID
+   * @param year 年份
+   */
+  getDoctorMonthlyReport: async (doctorId: string, year: number): Promise<MonthlyReportResponse> => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/book/DoctorMonthlyReport?doctorId=${doctorId}&year=${year}`
+      );
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching doctor monthly report:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * 获取医生指定月份的详细预约数据
+   * @param doctorId 医生ID
+   * @param year 年份
+   * @param month 月份 (1-12)
+   */
+  getDoctorMonthlyDetails: async (
+    doctorId: string, 
+    year: number, 
+    month: number
+  ): Promise<AppointmentDetailsResponse> => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/book/DoctorMonthlyDetails?doctorId=${doctorId}&year=${year}&month=${month}`
+      );
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching doctor monthly details:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * 获取管理员的月度报告（全部医生）
+   * @param year 年份
+   */
+  getMonthlyReport: async (year: number): Promise<MonthlyReportResponse> => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/book/MonthlyReport?year=${year}`
+      );
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching monthly report:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * 获取用户的月度报告
+   * @param userId 用户ID
+   * @param year 年份
+   */
+  getUserMonthlyReport: async (userId: string, year: number): Promise<MonthlyReportResponse> => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/book/UserMonthlyReport?userId=${userId}&year=${year}`
+      );
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching user monthly report:', error);
+      throw error;
+    }
+  }
+};
+
