@@ -22,17 +22,17 @@ import {
 } from 'lucide-react';
 import { authAPI, authUtils } from '../lib/api';
 
-// 定义菜单项类型
+
 interface MenuItem {
   label: string;
   href: string;
   icon: React.ReactNode;
-  roles: string[]; // 哪些角色可以看到这个菜单
+  roles: string[];
 }
 
-// 所有菜单配置
+
 const menuItems: MenuItem[] = [
-  // 通用菜单
+ 
   {
     label: 'Dashboard',
     href: '/dashboard',
@@ -40,7 +40,7 @@ const menuItems: MenuItem[] = [
     roles: ['customer', 'doctor', 'admin'],
   },
   
-  // Customer 专属
+  // Customer 
   {
     label: 'My Appointments',
     href: '/dashboard/book-appointments',
@@ -60,7 +60,7 @@ const menuItems: MenuItem[] = [
     roles: ['customer'],
   },
   
-  // Doctor 专属
+  // Doctor 
   {
     label: 'Pending Appointments',
     href: '/dashboard/doctor/pending_appointment',
@@ -81,7 +81,7 @@ const menuItems: MenuItem[] = [
   },
   
   
-  // Admin 专属
+  // Admin 
   {
     label: 'User Management',
     href: '/dashboard/admin/user-management',
@@ -102,7 +102,7 @@ const menuItems: MenuItem[] = [
   },
  
   
-  // 通用设置
+
   {
     label: 'Profile',
     href: '/dashboard/profile',
@@ -122,21 +122,20 @@ export default function Sidebar({ userRole, userName }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
 
-  // 获取当前用户角色（从 props 或 localStorage）
+ 
   const currentRole = userRole || authUtils.getUserRole() || 'customer';
 
-  // 根据角色过滤菜单
   const filteredMenuItems = menuItems.filter(item =>
     item.roles.includes(currentRole)
   );
 
-  // 处理登出
+
   const handleLogout = () => {
     authAPI.logout();
     router.push('/login');
   };
 
-  // 获取角色显示名称
+
   const getRoleDisplayName = (role: string) => {
     const roleNames: Record<string, string> = {
       customer: 'Patient',

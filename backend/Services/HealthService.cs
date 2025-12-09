@@ -4,12 +4,11 @@ namespace Service
 {
     public class HealthService
     {
-        // 创建健康记录
+       
         public static HttpVO CreateHealth(CreateHealthVO createHealthVO)
         {
             HttpVO httpVO = new HttpVO();
 
-            // 检查当天是否已有记录
             var existing = HealthMapper.SelectByUserIdAndDate(createHealthVO.UserId, createHealthVO.RecordDate.Date);
             if (existing != null)
             {
@@ -40,7 +39,7 @@ namespace Service
             return httpVO;
         }
 
-        // 删除健康记录
+  
         public static HttpVO DeleteHealth(string id)
         {
             HttpVO httpVO = new HttpVO();
@@ -50,7 +49,7 @@ namespace Service
             return httpVO;
         }
 
-        // 更新健康记录
+      
         public static HttpVO UpdateHealth(HealthDO healthDO)
         {
             HttpVO httpVO = new HttpVO();
@@ -66,7 +65,7 @@ namespace Service
             return httpVO;
         }
 
-        // 获取用户所有健康记录
+     
         public static HttpVO GetUserHealthRecords(string userId)
         {
             HttpVO httpVO = new HttpVO();
@@ -77,7 +76,7 @@ namespace Service
             return httpVO;
         }
 
-        // 按日期范围过滤（用于趋势图）
+       
         public static HttpVO GetHealthRecordsByDateRange(string userId, DateTime startDate, DateTime endDate)
         {
             HttpVO httpVO = new HttpVO();
@@ -88,7 +87,6 @@ namespace Service
             return httpVO;
         }
 
-        // 获取单条记录
         public static HttpVO GetHealthById(string id)
         {
             HttpVO httpVO = new HttpVO();

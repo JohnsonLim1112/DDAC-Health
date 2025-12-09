@@ -58,7 +58,7 @@ export default function CreateUserModal({ isOpen, onClose, onSuccess }: CreateUs
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // 验证：如果是医生，必须填写医生资料
+  
     if (newUser.role === 'doctor') {
       if (!doctorInfo.Name || !doctorInfo.Specialization || !doctorInfo.Address) {
         alert('Please fill in all required doctor information!');
@@ -69,7 +69,7 @@ export default function CreateUserModal({ isOpen, onClose, onSuccess }: CreateUs
     try {
       const adminId = authUtils.getUserId();
       
-      // 1. 创建用户账号
+  
       const createUserResult = await usersAPI.create({
         AdminId: adminId!,
         Username: newUser.Username,
@@ -82,7 +82,7 @@ export default function CreateUserModal({ isOpen, onClose, onSuccess }: CreateUs
         return;
       }
 
-      // 2. 如果是医生，创建医生资料
+ 
       if (newUser.role === 'doctor' && createUserResult.data?.userId) {
         const doctorData = {
           userId: createUserResult.data.userId,

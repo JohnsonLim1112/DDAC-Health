@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Configuration; // 补充缺失的配置引用
+﻿using Microsoft.Extensions.Configuration; 
 using Npgsql;
 using System;
 using System.Collections.Generic;
@@ -86,7 +86,7 @@ public static class LoginMapper
         return null;
     }
 
-    //根据 user_id 字段查询
+   
     public static LoginDO? SelectByUserId(string userId)
     {
         string sql = $"SELECT * FROM {TableName} WHERE user_id = @user_id";

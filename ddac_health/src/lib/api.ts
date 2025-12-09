@@ -1,9 +1,9 @@
 // src/lib/api.ts
 
-// ==================== 配置 ====================
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5255';
 
-// ==================== 类型定义 ====================
+
 
 export interface LoginRequest {
   Username: string;
@@ -23,11 +23,11 @@ export interface HttpVO<T = any> {
   data?: T;
 }
 
-// 登录成功后的数据
+
 export interface LoginData {
   LoginId: string;
   LoginRole: string;
-  LoginUsername: string;  // ✅ 添加 username
+  LoginUsername: string;  
 }
 
 export interface ApiError {
@@ -35,7 +35,7 @@ export interface ApiError {
   status: number;
 }
 
-// Appointments (Book) 相关
+// Appointments (Book) 
 export interface Appointment {
   id: string;
   userId: string;
@@ -46,20 +46,20 @@ export interface Appointment {
   price: number;
   comment: string;
   status: string;
-  date: string;        // 创建日期
-  startTime: string;   // 预约开始时间（包含日期）
-  endTime: string;     // 预约结束时间（包含日期）
+  date: string;      
+  startTime: string;  
+  endTime: string;     
 }
 
 export interface CreateAppointmentRequest {
   UserId: string;
   DoctorId: string;
   IllnessTxt: string;
-  StartTime: string;   // ✅ 预约开始时间（包含日期）ISO format
-  EndTime: string;     // ✅ 预约结束时间（包含日期）ISO format
+  StartTime: string;   
+  EndTime: string;    
 }
 
-// User Management 相关
+// User Management 
 export interface User {
   id: string;
   username: string;
@@ -75,7 +75,7 @@ export interface CreateUserRequest {
   role: string;
 }
 
-// ==================== 工具函数 ====================
+
 
 async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
@@ -116,7 +116,7 @@ function createHeaders(): HeadersInit {
   };
 }
 
-// ==================== 认证 API ====================
+
 
 export const authAPI = {
   /**
@@ -135,13 +135,13 @@ export const authAPI = {
       
       const result = await handleResponse<HttpVO>(response);
       
-      // 保存用户数据
+    
       if (result.success && result.data) {
-        // 转换后端返回的小写字段为大写
+       
         const transformedData: LoginData = {
           LoginId: result.data.loginId,    
           LoginRole: result.data.loginRole,
-          LoginUsername: email  // ✅ 保存 email
+          LoginUsername: email  // 
         };
         setUserData(transformedData);
       }
@@ -387,9 +387,7 @@ export const appointmentsAPI = {
 // ==================== User Management API ====================
 
 export const usersAPI = {
-  /**
-   * 获取所有用户（需要 admin 权限）
-   */
+  
   getAll: async (adminId: string): Promise<HttpVO> => {
     try {
       const response = await fetch(`${API_BASE_URL}/users/get?adminId=${adminId}`, {
@@ -404,9 +402,7 @@ export const usersAPI = {
     }
   },
 
-  /**
-   * 创建用户（需要 admin 权限）
-   */
+ 
   create: async (userData: CreateUserRequest): Promise<HttpVO> => {
     try {
       const response = await fetch(`${API_BASE_URL}/users/create`, {
@@ -422,9 +418,7 @@ export const usersAPI = {
     }
   },
 
-  /**
-   * 更新用户（需要 admin 权限）
-   */
+  
  update: async (
     adminId: string,
     users: User[],
@@ -436,8 +430,8 @@ export const usersAPI = {
         headers: createHeaders(),
         body: JSON.stringify({
           id: adminId,
-          updatePassword: options?.changePassword ?? false,     // 关键字段！
-          updateSecurityPassword: false,                        // 你没用到，传 false
+          updatePassword: options?.changePassword ?? false,    
+          updateSecurityPassword: false,                        
           Data: users
         }),
       });
@@ -449,9 +443,7 @@ export const usersAPI = {
     }
   },
 
-  /**
-   * 删除用户（需要 admin 权限）
-   */
+  
   delete: async (id: string): Promise<HttpVO> => {
     try {
       const response = await fetch(`${API_BASE_URL}/users/delete`, {
@@ -482,9 +474,7 @@ export interface UserInfo {
 }
 
 export const userInfoAPI = {
-  /**
-   * 获取用户信息
-   */
+  
   get: async (userId: string): Promise<HttpVO> => {
     try {
       const response = await fetch(`${API_BASE_URL}/UserInfo/get?UserId=${userId}`, {
@@ -499,9 +489,7 @@ export const userInfoAPI = {
     }
   },
 
-  /**
-   * 获取所有医生列表
-   */
+ 
   getDoctors: async (): Promise<HttpVO> => {
     try {
       const response = await fetch(`${API_BASE_URL}/UserInfo/GetDoctors`, {
@@ -516,9 +504,7 @@ export const userInfoAPI = {
     }
   },
 
-  /**
-   * 创建用户信息
-   */
+  
   create: async (userInfo: Partial<UserInfo>): Promise<HttpVO> => {
     try {
       const response = await fetch(`${API_BASE_URL}/UserInfo/create`, {
@@ -534,9 +520,7 @@ export const userInfoAPI = {
     }
   },
 
-  /**
-   * 更新用户信息
-   */
+ 
   update: async (userInfo: UserInfo): Promise<HttpVO> => {
     try {
       const response = await fetch(`${API_BASE_URL}/UserInfo/update`, {
@@ -571,7 +555,7 @@ export const userInfoAPI = {
   },
 };
 
-// ==================== 导出工具函数 ====================
+
 
 export const authUtils = {
   getUserData,
@@ -588,15 +572,15 @@ export const authUtils = {
     const userData = getUserData();
     return userData?.LoginRole || null;
   },
-  getRole: (): string | null => {  // ✅ 别名方法
+  getRole: (): string | null => {  
     const userData = getUserData();
     return userData?.LoginRole || null;
   },
-  getUserEmail: (): string | null => {  // ✅ 新增获取 email 方法
+  getUserEmail: (): string | null => {  
     const userData = getUserData();
     return userData?.LoginUsername || null;
   },
-  logout: (): void => {  // ✅ 添加 logout 方法
+  logout: (): void => { 
     clearUserData();
   },
 };

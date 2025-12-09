@@ -19,7 +19,7 @@ interface Appointment {
 interface CommentModalProps {
   show: boolean;
   appointment: Appointment | null;
-  onSave: (comment: string) => void;  // ✅ 修复：接收 comment 参数
+  onSave: (comment: string) => void;  
   onClose: () => void;
   isProcessing: boolean;
 }
@@ -31,7 +31,7 @@ export default function CommentModal({
   onClose,
   isProcessing
 }: CommentModalProps) {
-  const [comment, setComment] = React.useState('');  // ✅ 内部管理 comment 状态
+  const [comment, setComment] = React.useState(''); 
 
   React.useEffect(() => {
     if (appointment) {

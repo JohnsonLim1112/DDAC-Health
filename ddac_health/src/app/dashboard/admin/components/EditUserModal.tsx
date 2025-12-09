@@ -34,15 +34,15 @@ export default function EditUserModal({ isOpen, user, onClose, onSuccess }: Edit
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [isLoadingUserInfo, setIsLoadingUserInfo] = useState(false);
   const [userInfoExists, setUserInfoExists] = useState(false);
-  const [showPasswordChange, setShowPasswordChange] = useState(false);  // ✅ 控制密码修改区域
-  const [newPassword, setNewPassword] = useState('');  // ✅ 新密码
+  const [showPasswordChange, setShowPasswordChange] = useState(false);  
+  const [newPassword, setNewPassword] = useState('');  
 
   useEffect(() => {
     if (user) {
       
       setEditingUser({ 
         ...user, 
-        password: ''  // ✅ 始终为空，不从数据库获取
+        password: '' 
       });
       loadUserInfo(user.id);
       setShowPasswordChange(false);
@@ -102,7 +102,7 @@ export default function EditUserModal({ isOpen, user, onClose, onSuccess }: Edit
   e.preventDefault();
   if (!editingUser || !userInfo) return;
 
-  // 医生必填校验
+  
   if (editingUser.role === 'doctor') {
     if (!userInfo.name?.trim()) {
       alert('Doctor name is required!');
@@ -127,23 +127,23 @@ export default function EditUserModal({ isOpen, user, onClose, onSuccess }: Edit
       return;
     }
 
-    // 判断是否真的要修改密码
+  
     const isChangingPassword = showPasswordChange && newPassword.trim() !== '';
 
-    // 构造要发送的用户对象
+    
     const userToUpdate: User = {
       id: editingUser.id,
       username: editingUser.username,
-      password: isChangingPassword ? newPassword : user!.password, // 关键！
+      password: isChangingPassword ? newPassword : user!.password, 
       securityPassword: editingUser.securityPassword,
       role: editingUser.role
     };
 
-    // 调用更新接口，明确告诉后端是否要改密码
+   
     const updateUserResult = await usersAPI.update(
       adminId,
       [userToUpdate],
-      { changePassword: isChangingPassword }  // 这一行决定一切！
+      { changePassword: isChangingPassword }  
     );
 
     if (updateUserResult.message !== 'User updated') {
@@ -151,7 +151,7 @@ export default function EditUserModal({ isOpen, user, onClose, onSuccess }: Edit
       return;
     }
 
-    // 保存用户信息（UserInfo 表）
+  
     if (shouldSaveUserInfo) {
       const userData: UserInfo = {
         userId: editingUser.id,
@@ -170,7 +170,7 @@ export default function EditUserModal({ isOpen, user, onClose, onSuccess }: Edit
 
       if (!userInfoResult.success) {
         alert('Account updated but failed to save profile info');
-        // 不 return，优先保证账号安全
+      
       }
     }
 

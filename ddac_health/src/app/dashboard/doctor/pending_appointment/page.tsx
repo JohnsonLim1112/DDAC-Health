@@ -9,7 +9,7 @@ import {
   Calendar,
   User,
   FileText,
-  Activity  // ✅ 添加健康数据图标
+  Activity  
 } from 'lucide-react';
 import { appointmentsAPI, authUtils, usersAPI } from '../../../../lib/api';
 import PatientHealthView from '../../../../components/PatientHealthView';
@@ -76,7 +76,7 @@ export default function DoctorPendingAppointmentsPage() {
     }
   };
 
-  // ✅ 获取用户邮箱
+ 
   const getUserEmail = (userId: string): string => {
     const user = users.find(u => u.id === userId);
     return user?.username || '';
@@ -154,7 +154,7 @@ export default function DoctorPendingAppointmentsPage() {
     }
   };
 
-  // ✅ 查看健康数据
+
   const handleViewHealthData = (appointment: Appointment) => {
     setSelectedAppointment(appointment);
     setShowHealthModal(true);

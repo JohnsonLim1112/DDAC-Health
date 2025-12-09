@@ -7,7 +7,7 @@ public record UserInfoDO
     string Gender,
     int Age,
     string Address,
-    string? Specialization,              // 医生专业
-    int? ExperienceYears,                // 从业年数
-    string? Bio                          // 个人简介
+    string? Specialization,            
+    int? ExperienceYears,                
+    string? Bio                          
 );

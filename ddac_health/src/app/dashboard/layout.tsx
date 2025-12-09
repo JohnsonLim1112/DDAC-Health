@@ -22,8 +22,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     }
 
     const userData = authUtils.getUserData();
-    if (userData && userData.LoginRole) {  // ✅ 改成 LoginRole
-      setUserRole(userData.LoginRole);     // ✅ 改成 LoginRole
+    if (userData && userData.LoginRole) {  // 
+      setUserRole(userData.LoginRole);     // 
       const roleName = userData.LoginRole.charAt(0).toUpperCase() + userData.LoginRole.slice(1);
       setUserName(roleName);
     } else {

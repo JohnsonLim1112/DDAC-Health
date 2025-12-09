@@ -23,7 +23,7 @@ interface Appointment {
   createTime: string;
 }
 
-// 统计卡片组件
+
 interface StatCardProps {
   title: string;
   value: string | number;
@@ -52,7 +52,7 @@ function StatCard({ title, value, icon, color, isLoading }: StatCardProps) {
   );
 }
 
-// 快捷操作卡片
+
 interface QuickActionProps {
   title: string;
   description: string;
@@ -90,13 +90,13 @@ export default function AdminDashboard() {
       setIsLoading(true);
       const adminId = authUtils.getUserId();
       
-      // 1. 获取所有用户
+      
       const usersResult = await usersAPI.getAll(adminId!);
       if (usersResult.success && usersResult.data) {
         setUsers(usersResult.data);
       }
 
-      // 2. 获取所有预约
+     
       try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/book/GetAll`);
         const appointmentsResult = await response.json();
@@ -114,7 +114,7 @@ export default function AdminDashboard() {
     }
   };
 
-  // 统计数据
+
   const now = new Date();
   const currentMonth = now.getMonth();
   const currentYear = now.getFullYear();

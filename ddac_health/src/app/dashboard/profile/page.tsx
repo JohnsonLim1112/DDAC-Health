@@ -65,7 +65,6 @@ export default function ProfilePage() {
         return;
       }
 
-      // 设置登录信息
       setLoginInfo({
         id: userId,
         username: userEmail || '',
@@ -74,7 +73,7 @@ export default function ProfilePage() {
         role: (userRole as 'customer' | 'doctor' | 'admin') || 'customer'
       });
 
-      // 加载用户详细信息
+
       const result = await userInfoAPI.get(userId);
       
       if (result.success && result.data) {
@@ -110,7 +109,7 @@ export default function ProfilePage() {
     }
   };
 
-  // ✅ 验证安全密码
+
   const handleVerifySecurityPassword = async () => {
     if (!securityPassword.trim()) {
       alert('Please enter your security password');
@@ -137,13 +136,13 @@ export default function ProfilePage() {
   const handleSave = async () => {
     if (!userInfo || !loginInfo) return;
 
-    // ✅ 如果要修改密码，必须先验证安全密码
+  
     if (newPassword.trim() && !isSecurityVerified) {
       alert('Please verify your security password before changing your password!');
       return;
     }
 
-    // 验证医生必填字段
+
     if (loginInfo.role === 'doctor') {
       if (!userInfo.name || !userInfo.address) {
         alert('Please fill in Name and Address!');
@@ -158,7 +157,7 @@ export default function ProfilePage() {
     try {
       setIsSaving(true);
 
-      // 1. ✅ 如果验证通过且修改了密码，使用 changePassword API
+    
       if (newPassword.trim() && isSecurityVerified) {
         const userId = authUtils.getUserId();
         
@@ -170,7 +169,7 @@ export default function ProfilePage() {
         }
       }
 
-      // 2. 保存用户信息（如果有填写内容或者是医生）
+   
       const shouldSaveUserInfo = userInfo.name || userInfo.address || loginInfo.role === 'doctor';
 
       if (shouldSaveUserInfo) {
@@ -203,7 +202,7 @@ export default function ProfilePage() {
       setNewPassword('');
       setSecurityPassword('');
       setIsSecurityVerified(false);
-      loadProfile(); // 刷新数据
+      loadProfile(); 
     } catch (error) {
       console.error('Error saving profile:', error);
       alert('Failed to save profile');

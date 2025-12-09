@@ -19,7 +19,7 @@ interface Appointment {
 interface PriceModalProps {
   show: boolean;
   appointment: Appointment | null;
-  onSave: (price: number) => void;  // ✅ 修复：接收 price 参数
+  onSave: (price: number) => void;  
   onClose: () => void;
   isProcessing: boolean;
 }
@@ -31,7 +31,7 @@ export default function PriceModal({
   onClose,
   isProcessing
 }: PriceModalProps) {
-  const [price, setPrice] = React.useState('');  // ✅ 内部管理 price 状态
+  const [price, setPrice] = React.useState('');  
 
   React.useEffect(() => {
     if (appointment) {
