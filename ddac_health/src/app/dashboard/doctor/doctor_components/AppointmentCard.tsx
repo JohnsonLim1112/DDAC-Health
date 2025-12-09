@@ -29,7 +29,7 @@ interface Appointment {
 
 interface AppointmentCardProps {
   appointment: Appointment;
-  patientEmail?: string;  // ✅ 添加患者邮箱
+  patientEmail: string;  // ✅ 添加患者邮箱
   onMarkCompleted: (appointment: Appointment) => void;
   onSetPrice: (appointment: Appointment) => void;
   onAddComment: (appointment: Appointment) => void;
@@ -55,6 +55,7 @@ export default function AppointmentCard({
     const endTimeStr = end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     return `${dateStr} ${startTimeStr} - ${endTimeStr}`;
   };
+  
 
   const getStatusBadge = (status: string) => {
     if (status === '1') return { color: 'bg-green-100 text-green-800', icon: CheckCircle, label: 'Accepted', borderColor: '#10b981' };

@@ -179,28 +179,7 @@ export default function DoctorDashboard() {
           </div>
         )}
       </div>
-
-
-      {/* 快速操作 */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-        <button className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-xl shadow-md hover:shadow-lg transition-all">
-          <Users className="w-8 h-8 mb-3" />
-          <h3 className="font-semibold text-lg">View All Patients</h3>
-          <p className="text-blue-100 text-sm mt-2">Manage patient records</p>
-        </button>
-
-        <button className="bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-xl shadow-md hover:shadow-lg transition-all">
-          <Calendar className="w-8 h-8 mb-3" />
-          <h3 className="font-semibold text-lg">Manage Schedule</h3>
-          <p className="text-green-100 text-sm mt-2">View and update availability</p>
-        </button>
-
-        <button className="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-6 rounded-xl shadow-md hover:shadow-lg transition-all">
-          <TrendingUp className="w-8 h-8 mb-3" />
-          <h3 className="font-semibold text-lg">View Reports</h3>
-          <p className="text-purple-100 text-sm mt-2">Analytics and insights</p>
-        </button>
-      </div>
+    
     </div>
   );
 }

@@ -213,7 +213,7 @@ export default function AdminDashboard() {
             title="User Management"
             description="Manage system users"
             icon={<Users className="w-6 h-6 text-white" />}
-            href="/dashboard/user-management"
+            href="/dashboard/admin/user-management"
             color="bg-blue-500"
           />
           <QuickAction
