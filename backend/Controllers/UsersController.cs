@@ -57,5 +57,13 @@ namespace Controllers
                 return UsersService.CreateUser(admincreate);
             }
         }
+
+        // check username
+        [HttpPost("username")]
+        public HttpVO CheckUsername([FromQuery] string id)
+        {
+            HttpVO user = UsersService.CheckUsername(id);
+            return user;
+        }
     }
 }
