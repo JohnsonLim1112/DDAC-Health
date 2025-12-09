@@ -108,15 +108,6 @@ type LayoutConfig<Route extends LayoutRoutes = LayoutRoutes> = {
   type __Unused = __Check
 }
 
-// Validate ../../src/app/dashboard/forgot_password/page.tsx
-{
-  type __IsExpected<Specific extends AppPageConfig<"/dashboard/forgot_password">> = Specific
-  const handler = {} as typeof import("../../src/app/dashboard/forgot_password/page.js")
-  type __Check = __IsExpected<typeof handler>
-  // @ts-ignore
-  type __Unused = __Check
-}
-
 // Validate ../../src/app/dashboard/health/page.tsx
 {
   type __IsExpected<Specific extends AppPageConfig<"/dashboard/health">> = Specific
@@ -139,6 +130,15 @@ type LayoutConfig<Route extends LayoutRoutes = LayoutRoutes> = {
 {
   type __IsExpected<Specific extends AppPageConfig<"/dashboard/profile">> = Specific
   const handler = {} as typeof import("../../src/app/dashboard/profile/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../src/app/forgot_password/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/forgot_password">> = Specific
+  const handler = {} as typeof import("../../src/app/forgot_password/page.js")
   type __Check = __IsExpected<typeof handler>
   // @ts-ignore
   type __Unused = __Check

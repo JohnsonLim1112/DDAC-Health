@@ -2,8 +2,6 @@
 
 namespace Service;
 
-
-
 public static class LoginService
 {
     private static HttpVO Registercheck(string username, string password, string password2, string SecurityPassword)
@@ -35,13 +33,10 @@ public static class LoginService
         return httpVO;
     }
 
-
-    //Service Funtion
     public static HttpVO Register(string username, string password, string password2, string SecurityPassword)
     {
-
         HttpVO httpvo = Registercheck(username, password, password2, SecurityPassword);
-        
+
         if (httpvo.success == true)
         {
             string PasswordToken = Tools.Token(password);
@@ -55,13 +50,12 @@ public static class LoginService
                 Role: "customer"
             );
             LoginMapper.Insert(loginDO);
-            // check Object
             Console.WriteLine($"Successfully created the LoginDO object：");
             Console.WriteLine($"LoginDO.Id：{loginDO.Id}");
             Console.WriteLine($"LoginDO.Username：{loginDO.Username}");
             Console.WriteLine($"LoginDO.Role：{loginDO.Role}");
         }
-        
+
         return httpvo;
     }
 
@@ -101,7 +95,7 @@ public static class LoginService
                 httpVO.success = true;
                 httpVO.data = new
                 {
-                    LoginId = user.Id,
+                    LoginId = user.Id,  
                 };
                 return httpVO;
             }
@@ -109,32 +103,55 @@ public static class LoginService
         httpVO.message = "Email does not exist";
         return httpVO;
     }
+
+
     public static HttpVO ValidateSecurityPassword(string id, string SecurityPassword)
     {
-        string SecurityPasswordToken = Tools.Token(SecurityPassword);
-        var user = LoginMapper.SelectById(id);
         HttpVO httpVO = new HttpVO();
+        var user = LoginMapper.SelectById(id);
+
+        
+        if (user == null)
+        {
+            httpVO.success = false;
+            httpVO.message = "User not found";
+            return httpVO;
+        }
+
+        string SecurityPasswordToken = Tools.Token(SecurityPassword);
+
         if (user.SecurityPassword.Equals(SecurityPasswordToken))
         {
             httpVO.success = true;
+            httpVO.message = "Security password is correct";
             httpVO.data = new
             {
                 LoginId = user.Id,
             };
-            return httpVO;
         }
         else
         {
             httpVO.success = false;
             httpVO.message = "Security password is incorrect";
         }
+
         return httpVO;
     }
-    public  static HttpVO ChangePassword(string id, string password)
+
+    public static HttpVO ChangePassword(string id, string password)
     {
         HttpVO httpVO = new HttpVO();
-        string psToken = Tools.Token(password);
+
+        // ✅ 添加 null 检查
         var data = LoginMapper.SelectById(id);
+        if (data == null)
+        {
+            httpVO.success = false;
+            httpVO.message = "User not found";
+            return httpVO;
+        }
+
+        string psToken = Tools.Token(password);
         LoginDO loginDO = new LoginDO(
             Id: id,
             Username: data.Username,
@@ -144,6 +161,7 @@ public static class LoginService
         );
         LoginMapper.Update(loginDO);
         httpVO.success = true;
+        httpVO.message = "Password changed successfully";
         return httpVO;
     }
 
@@ -157,10 +175,31 @@ public static class LoginService
             httpVO.message = "User does not exist";
             return httpVO;
         }
-        else {
+        else
+        {
             LoginMapper.Delete(id);
             httpVO.success = true;
+            httpVO.message = "User deleted successfully";
             return httpVO;
         }
+    }
+
+    // ✅ 新增：根据用户ID获取用户名
+    public static HttpVO CheckUsername(string id)
+    {
+        HttpVO httpVO = new HttpVO();
+        LoginDO user = LoginMapper.SelectById(id);
+        if (user != null)
+        {
+            httpVO.success = true;
+            httpVO.message = "User found";
+            httpVO.data = user.Username;
+        }
+        else
+        {
+            httpVO.success = false;
+            httpVO.message = "User not found";
+        }
+        return httpVO;
     }
 }

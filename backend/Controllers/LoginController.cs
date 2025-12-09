@@ -51,4 +51,11 @@ public class LoginController : ControllerBase
         HttpVO isValid = LoginService.DeleteUser(delete.id);
         return isValid;
     }
+
+    [HttpPost("username")]
+    public HttpVO CheckUsername([FromQuery] string id)
+    {
+        HttpVO user = LoginService.CheckUsername(id);
+        return user;
+    }
 }
