@@ -281,6 +281,23 @@ export const authAPI = {
       throw error;
     }
   },
+
+  /**
+   * ✅ 根据用户ID获取用户名（email）
+   */
+  checkUsername: async (userId: string): Promise<HttpVO> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/users/username?id=${userId}`, {
+        method: 'POST',
+        headers: createHeaders(),
+      });
+      
+      return handleResponse<HttpVO>(response);
+    } catch (error) {
+      console.error('Check username error:', error);
+      throw error;
+    }
+  },
 };
 
 // ==================== Appointments API ====================
@@ -781,4 +798,3 @@ export const appointmentsReportAPI = {
     }
   }
 };
-

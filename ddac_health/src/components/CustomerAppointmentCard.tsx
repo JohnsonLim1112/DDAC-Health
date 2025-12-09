@@ -7,7 +7,8 @@ import {
   FileText,
   MessageSquare,
   CreditCard,
-  Ban
+  Ban,
+  Stethoscope
 } from 'lucide-react';
 
 interface Appointment {
@@ -27,6 +28,7 @@ interface Appointment {
 
 interface CustomerAppointmentCardProps {
   appointment: Appointment;
+  doctorEmail: string;  // ✅ 新增 prop
   onPay: (appointment: Appointment) => void;
   onCancel: (appointment: Appointment) => void;
   isProcessing: boolean;
@@ -34,6 +36,7 @@ interface CustomerAppointmentCardProps {
 
 export default function CustomerAppointmentCard({ 
   appointment, 
+  doctorEmail,  // ✅ 接收 doctorEmail
   onPay, 
   onCancel,
   isProcessing 
@@ -63,7 +66,6 @@ export default function CustomerAppointmentCard({
   const isRejected = appointment.status === '2';
   const isCancelled = appointment.status === '4';
   const isPaid = appointment.status === '5';
-  const isCompleted = appointment.status === '3';
   const canCancel = appointment.status === '0' || appointment.status === '1'; // Pending or Accepted
   const canPay = appointment.status === '3' && appointment.price > 0; // Completed with price
 
@@ -92,6 +94,19 @@ export default function CustomerAppointmentCard({
               <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
                 <Clock className="w-4 h-4" />
                 <span>{formatAppointmentTime(appointment.startTime, appointment.endTime)}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* ✅ Doctor Information */}
+          <div className="bg-teal-50 rounded-lg p-4 mb-4 border border-teal-200">
+            <div className="flex items-center gap-2">
+              <Stethoscope className="w-5 h-5 text-teal-600" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-teal-700 mb-1">Doctor:</p>
+                <p className="text-gray-800 font-semibold">
+                  {doctorEmail || `Doctor ID: ${appointment.doctorId.substring(0, 12)}...`}
+                </p>
               </div>
             </div>
           </div>

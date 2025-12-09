@@ -9,9 +9,9 @@ import {
   Calendar,
   User,
   FileText,
-  Activity  
+  Activity
 } from 'lucide-react';
-import { appointmentsAPI, authUtils, usersAPI } from '../../../../lib/api';
+import { appointmentsAPI, authUtils, authAPI } from '../../../../lib/api';
 import PatientHealthView from '../../../../components/PatientHealthView';
 
 interface Appointment {
@@ -29,15 +29,9 @@ interface Appointment {
   endTime: string;
 }
 
-interface User {
-  id: string;
-  username: string;
-  role: string;
-}
-
 export default function DoctorPendingAppointmentsPage() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
+  const [userEmails, setUserEmails] = useState<{ [key: string]: string }>({});
   const [isLoading, setIsLoading] = useState(true);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [showHealthModal, setShowHealthModal] = useState(false);
@@ -55,18 +49,15 @@ export default function DoctorPendingAppointmentsPage() {
       const doctorId = authUtils.getUserId();
       if (!doctorId) return;
 
-      const [appointmentsResult, usersResult] = await Promise.all([
-        appointmentsAPI.getByDoctorId(doctorId),
-        usersAPI.getAll(doctorId)
-      ]);
+      // 1. 加载预约数据
+      const appointmentsResult = await appointmentsAPI.getByDoctorId(doctorId);
 
       if (appointmentsResult.success && appointmentsResult.data) {
         const pendingOnly = appointmentsResult.data.filter((apt: Appointment) => apt.status === '0');
         setAppointments(pendingOnly);
-      }
 
-      if (usersResult.success && usersResult.data) {
-        setUsers(usersResult.data);
+        // 2. ✅ 获取所有患者的 email
+        await loadUserEmails(pendingOnly);
       }
     } catch (error) {
       console.error('Error loading data:', error);
@@ -76,10 +67,43 @@ export default function DoctorPendingAppointmentsPage() {
     }
   };
 
- 
+  // ✅ 使用新 API 获取用户 email
+  const loadUserEmails = async (appointments: Appointment[]) => {
+    try {
+      // 获取所有唯一的 userId
+      const userIds = Array.from(new Set(appointments.map(apt => apt.userId)));
+      
+      // 并行获取所有用户的 email
+      const emailPromises = userIds.map(async (userId) => {
+        try {
+          const result = await authAPI.checkUsername(userId);
+          
+          if (result.success && result.data) {
+            return { userId, email: result.data };
+          }
+          return { userId, email: '' };
+        } catch (error) {
+          console.error(`Failed to fetch email for user ${userId}:`, error);
+          return { userId, email: '' };
+        }
+      });
+
+      const emailResults = await Promise.all(emailPromises);
+      
+      // 构建 userId -> email 映射
+      const emailMap: { [key: string]: string } = {};
+      emailResults.forEach(({ userId, email }) => {
+        emailMap[userId] = email;
+      });
+
+      setUserEmails(emailMap);
+    } catch (error) {
+      console.error('Error loading user emails:', error);
+    }
+  };
+
   const getUserEmail = (userId: string): string => {
-    const user = users.find(u => u.id === userId);
-    return user?.username || '';
+    return userEmails[userId] || '';
   };
 
   const handleAccept = async (appointment: Appointment) => {
@@ -153,7 +177,6 @@ export default function DoctorPendingAppointmentsPage() {
       setIsProcessing(false);
     }
   };
-
 
   const handleViewHealthData = (appointment: Appointment) => {
     setSelectedAppointment(appointment);
@@ -239,91 +262,95 @@ export default function DoctorPendingAppointmentsPage() {
         </div>
       ) : (
         <div className="space-y-4">
-          {appointments.map((appointment) => (
-            <div 
-              key={appointment.id} 
-              className="bg-white rounded-xl shadow-md p-6 border-l-4 border-yellow-400 hover:shadow-lg transition-shadow"
-            >
-              <div className="flex items-start justify-between">
-                {/* Left side - Appointment Info */}
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="bg-yellow-100 p-3 rounded-lg">
-                      <User className="w-6 h-6 text-yellow-600" />
+          {appointments.map((appointment) => {
+            const patientEmail = getUserEmail(appointment.userId);
+            
+            return (
+              <div 
+                key={appointment.id} 
+                className="bg-white rounded-xl shadow-md p-6 border-l-4 border-yellow-400 hover:shadow-lg transition-shadow"
+              >
+                <div className="flex items-start justify-between">
+                  {/* Left side - Appointment Info */}
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="bg-yellow-100 p-3 rounded-lg">
+                        <User className="w-6 h-6 text-yellow-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-lg text-gray-800">
+                          {patientEmail || `Patient ID: ${appointment.userId.substring(0, 8)}...`}
+                        </h3>
+                        <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
+                          <Calendar className="w-4 h-4" />
+                          <span>{formatAppointmentTime(appointment.startTime, appointment.endTime)}</span>
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-lg text-gray-800">
-                        {getUserEmail(appointment.userId) || `Patient ID: ${appointment.userId.substring(0, 8)}...`}
-                      </h3>
-                      <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
-                        <Calendar className="w-4 h-4" />
-                        <span>{formatAppointmentTime(appointment.startTime, appointment.endTime)}</span>
+
+                    {/* Symptoms */}
+                    <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                      <div className="flex items-start gap-2">
+                        <FileText className="w-5 h-5 text-gray-600 mt-0.5" />
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-700 mb-1">Symptoms / Reason:</p>
+                          <p className="text-gray-800">{appointment.illnessTxt}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Appointment Details */}
+                    <div className="grid grid-cols-3 gap-4 text-sm">
+                      <div>
+                        <p className="text-gray-600">Appointment ID</p>
+                        <p className="font-mono text-gray-800">{appointment.id.substring(0, 8)}...</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-600">Status</p>
+                        <span className="inline-block px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-semibold">
+                          Pending
+                        </span>
+                      </div>
+                      <div>
+                        <p className="text-gray-600">Price</p>
+                        <p className="font-semibold text-gray-800">RM {appointment.price.toFixed(2)}</p>
                       </div>
                     </div>
                   </div>
 
-                  {/* Symptoms */}
-                  <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                    <div className="flex items-start gap-2">
-                      <FileText className="w-5 h-5 text-gray-600 mt-0.5" />
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-700 mb-1">Symptoms / Reason:</p>
-                        <p className="text-gray-800">{appointment.illnessTxt}</p>
-                      </div>
-                    </div>
+                  {/* Right side - Action Buttons */}
+                  <div className="flex flex-col gap-3 ml-6">
+                    {/* View Health Data */}
+                    <button
+                      onClick={() => handleViewHealthData(appointment)}
+                      disabled={isProcessing}
+                      className="flex items-center gap-2 bg-teal-600 text-white px-6 py-3 rounded-lg hover:bg-teal-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
+                    >
+                      <Activity className="w-5 h-5" />
+                      View Health Data
+                    </button>
+
+                    <button
+                      onClick={() => handleAccept(appointment)}
+                      disabled={isProcessing}
+                      className="flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <CheckCircle className="w-5 h-5" />
+                      Accept
+                    </button>
+                    <button
+                      onClick={() => handleRejectClick(appointment)}
+                      disabled={isProcessing}
+                      className="flex items-center gap-2 bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <XCircle className="w-5 h-5" />
+                      Reject
+                    </button>
                   </div>
-
-                  {/* Appointment Details */}
-                  <div className="grid grid-cols-3 gap-4 text-sm">
-                    <div>
-                      <p className="text-gray-600">Appointment ID</p>
-                      <p className="font-mono text-gray-800">{appointment.id.substring(0, 8)}...</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-600">Status</p>
-                      <span className="inline-block px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-semibold">
-                        Pending
-                      </span>
-                    </div>
-                    <div>
-                      <p className="text-gray-600">Price</p>
-                      <p className="font-semibold text-gray-800">RM {appointment.price.toFixed(2)}</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Right side - Action Buttons */}
-                <div className="flex flex-col gap-3 ml-6">
-                  {/* ✅ View Health Data */}
-                  <button
-                    onClick={() => handleViewHealthData(appointment)}
-                    disabled={isProcessing}
-                    className="flex items-center gap-2 bg-teal-600 text-white px-6 py-3 rounded-lg hover:bg-teal-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
-                  >
-                    <Activity className="w-5 h-5" />
-                    View Health Data
-                  </button>
-
-                  <button
-                    onClick={() => handleAccept(appointment)}
-                    disabled={isProcessing}
-                    className="flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-                  >
-                    <CheckCircle className="w-5 h-5" />
-                    Accept
-                  </button>
-                  <button
-                    onClick={() => handleRejectClick(appointment)}
-                    disabled={isProcessing}
-                    className="flex items-center gap-2 bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-                  >
-                    <XCircle className="w-5 h-5" />
-                    Reject
-                  </button>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -345,7 +372,7 @@ export default function DoctorPendingAppointmentsPage() {
                   Patient
                 </label>
                 <p className="text-gray-800 bg-gray-50 p-2 rounded">
-                  {getUserEmail(selectedAppointment.userId) || selectedAppointment.userId}
+                  {getUserEmail(selectedAppointment.userId) || `Patient ID: ${selectedAppointment.userId.substring(0, 12)}...`}
                 </p>
               </div>
 
@@ -409,7 +436,7 @@ export default function DoctorPendingAppointmentsPage() {
         </div>
       )}
 
-      {/* ✅ Patient Health Data Modal */}
+      {/* Patient Health Data Modal */}
       <PatientHealthView
         show={showHealthModal}
         patientId={selectedAppointment?.userId || ''}
