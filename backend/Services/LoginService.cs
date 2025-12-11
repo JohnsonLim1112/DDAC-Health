@@ -142,7 +142,6 @@ public static class LoginService
     {
         HttpVO httpVO = new HttpVO();
 
-        // ✅ 添加 null 检查
         var data = LoginMapper.SelectById(id);
         if (data == null)
         {
@@ -184,7 +183,6 @@ public static class LoginService
         }
     }
 
-    // ✅ 新增：根据用户ID获取用户名
     public static HttpVO CheckUsername(string id)
     {
         HttpVO httpVO = new HttpVO();

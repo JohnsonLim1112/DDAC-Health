@@ -1,0 +1,2 @@
+"id","user_id","doctor_id","is_accept","illness_txt","medicine","price","comment","status","date","start_time","end_time"
+a02518c5-f776-4a1a-b527-f62d7e2e13ba,db30b9c6-f5dc-421c-a059-bf185b35031e,c6d7315b-adce-4fc7-9c7d-0140e8b7731d,true,test appointment,"",0.0,"","1",2025-12-11 12:20:08.055,2025-12-19 12:22:00.000,2025-12-19 13:22:00.000
