@@ -167,7 +167,7 @@ export default function AppointmentsManagementPage() {
   };
 
   const handleDeleteAppointment = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this appointment?')) return;
+    if (!window.confirm('Are you sure you want to delete this appointment?')) return;
     
     try {
       const result = await appointmentsAPI.delete(id);

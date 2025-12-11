@@ -107,7 +107,7 @@ export default function DoctorPendingAppointmentsPage() {
   };
 
   const handleAccept = async (appointment: Appointment) => {
-    if (!confirm('Are you sure you want to accept this appointment?')) return;
+    if (!window.confirm('Are you sure you want to accept this appointment?')) return;
 
     try {
       setIsProcessing(true);

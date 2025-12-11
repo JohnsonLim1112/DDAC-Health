@@ -137,7 +137,7 @@ export default function CustomerHealthRecordsPage() {
   };
 
   const handleDeleteRecord = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this health record?')) return;
+    if (!window.confirm('Are you sure you want to delete this health record?')) return;
 
     try {
       const result = await healthAPI.delete(id);

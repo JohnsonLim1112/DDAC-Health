@@ -141,7 +141,7 @@ export default function CustomerAppointmentHistoryPage() {
   };
 
   const handleCancelAppointment = async (appointment: Appointment) => {
-    if (!confirm('Are you sure you want to cancel this appointment?')) return;
+    if (!window.confirm('Are you sure you want to cancel this appointment?')) return;
 
     try {
       setIsProcessing(true);
