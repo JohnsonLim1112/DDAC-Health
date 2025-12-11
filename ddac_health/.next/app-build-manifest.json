@@ -31,15 +31,15 @@
       "static/chunks/main-app.js",
       "static/chunks/app/dashboard/admin/summary/page.js"
     ],
-    "/dashboard/admin/user-management/page": [
+    "/dashboard/book-appointments/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/dashboard/admin/user-management/page.js"
+      "static/chunks/app/dashboard/book-appointments/page.js"
     ],
-    "/dashboard/doctor/pending_appointment/page": [
+    "/dashboard/doctor/appointment_history/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/dashboard/doctor/pending_appointment/page.js"
+      "static/chunks/app/dashboard/doctor/appointment_history/page.js"
     ],
     "/dashboard/doctor/summary/page": [
       "static/chunks/webpack.js",

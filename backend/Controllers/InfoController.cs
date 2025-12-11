@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Service;
 using Mapper;
 
-namespace backend.Controllers
+namespace Controller
 {
     [Route("UserInfo")]
     [ApiController]

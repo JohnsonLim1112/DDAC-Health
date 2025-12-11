@@ -7,7 +7,7 @@ namespace Mapper;
 
 public static class UserInfoMapper
 {
-    private const string TableName = "\"UserInfo\"";
+    private const string TableName = "user_info";
     private static readonly string _connectionString;
 
     static UserInfoMapper()
@@ -26,7 +26,7 @@ public static class UserInfoMapper
     {
        
         string sql = $@"INSERT INTO {TableName} 
-            (""UserId"", name, gender, age, address, specialization, experience_years, bio) 
+            (user_id, name, gender, age, address, specialization, experience_years, bio) 
             VALUES (@userid, @name, @gender, @age, @address, @specialization, @experience_years, @bio)";
 
         using var conn = new NpgsqlConnection(_connectionString);
@@ -74,7 +74,7 @@ public static class UserInfoMapper
 
     public static UserInfoDO? SelectByUserId(string userId)
     {
-        string sql = $"SELECT * FROM {TableName} WHERE \"UserId\" = @userid";
+        string sql = $"SELECT * FROM {TableName} WHERE user_id = @userid";
 
         using var conn = new NpgsqlConnection(_connectionString);
         using var cmd = new NpgsqlCommand(sql, conn);
@@ -133,7 +133,7 @@ public static class UserInfoMapper
             SET name=@name, gender=@gender, age=@age, 
                 address=@address, specialization=@specialization, 
                 experience_years=@experience_years, bio=@bio 
-            WHERE ""UserId""=@userid";
+            WHERE user_id=@userid";
 
         using var conn = new NpgsqlConnection(_connectionString);
         using var cmd = new NpgsqlCommand(sql, conn);
@@ -153,7 +153,7 @@ public static class UserInfoMapper
 
     public static void Delete(string userId)
     {
-        string sql = $"DELETE FROM {TableName} WHERE \"UserId\"=@userid";
+        string sql = $"DELETE FROM {TableName} WHERE user_id=@userid";
 
         using var conn = new NpgsqlConnection(_connectionString);
         using var cmd = new NpgsqlCommand(sql, conn);
