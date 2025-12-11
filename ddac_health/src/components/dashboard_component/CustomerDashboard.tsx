@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Calendar, Clock, User, Stethoscope, FileText, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
+import { Calendar, Clock, User, Stethoscope, FileText, AlertCircle, CheckCircle, XCircle, Link } from 'lucide-react';
 import { appointmentsAPI, authUtils } from '../../lib/api';
 
 interface Appointment {
@@ -156,23 +156,23 @@ export default function CustomerDashboard() {
       <div>
         <h2 className="text-xl font-bold text-gray-800 mb-4">Quick Actions</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <a href="/dashboard/book-appointments" 
+          <Link href="/dashboard/book-appointments" 
              className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-lg transition-all hover:scale-105">
             <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center mb-4">
               <Calendar className="w-6 h-6 text-white" />
             </div>
             <h3 className="font-semibold text-gray-800 mb-1">Appointment</h3>
             <p className="text-sm text-gray-600">Schedule a visit with a doctor</p>
-          </a>
+          </Link>
 
-          <a href="/dashboard/health" 
+          <Link href="/dashboard/health" 
              className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-lg transition-all hover:scale-105">
             <div className="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center mb-4">
               <User className="w-6 h-6 text-white" />
             </div>
             <h3 className="font-semibold text-gray-800 mb-1">Health records</h3>
             <p className="text-sm text-gray-600">Manage your health information</p>
-          </a>
+          </Link>
         </div>
       </div>
 
@@ -191,10 +191,10 @@ export default function CustomerDashboard() {
           <div className="p-12 text-center">
             <Calendar className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <p className="text-gray-600 mb-2">No appointments yet</p>
-            <a href="/dashboard/book-appointment" 
+            <Link href="/dashboard/book-appointment" 
                className="text-blue-600 hover:text-blue-700 text-sm font-medium">
               Book your first appointment →
-            </a>
+            </Link>
           </div>
         ) : (
           <div className="divide-y divide-gray-100">
@@ -256,10 +256,10 @@ export default function CustomerDashboard() {
 
         {upcomingAppointments.length > 0 && (
           <div className="p-4 bg-gray-50 border-t border-gray-100">
-            <a href="/dashboard/my-appointments" 
+            <Link href="/dashboard/my-appointments" 
                className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center justify-center">
               View all appointments →
-            </a>
+            </Link>
           </div>
         )}
       </div>
