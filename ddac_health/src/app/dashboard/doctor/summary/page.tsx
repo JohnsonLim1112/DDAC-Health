@@ -36,6 +36,9 @@ interface Appointment {
   endTime: string;
 }
 
+// ✅ 使用环境变量
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5255';
+
 export default function DoctorSummaryPage() {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
@@ -54,14 +57,14 @@ export default function DoctorSummaryPage() {
       const doctorId = authUtils.getUserId();
       if (!doctorId) return;
 
+      
       const response = await fetch(
-        `http://localhost:5255/book/DoctorMonthlyReport?doctorId=${doctorId}&year=${selectedYear}`
+        `${API_BASE_URL}/book/DoctorMonthlyReport?doctorId=${doctorId}&year=${selectedYear}`
       );
       
       const result = await response.json();
 
       if (result.success && result.data) {
-     
         const processedData = processMonthlyData(result.data);
         setMonthlyData(processedData);
       }
@@ -73,7 +76,6 @@ export default function DoctorSummaryPage() {
     }
   };
 
-  
   const processMonthlyData = (data: { [key: string]: number }): MonthlyData[] => {
     const months = [
       '01', '02', '03', '04', '05', '06',
@@ -120,8 +122,10 @@ export default function DoctorSummaryPage() {
       if (!doctorId) return;
 
       const [year, month] = monthKey.split('-');
+      
+ 
       const response = await fetch(
-        `http://localhost:5255/book/DoctorMonthlyDetails?doctorId=${doctorId}&year=${year}&month=${parseInt(month)}`
+        `${API_BASE_URL}/book/DoctorMonthlyDetails?doctorId=${doctorId}&year=${year}&month=${parseInt(month)}`
       );
 
       const result = await response.json();
@@ -140,7 +144,6 @@ export default function DoctorSummaryPage() {
       setIsLoadingDetails(false);
     }
   };
-
 
   const downloadCSVReport = () => {
     const headers = ['Month', 'Appointments', 'Change', 'Change %'];
@@ -167,27 +170,27 @@ export default function DoctorSummaryPage() {
     window.URL.revokeObjectURL(url);
   };
 
-
   const downloadDetailedCSVReport = async () => {
     try {
       const doctorId = authUtils.getUserId();
       if (!doctorId) return;
 
-     
       const allDetails: Appointment[] = [];
       
       for (const data of monthlyData.filter(d => d.count > 0)) {
         const [year, month] = data.month.split('-');
+        
+
         const response = await fetch(
-          `http://localhost:5255/book/DoctorMonthlyDetails?doctorId=${doctorId}&year=${year}&month=${parseInt(month)}`
+          `${API_BASE_URL}/book/DoctorMonthlyDetails?doctorId=${doctorId}&year=${year}&month=${parseInt(month)}`
         );
+        
         const result = await response.json();
         if (result.success && result.data) {
           allDetails.push(...result.data);
         }
       }
 
-      
       const headers = ['Date', 'Patient ID', 'Symptoms', 'Status', 'Price', 'Notes'];
       const rows = allDetails.map(apt => [
         new Date(apt.startTime).toLocaleDateString(),
@@ -262,6 +265,7 @@ export default function DoctorSummaryPage() {
       </div>
     );
   }
+
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
