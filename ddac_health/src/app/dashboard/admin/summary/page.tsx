@@ -9,7 +9,7 @@ import {
   BarChart3,
   Calendar,
   Building2,
-  ChevronDown
+ 
 } from 'lucide-react';
 import { authUtils, usersAPI } from '../../../../lib/api';
 
@@ -27,6 +27,9 @@ interface User {
   username: string;
   role: string;
 }
+
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5255';
 
 export default function AdminReportsPage() {
   const [reportType, setReportType] = useState<ReportType>('system');
@@ -71,7 +74,7 @@ export default function AdminReportsPage() {
       if (result.success && result.data) {
         setUsers(result.data);
         
-        // 筛选出医生
+
         const doctorsList = result.data.filter((user: User) => user.role === 'doctor');
         setDoctors(doctorsList);
       }
@@ -80,12 +83,13 @@ export default function AdminReportsPage() {
     }
   };
 
-  // 1. 系统总报告
+
   const loadSystemReport = async () => {
     try {
       setIsLoading(true);
+  
       const response = await fetch(
-        `http://localhost:5255/book/MonthlyReport?year=${selectedYear}`
+        `${API_BASE_URL}/book/MonthlyReport?year=${selectedYear}`
       );
       const result = await response.json();
 
@@ -101,12 +105,13 @@ export default function AdminReportsPage() {
     }
   };
 
-  // 2. 用户个别报告
+
   const loadUserReport = async () => {
     try {
       setIsLoading(true);
+
       const response = await fetch(
-        `http://localhost:5255/book/UserMonthlyReport?userId=${selectedUserId}&year=${selectedYear}`
+        `${API_BASE_URL}/book/UserMonthlyReport?userId=${selectedUserId}&year=${selectedYear}`
       );
       const result = await response.json();
 
@@ -122,12 +127,13 @@ export default function AdminReportsPage() {
     }
   };
 
-  // 3. 医生个别报告
+
   const loadDoctorReport = async () => {
     try {
       setIsLoading(true);
+
       const response = await fetch(
-        `http://localhost:5255/book/DoctorMonthlyReport?doctorId=${selectedDoctorId}&year=${selectedYear}`
+        `${API_BASE_URL}/book/DoctorMonthlyReport?doctorId=${selectedDoctorId}&year=${selectedYear}`
       );
       const result = await response.json();
 
@@ -243,6 +249,8 @@ export default function AdminReportsPage() {
     }
     return 'Appointments Growth Report';
   };
+
+
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
