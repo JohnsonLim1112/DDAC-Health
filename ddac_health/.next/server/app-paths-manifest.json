@@ -1,8 +1,1 @@
-{
-  "/login/page": "app/login/page.js",
-  "/dashboard/doctor/summary/page": "app/dashboard/doctor/summary/page.js",
-  "/dashboard/admin/user-management/page": "app/dashboard/admin/user-management/page.js",
-  "/dashboard/admin/appointments/page": "app/dashboard/admin/appointments/page.js",
-  "/dashboard/admin/summary/page": "app/dashboard/admin/summary/page.js",
-  "/dashboard/page": "app/dashboard/page.js"
-}
+{}
