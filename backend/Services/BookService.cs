@@ -37,7 +37,6 @@ namespace Service
             return httpVO;
         }
 
-        //hhw change
         public static HttpVO updateBook(BookDO bookDO)
         {
             HttpVO httpVO = new HttpVO();
