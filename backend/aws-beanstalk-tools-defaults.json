@@ -7,7 +7,7 @@
   "environment": "backend-api-dev",
   "enable-xray": false,
   "enhanced-health-type": "basic",
-  "additional-options": "\u0022aws:autoscaling:launchconfiguration,SecurityGroups\u0022=\u0022sg-00f93455cd67a8b3a\u0022;\u0022aws:ec2:vpc,Subnets\u0022=\u0022subnet-0702fbbfe93fc06bf\u0022",
+  "additional-options": "",
   "solution-stack": "64bit Amazon Linux 2 v2.12.0 running .NET Core",
   "environment-type": "SingleInstance",
   "cname": "backend-api-dev",
