@@ -104,7 +104,7 @@ export default function DoctorAppointmentHistoryPage() {
   };
 
   const handleMarkCompleted = async (appointment: Appointment) => {
-    if (!confirm('Mark this appointment as completed?')) return;
+    if (!window.confirm('Mark this appointment as completed?')) return;
 
     try {
       setIsProcessing(true);
