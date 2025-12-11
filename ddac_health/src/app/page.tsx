@@ -14,7 +14,8 @@ import {
   TrendingUp,
   CheckCircle,
   ArrowRight,
-  Sparkles
+  Sparkles,
+  Link
 } from 'lucide-react';
 
 export default function HomePage() {
@@ -67,9 +68,9 @@ export default function HomePage() {
 
             {/* Nav Links */}
             <div className="hidden md:flex items-center gap-6">
-              <a href="#features" className="text-gray-600 hover:text-blue-600 transition-colors">
+              <Link href="#features" className="text-gray-600 hover:text-blue-600 transition-colors">
                 Features
-              </a>
+              </Link>
             </div>
 
             {/* Auth Buttons */}
@@ -324,8 +325,8 @@ export default function HomePage() {
             <div>
               <h3 className="font-semibold mb-4">Product</h3>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="#features" className="hover:text-white transition-colors">Features</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Security</a></li>
+                <li><Link href="#features" className="hover:text-white transition-colors">Features</Link></li>
+                <li><Link href="#" className="hover:text-white transition-colors">Security</Link></li>
               </ul>
             </div>
 
