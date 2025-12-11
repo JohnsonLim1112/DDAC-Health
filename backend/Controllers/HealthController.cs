@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Service;
 
-namespace backend.Controllers
+namespace Controller
 {
     [Route("health")]
     [ApiController]

@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Service;
 
-namespace backend.Controllers
+namespace Controller
 {
     [Route("book")]
     [ApiController]
