@@ -19,7 +19,6 @@ import {
 } from 'lucide-react';
 import { authUtils, userInfoAPI, authAPI } from '../../../lib/api';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 
 interface UserInfo {
   userId: string;
@@ -85,13 +84,9 @@ export default function ProfilePage() {
 
       const result = await userInfoAPI.get(userId);
       
-
-      
       if (result.success && result.data) {
         setUserInfoExists(true);
         const pictureUrl = result.data.picture || '';
-        
-
         
         setUserInfo({
           userId: result.data.userId,
@@ -105,12 +100,8 @@ export default function ProfilePage() {
           picture: pictureUrl
         });
         
-        // Set image preview if picture exists
         if (pictureUrl) {
-     
           setImagePreview(pictureUrl);
-        } else {
-          console.log('No picture URL found');
         }
       } else {
         setUserInfoExists(false);
@@ -138,13 +129,11 @@ export default function ProfilePage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
     if (!file.type.startsWith('image/')) {
       alert('Please select an image file');
       return;
     }
 
-    // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       alert('Image size should be less than 5MB');
       return;
@@ -152,7 +141,6 @@ export default function ProfilePage() {
 
     setSelectedImage(file);
     
-    // Create preview
     const reader = new FileReader();
     reader.onloadend = () => {
       setImagePreview(reader.result as string);
@@ -173,7 +161,6 @@ export default function ProfilePage() {
     formData.append('file', file);
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5255';
-
     
     const response = await fetch(`${apiUrl}/file/s3`, {
       method: 'POST',
@@ -182,14 +169,11 @@ export default function ProfilePage() {
 
     const result = await response.json();
     
-
-    
     if (!result.success) {
       throw new Error(result.message || 'Failed to upload image');
     }
 
- 
-    return result.data; // This should be the S3 URL
+    return result.data;
   };
 
   const handleVerifySecurityPassword = async () => {
@@ -243,7 +227,7 @@ export default function ProfilePage() {
         setIsUploadingImage(true);
         try {
           pictureUrl = await uploadImageToS3(selectedImage);
-
+          console.log('✅ Image uploaded successfully:', pictureUrl);
           setIsUploadingImage(false);
         } catch (error) {
           setIsUploadingImage(false);
@@ -264,8 +248,13 @@ export default function ProfilePage() {
         }
       }
 
-      // Save user info
-      const shouldSaveUserInfo = userInfo.name || userInfo.address || loginInfo.role === 'doctor';
+      // ✅ 修改: 如果上传了图片，强制保存 UserInfo（即使其他字段为空）
+      const shouldSaveUserInfo = 
+        userInfo.name || 
+        userInfo.address || 
+        loginInfo.role === 'doctor' || 
+        selectedImage ||  // 🔥 如果选择了图片，就保存
+        pictureUrl;       // 🔥 如果有图片 URL，就保存
 
       if (shouldSaveUserInfo) {
         const userData: UserInfo = {
@@ -280,7 +269,7 @@ export default function ProfilePage() {
           picture: pictureUrl
         };
 
-
+        console.log('💾 Saving user data with picture:', userData);
 
         let userResult;
         if (userInfoExists) {
@@ -290,6 +279,7 @@ export default function ProfilePage() {
           setUserInfoExists(true);
         }
 
+        console.log('💾 Save result:', userResult);
 
         if (!userResult.success) {
           alert('Failed to save profile');
@@ -344,8 +334,6 @@ export default function ProfilePage() {
       </div>
 
       <div className="space-y-6">
-        
-
         {/* Profile Picture Section */}
         <div className="bg-white rounded-xl shadow-md p-6 border">
           <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
@@ -365,9 +353,10 @@ export default function ProfilePage() {
                     onError={(e) => {
                       console.error('❌ Image failed to load:', imagePreview);
                       e.currentTarget.style.display = 'none';
-                    }}
-                    onLoad={() => {
-                      console.log('✅ Image loaded successfully:', imagePreview);
+                      const parent = e.currentTarget.parentElement;
+                      if (parent) {
+                        parent.innerHTML = '<svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>';
+                      }
                     }}
                   />
                 ) : (
@@ -406,9 +395,14 @@ export default function ProfilePage() {
                 Supported formats: JPG, PNG, GIF, WebP
               </p>
               {selectedImage && (
-                <p className="text-sm text-green-600 mt-2 flex items-center gap-1">
-                  ✓ New image selected: {selectedImage.name}
-                </p>
+                <div className="mt-3 space-y-2">
+                  <p className="text-sm text-green-600 flex items-center gap-1">
+                    ✓ New image selected: {selectedImage.name}
+                  </p>
+                  <p className="text-xs text-blue-600 bg-blue-50 border border-blue-200 rounded p-2">
+                    💡 <strong>Tip:</strong> Click "Save Changes" button below to upload and save your profile picture!
+                  </p>
+                </div>
               )}
               {isUploadingImage && (
                 <div className="text-sm text-blue-600 mt-2 flex items-center gap-2">
@@ -428,7 +422,6 @@ export default function ProfilePage() {
           </h2>
 
           <div className="space-y-4">
-            {/* Email - Read Only */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 <Mail className="w-4 h-4 inline mr-2" />
@@ -443,7 +436,6 @@ export default function ProfilePage() {
               <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
             </div>
 
-            {/* Role - Read Only */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 <User className="w-4 h-4 inline mr-2" />
@@ -460,7 +452,6 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            {/* New Password */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 <Lock className="w-4 h-4 inline mr-2" />
@@ -493,7 +484,6 @@ export default function ProfilePage() {
               )}
             </div>
 
-            {/* Security Password Verification */}
             <div className="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 <Lock className="w-4 h-4 inline mr-2" />
@@ -611,7 +601,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Doctor Information - Only for doctors */}
+        {/* Doctor Information */}
         {loginInfo.role === 'doctor' && (
           <div className="bg-blue-50 rounded-xl shadow-md p-6 border-2 border-blue-200">
             <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
