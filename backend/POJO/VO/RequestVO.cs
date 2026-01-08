@@ -84,7 +84,6 @@ public class CreateInfoVO
     public string? Specialization { get; set; }
     public int? ExperienceYears { get; set; }
     public string? Bio { get; set; }
-    public string Picture {  get; set; }
 }
 
 public class getInfoVO
