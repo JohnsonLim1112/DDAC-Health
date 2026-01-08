@@ -79,11 +79,10 @@ public class CreateInfoVO
     public string Gender { get; set; }
     public int Age { get; set; }
     public string Address { get; set; }
-
-  
     public string? Specialization { get; set; }
     public int? ExperienceYears { get; set; }
     public string? Bio { get; set; }
+    public string Picture { get; set; }
 }
 
 public class getInfoVO

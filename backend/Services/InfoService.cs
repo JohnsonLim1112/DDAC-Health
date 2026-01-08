@@ -8,7 +8,9 @@ namespace Service
         {
             HttpVO httpVO = new HttpVO();
 
-            var userInfoDO = new UserInfoDO(
+            if (createInfoVO.Picture == null)
+            {
+                var userInfoDO = new UserInfoDO(
                 UserId: createInfoVO.UserId,
                 Name: createInfoVO.Name,
                 Gender: createInfoVO.Gender,
@@ -17,10 +19,24 @@ namespace Service
                 Specialization: createInfoVO.Specialization,
                 ExperienceYears: createInfoVO.ExperienceYears,
                 Bio: createInfoVO.Bio,
-                Picture: "https://ddachlife.s3.ap-southeast-2.amazonaws.com/images/1ec17e46-90c8-4e82-9192-e7008f0be93f.png"
-            );
-
-            UserInfoMapper.Insert(userInfoDO);
+                Picture: "https://ddachlife.s3.ap-southeast-2.amazonaws.com/images/1ec17e46-90c8-4e82-9192-e7008f0be93f.png");
+                UserInfoMapper.Insert(userInfoDO);
+            }
+            else
+            {
+                var userInfoDO = new UserInfoDO(
+                UserId: createInfoVO.UserId,
+                Name: createInfoVO.Name,
+                Gender: createInfoVO.Gender,
+                Age: createInfoVO.Age,
+                Address: createInfoVO.Address,
+                Specialization: createInfoVO.Specialization,
+                ExperienceYears: createInfoVO.ExperienceYears,
+                Bio: createInfoVO.Bio,
+                Picture: createInfoVO.Picture);
+                UserInfoMapper.Insert(userInfoDO);
+            }
+            
             httpVO.success = true;
             httpVO.message = "create successfully";
             return httpVO;

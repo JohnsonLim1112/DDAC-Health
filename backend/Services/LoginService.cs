@@ -1,4 +1,8 @@
 ﻿using Mapper;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Net;
+using System.Reflection;
+using System.Xml.Linq;
 
 namespace Service;
 
@@ -50,11 +54,8 @@ public static class LoginService
                 Role: "customer"
             );
             LoginMapper.Insert(loginDO);
-            Console.WriteLine($"Successfully created the LoginDO object：");
-            Console.WriteLine($"LoginDO.Id：{loginDO.Id}");
-            Console.WriteLine($"LoginDO.Username：{loginDO.Username}");
-            Console.WriteLine($"LoginDO.Role：{loginDO.Role}");
         }
+        httpvo.message = "Registration successful";
 
         return httpvo;
     }
