@@ -1,10 +1,6 @@
 {
   "/page": "app/page.js",
   "/login/page": "app/login/page.js",
-  "/register/page": "app/register/page.js",
   "/dashboard/page": "app/dashboard/page.js",
-  "/dashboard/profile/page": "app/dashboard/profile/page.js",
-  "/dashboard/appointment_history/page": "app/dashboard/appointment_history/page.js",
-  "/dashboard/health/page": "app/dashboard/health/page.js",
-  "/dashboard/book-appointments/page": "app/dashboard/book-appointments/page.js"
+  "/dashboard/profile/page": "app/dashboard/profile/page.js"
 }
