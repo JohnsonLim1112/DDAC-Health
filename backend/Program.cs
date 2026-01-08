@@ -12,6 +12,7 @@ builder.Services.AddCors(options =>
     });
 });
 
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
