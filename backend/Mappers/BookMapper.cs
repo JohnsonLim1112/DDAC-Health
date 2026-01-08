@@ -24,10 +24,10 @@ public static class BookMapper
 
     public static void Insert(BookDO book)
     {
-        // date, start_time, end_time, comment
+        // 1. is_reminded to INSERT
         string sql = $@"INSERT INTO {TableName} 
-            (id, user_id, doctor_id, is_accept, illness_txt, medicine, price, comment, status, date, start_time, end_time) 
-            VALUES (@id, @user_id, @doctor_id, @is_accept, @illness_txt, @medicine, @price, @comment, @status, @date, @start_time, @end_time)";
+            (id, user_id, doctor_id, is_accept, illness_txt, medicine, price, comment, status, date, start_time, end_time, is_reminded) 
+            VALUES (@id, @user_id, @doctor_id, @is_accept, @illness_txt, @medicine, @price, @comment, @status, @date, @start_time, @end_time, @is_reminded)";
 
         using var conn = new NpgsqlConnection(_connectionString);
         using var cmd = new NpgsqlCommand(sql, conn);
@@ -39,11 +39,12 @@ public static class BookMapper
         cmd.Parameters.AddWithValue("illness_txt", book.IllnessTxt);
         cmd.Parameters.AddWithValue("medicine", book.Medicine ?? "");
         cmd.Parameters.AddWithValue("price", book.Price);
-        cmd.Parameters.AddWithValue("comment", book.Comment ?? ""); 
+        cmd.Parameters.AddWithValue("comment", book.Comment ?? "");
         cmd.Parameters.AddWithValue("status", book.Status);
         cmd.Parameters.AddWithValue("date", book.Date);
         cmd.Parameters.AddWithValue("start_time", book.StartTime);
         cmd.Parameters.AddWithValue("end_time", book.EndTime);
+        cmd.Parameters.AddWithValue("is_reminded", book.IsReminded);
 
         conn.Open();
         cmd.ExecuteNonQuery();
@@ -74,7 +75,8 @@ public static class BookMapper
                 reader.GetString(8),      // status
                 reader.GetDateTime(9),    // date
                 reader.GetDateTime(10),   // start_time
-                reader.GetDateTime(11)    // end_time
+                reader.GetDateTime(11),   // end_time
+                reader.GetBoolean(12)     // is_reminded
             ));
         }
         return list;
@@ -105,7 +107,8 @@ public static class BookMapper
                 reader.GetString(8),      // status
                 reader.GetDateTime(9),    // date
                 reader.GetDateTime(10),   // start_time
-                reader.GetDateTime(11)    // end_time
+                reader.GetDateTime(11),   // end_time
+                reader.GetBoolean(12)     // is_reminded
             );
         }
         return null;
@@ -137,7 +140,8 @@ public static class BookMapper
                 reader.GetString(8),      // status
                 reader.GetDateTime(9),    // date
                 reader.GetDateTime(10),   // start_time
-                reader.GetDateTime(11)    // end_time
+                reader.GetDateTime(11),   // end_time
+                reader.GetBoolean(12)     // is_reminded
             ));
         }
         return list;
@@ -169,7 +173,8 @@ public static class BookMapper
                 reader.GetString(8),      // status
                 reader.GetDateTime(9),    // date
                 reader.GetDateTime(10),   // start_time
-                reader.GetDateTime(11)    // end_time
+                reader.GetDateTime(11),   // end_time
+                reader.GetBoolean(12)     // is_reminded
             ));
         }
         return list;
@@ -177,7 +182,6 @@ public static class BookMapper
 
     public static void Update(BookDO book)
     {
-      
         string sql = $@"UPDATE {TableName} 
             SET user_id=@user_id, 
                 doctor_id=@doctor_id, 
@@ -189,7 +193,8 @@ public static class BookMapper
                 status=@status, 
                 date=@date, 
                 start_time=@start_time, 
-                end_time=@end_time 
+                end_time=@end_time,
+                is_reminded=@is_reminded  
             WHERE id=@id";
 
         using var conn = new NpgsqlConnection(_connectionString);
@@ -202,11 +207,12 @@ public static class BookMapper
         cmd.Parameters.AddWithValue("illness_txt", book.IllnessTxt);
         cmd.Parameters.AddWithValue("medicine", book.Medicine ?? "");
         cmd.Parameters.AddWithValue("price", book.Price);
-        cmd.Parameters.AddWithValue("comment", book.Comment ?? "");  
+        cmd.Parameters.AddWithValue("comment", book.Comment ?? "");
         cmd.Parameters.AddWithValue("status", book.Status);
         cmd.Parameters.AddWithValue("date", book.Date);
         cmd.Parameters.AddWithValue("start_time", book.StartTime);
         cmd.Parameters.AddWithValue("end_time", book.EndTime);
+        cmd.Parameters.AddWithValue("is_reminded", book.IsReminded); 
 
         conn.Open();
         cmd.ExecuteNonQuery();
@@ -224,7 +230,6 @@ public static class BookMapper
         cmd.ExecuteNonQuery();
     }
 
-  
     public static Dictionary<string, int> GetMonthlyAppointmentCount(int year)
     {
         var result = new Dictionary<string, int>();
@@ -248,7 +253,6 @@ public static class BookMapper
         }
         return result;
     }
-
 
     public static Dictionary<string, int> GetUserMonthlyAppointmentCount(string userId, int year)
     {
@@ -276,7 +280,6 @@ public static class BookMapper
         return result;
     }
 
-   
     public static Dictionary<string, int> GetDoctorMonthlyAppointmentCount(string doctorId, int year)
     {
         var result = new Dictionary<string, int>();
@@ -303,7 +306,6 @@ public static class BookMapper
         return result;
     }
 
-  
     public static List<BookDO> SelectByDoctorIdAndMonth(string doctorId, int year, int month)
     {
         var list = new List<BookDO>();
@@ -335,9 +337,73 @@ public static class BookMapper
                 reader.GetString(8),      // status
                 reader.GetDateTime(9),    // date
                 reader.GetDateTime(10),   // start_time
-                reader.GetDateTime(11)    // end_time
+                reader.GetDateTime(11),   // end_time
+                reader.GetBoolean(12)     // is_reminded
             ));
         }
         return list;
+    }
+
+    public static List<BookDO> SelectReminderAppointments()
+    {
+        var list = new List<BookDO>();
+
+        string sql = @"
+    SELECT
+      id, user_id, doctor_id, is_accept, illness_txt,
+      medicine, price, comment, status, date,
+      start_time, end_time, is_reminded
+    FROM book
+    WHERE start_time BETWEEN @start AND @end
+      AND is_reminded = false
+    ORDER BY start_time ASC;
+    ";
+
+        using var conn = new NpgsqlConnection(_connectionString);
+        using var cmd = new NpgsqlCommand(sql, conn);
+
+        var now = DateTime.Now;               
+        cmd.Parameters.AddWithValue("start", now);
+        cmd.Parameters.AddWithValue("end", now.AddHours(1));
+
+        conn.Open();
+        using var reader = cmd.ExecuteReader();
+
+        while (reader.Read())
+        {
+            list.Add(new BookDO(
+                reader.GetString(0),
+                reader.GetString(1),
+                reader.GetString(2),
+                reader.GetBoolean(3),
+                reader.GetString(4),
+                reader.GetString(5),
+                reader.GetDouble(6),
+                reader.GetString(7),
+                reader.GetString(8),
+                reader.GetDateTime(9),
+                reader.GetDateTime(10),
+                reader.GetDateTime(11),
+                reader.GetBoolean(12)
+            ));
+        }
+
+        return list;
+    }
+
+
+    public static void UpdateReminderStatus(string bookId, bool isReminded)
+    {
+        string sql = $@"UPDATE {TableName} 
+                        SET is_reminded = @is_reminded 
+                        WHERE id = @book_id";
+
+        using var conn = new NpgsqlConnection(_connectionString);
+        using var cmd = new NpgsqlCommand(sql, conn);
+        cmd.Parameters.AddWithValue("is_reminded", isReminded);
+        cmd.Parameters.AddWithValue("book_id", bookId);
+
+        conn.Open();
+        cmd.ExecuteNonQuery();
     }
 }

@@ -1,6 +1,6 @@
 ﻿using Mapper;
 
-namespace Service
+namespace backend.Services
 {
     public class BookService
     {
@@ -20,7 +20,8 @@ namespace Service
                 Status: "0",
                 Date: DateTime.Now,
                 StartTime: createBookVO.StartTime,
-                EndTime: createBookVO.EndTime
+                EndTime: createBookVO.EndTime,
+                IsReminded: false
                 );
             BookMapper.Insert(bookDO);
             httpVO.success = true;
