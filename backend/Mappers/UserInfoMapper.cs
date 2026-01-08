@@ -26,7 +26,7 @@ public static class UserInfoMapper
     {
        
         string sql = $@"INSERT INTO {TableName} 
-            (user_id, name, gender, age, address, specialization, experience_years, bio) 
+            (user_id, name, gender, age, address, specialization, experience_years, bio, picture) 
             VALUES (@userid, @name, @gender, @age, @address, @specialization, @experience_years, @bio, @picture)";
 
         using var conn = new NpgsqlConnection(_connectionString);
@@ -136,7 +136,7 @@ public static class UserInfoMapper
         string sql = $@"UPDATE {TableName} 
             SET name=@name, gender=@gender, age=@age, 
                 address=@address, specialization=@specialization, 
-                experience_years=@experience_years, bio=@bio 
+                experience_years=@experience_years, bio=@bio, picture=@picture
             WHERE user_id=@userid";
 
         using var conn = new NpgsqlConnection(_connectionString);
