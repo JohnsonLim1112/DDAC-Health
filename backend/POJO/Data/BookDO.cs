@@ -13,5 +13,6 @@ public record BookDO
     string Status,
     DateTime Date,
     DateTime StartTime,
-    DateTime EndTime
+    DateTime EndTime,
+    bool IsReminded = false
 );
