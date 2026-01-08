@@ -16,7 +16,8 @@ namespace Service
                 Address: createInfoVO.Address,
                 Specialization: createInfoVO.Specialization,
                 ExperienceYears: createInfoVO.ExperienceYears,
-                Bio: createInfoVO.Bio
+                Bio: createInfoVO.Bio,
+                Picture: createInfoVO.Picture
             );
 
             UserInfoMapper.Insert(userInfoDO);

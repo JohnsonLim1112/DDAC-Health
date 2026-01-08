@@ -9,5 +9,6 @@ public record UserInfoDO
     string Address,
     string? Specialization,            
     int? ExperienceYears,                
-    string? Bio                          
+    string? Bio, 
+    string Picture
 );
