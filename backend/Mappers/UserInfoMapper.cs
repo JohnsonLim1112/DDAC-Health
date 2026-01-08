@@ -27,7 +27,7 @@ public static class UserInfoMapper
        
         string sql = $@"INSERT INTO {TableName} 
             (user_id, name, gender, age, address, specialization, experience_years, bio) 
-            VALUES (@userid, @name, @gender, @age, @address, @specialization, @experience_years, @bio)";
+            VALUES (@userid, @name, @gender, @age, @address, @specialization, @experience_years, @bio, @picture)";
 
         using var conn = new NpgsqlConnection(_connectionString);
         using var cmd = new NpgsqlCommand(sql, conn);
@@ -40,6 +40,7 @@ public static class UserInfoMapper
         cmd.Parameters.AddWithValue("specialization", (object?)userInfo.Specialization ?? DBNull.Value);
         cmd.Parameters.AddWithValue("experience_years", (object?)userInfo.ExperienceYears ?? DBNull.Value);
         cmd.Parameters.AddWithValue("bio", (object?)userInfo.Bio ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("picture",userInfo.Picture);
 
         conn.Open();
         cmd.ExecuteNonQuery();
@@ -66,7 +67,8 @@ public static class UserInfoMapper
                 Address: reader.GetString(4),                           // address
                 Specialization: reader.IsDBNull(5) ? null : reader.GetString(5),    // specialization
                 ExperienceYears: reader.IsDBNull(6) ? null : reader.GetInt32(6),    // experience_years
-                Bio: reader.IsDBNull(7) ? null : reader.GetString(7)    // bio
+                Bio: reader.IsDBNull(7) ? null : reader.GetString(7),    // bio
+                Picture: reader.GetString(8) // picture
             ));
         }
         return list;
@@ -93,7 +95,8 @@ public static class UserInfoMapper
                 Address: reader.GetString(4),
                 Specialization: reader.IsDBNull(5) ? null : reader.GetString(5),
                 ExperienceYears: reader.IsDBNull(6) ? null : reader.GetInt32(6),
-                Bio: reader.IsDBNull(7) ? null : reader.GetString(7)
+                Bio: reader.IsDBNull(7) ? null : reader.GetString(7),
+                Picture: reader.GetString(8)
             );
         }
         return null;
@@ -120,7 +123,8 @@ public static class UserInfoMapper
                 Address: reader.GetString(4),
                 Specialization: reader.IsDBNull(5) ? null : reader.GetString(5),
                 ExperienceYears: reader.IsDBNull(6) ? null : reader.GetInt32(6),
-                Bio: reader.IsDBNull(7) ? null : reader.GetString(7)
+                Bio: reader.IsDBNull(7) ? null : reader.GetString(7),
+                Picture: reader.GetString(8)
             ));
         }
         return list;
@@ -146,6 +150,7 @@ public static class UserInfoMapper
         cmd.Parameters.AddWithValue("specialization", (object?)userInfo.Specialization ?? DBNull.Value);
         cmd.Parameters.AddWithValue("experience_years", (object?)userInfo.ExperienceYears ?? DBNull.Value);
         cmd.Parameters.AddWithValue("bio", (object?)userInfo.Bio ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("picture", userInfo.Picture);
 
         conn.Open();
         cmd.ExecuteNonQuery();
