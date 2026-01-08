@@ -1,9 +1,1 @@
-{
-  "/page": "app/page.js",
-  "/login/page": "app/login/page.js",
-  "/dashboard/page": "app/dashboard/page.js",
-  "/dashboard/admin/summary/page": "app/dashboard/admin/summary/page.js",
-  "/dashboard/book-appointments/page": "app/dashboard/book-appointments/page.js",
-  "/dashboard/doctor/appointment_history/page": "app/dashboard/doctor/appointment_history/page.js",
-  "/dashboard/doctor/summary/page": "app/dashboard/doctor/summary/page.js"
-}
+{}
