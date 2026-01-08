@@ -15,6 +15,7 @@ interface DoctorInfo {
   experienceYears?: number;
   qualification?: string;
   bio?: string;
+  picture?: string;
 }
 
 export default function BookAppointmentPage() {
@@ -36,14 +37,12 @@ export default function BookAppointmentPage() {
     fetchDoctors();
   }, []);
 
-
   const fetchDoctors = async () => {
     try {
       setIsLoading(true);
       const result = await userInfoAPI.getDoctors();
       
       if (result.success && result.data) {
-     
         const validDoctors = result.data.filter((doctor: DoctorInfo) => 
           doctor.specialization && 
           doctor.specialization.trim() !== ''
@@ -63,7 +62,6 @@ export default function BookAppointmentPage() {
     }
   };
 
-
   useEffect(() => {
     let filtered = doctors;
 
@@ -82,15 +80,12 @@ export default function BookAppointmentPage() {
     setFilteredDoctors(filtered);
   }, [searchTerm, selectedSpecialization, doctors]);
 
-  
   const specializations = Array.from(new Set(doctors.map(d => d.specialization).filter(Boolean)));
-
 
   const handleBookClick = (doctor: DoctorInfo) => {
     setSelectedDoctor(doctor);
     setShowBookingModal(true);
   };
-
 
   const handleStartTimeChange = (time: string) => {
     setStartTime(time);
@@ -102,7 +97,6 @@ export default function BookAppointmentPage() {
     }
   };
 
- 
   const validateTimeDuration = (start: string, end: string): boolean => {
     if (!start || !end) return true;
     
@@ -113,7 +107,6 @@ export default function BookAppointmentPage() {
     return durationMinutes > 0 && durationMinutes <= 60;
   };
 
-
   const validateWorkingHours = (time: string): boolean => {
     if (!time) return true;
     
@@ -121,7 +114,6 @@ export default function BookAppointmentPage() {
     return hours >= 8 && hours < 18;
   };
 
- 
   const handleSubmitBooking = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -233,30 +225,50 @@ export default function BookAppointmentPage() {
 
       {/* Doctors List */}
       {isLoading ? (
-  <div className="bg-white rounded-xl shadow-sm border p-12 text-center">
-    <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-    <p className="text-gray-600">Loading doctors...</p>
-  </div>
-) : filteredDoctors.length === 0 ? (
-  <div className="bg-white rounded-xl shadow-sm border p-12 text-center">
-    <Stethoscope className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-    <h3 className="text-xl font-semibold text-gray-800 mb-2">No Doctors Found</h3>
-    <p className="text-gray-600">
-      {searchTerm || selectedSpecialization !== 'all' 
-        ? 'Try adjusting your search filters'
-        : 'No doctors are currently available in the system'}
-    </p>
-  </div>
-) : (
+        <div className="bg-white rounded-xl shadow-sm border p-12 text-center">
+          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading doctors...</p>
+        </div>
+      ) : filteredDoctors.length === 0 ? (
+        <div className="bg-white rounded-xl shadow-sm border p-12 text-center">
+          <Stethoscope className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-gray-800 mb-2">No Doctors Found</h3>
+          <p className="text-gray-600">
+            {searchTerm || selectedSpecialization !== 'all' 
+              ? 'Try adjusting your search filters'
+              : 'No doctors are currently available in the system'}
+          </p>
+        </div>
+      ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredDoctors.map((doctor) => (
             <div key={doctor.id} className="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-lg transition-all overflow-hidden">
               <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-6 text-white">
-                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4">
-                  <Stethoscope className="w-8 h-8 text-blue-600" />
+                <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-4 overflow-hidden mx-auto border-4 border-blue-300">
+                  {doctor.picture ? (
+                    <img
+                      src={doctor.picture}
+                      alt={doctor.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        // Fallback to default icon if image fails to load
+                        e.currentTarget.style.display = 'none';
+                        const parent = e.currentTarget.parentElement;
+                        if (parent) {
+                          parent.innerHTML = `
+                            <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                          `;
+                        }
+                      }}
+                    />
+                  ) : (
+                    <Stethoscope className="w-10 h-10 text-blue-600" />
+                  )}
                 </div>
-                <h3 className="text-xl font-bold">{doctor.name}</h3>
-                <p className="text-blue-100 text-sm">{doctor.specialization}</p>
+                <h3 className="text-xl font-bold text-center">{doctor.name}</h3>
+                <p className="text-blue-100 text-sm text-center">{doctor.specialization}</p>
               </div>
 
               <div className="p-6 space-y-3">
@@ -301,14 +313,40 @@ export default function BookAppointmentPage() {
         </div>
       )}
 
-      {/* Booking Modal - Same as before */}
+      {/* Booking Modal */}
       {showBookingModal && selectedDoctor && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-2xl">
-              <h2 className="text-2xl font-bold">Book Appointment</h2>
-              <p className="mt-1">with Dr. {selectedDoctor.name}</p>
-              <p className="text-sm text-blue-100">{selectedDoctor.specialization}</p>
+              <div className="flex items-center gap-4 mb-3">
+                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center overflow-hidden flex-shrink-0">
+                  {selectedDoctor.picture ? (
+                    <img
+                      src={selectedDoctor.picture}
+                      alt={selectedDoctor.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                        const parent = e.currentTarget.parentElement;
+                        if (parent) {
+                          parent.innerHTML = `
+                            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                          `;
+                        }
+                      }}
+                    />
+                  ) : (
+                    <Stethoscope className="w-8 h-8 text-blue-600" />
+                  )}
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold">Book Appointment</h2>
+                  <p className="mt-1">with Dr. {selectedDoctor.name}</p>
+                  <p className="text-sm text-blue-100">{selectedDoctor.specialization}</p>
+                </div>
+              </div>
             </div>
 
             <form onSubmit={handleSubmitBooking} className="p-6 space-y-4">
