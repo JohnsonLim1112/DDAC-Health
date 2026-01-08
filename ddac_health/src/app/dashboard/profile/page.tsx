@@ -85,16 +85,13 @@ export default function ProfilePage() {
 
       const result = await userInfoAPI.get(userId);
       
-      // 🔍 DEBUG: 打印完整的 API 响应
-      console.log('🔍 API Response:', result);
-      console.log('🔍 Picture from API:', result.data?.picture);
+
       
       if (result.success && result.data) {
         setUserInfoExists(true);
         const pictureUrl = result.data.picture || '';
         
-        // 🔍 DEBUG: 打印图片 URL
-        console.log('🔍 Setting picture URL:', pictureUrl);
+
         
         setUserInfo({
           userId: result.data.userId,
@@ -110,10 +107,10 @@ export default function ProfilePage() {
         
         // Set image preview if picture exists
         if (pictureUrl) {
-          console.log('✅ Setting image preview:', pictureUrl);
+          console.log('Setting image preview:', pictureUrl);
           setImagePreview(pictureUrl);
         } else {
-          console.log('⚠️ No picture URL found');
+          console.log('No picture URL found');
         }
       } else {
         setUserInfoExists(false);
@@ -130,7 +127,7 @@ export default function ProfilePage() {
         });
       }
     } catch (error) {
-      console.error('❌ Error loading profile:', error);
+      console.error('Error loading profile:', error);
       alert('Failed to load profile');
     } finally {
       setIsLoading(false);
@@ -176,7 +173,7 @@ export default function ProfilePage() {
     formData.append('file', file);
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5255';
-    console.log('📤 Uploading to:', `${apiUrl}/file/s3`);
+
     
     const response = await fetch(`${apiUrl}/file/s3`, {
       method: 'POST',
@@ -185,8 +182,7 @@ export default function ProfilePage() {
 
     const result = await response.json();
     
-    // 🔍 DEBUG: 打印上传响应
-    console.log('📤 Upload Response:', result);
+
     
     if (!result.success) {
       throw new Error(result.message || 'Failed to upload image');
@@ -284,8 +280,7 @@ export default function ProfilePage() {
           picture: pictureUrl
         };
 
-        // 🔍 DEBUG: 打印要保存的数据
-        console.log('💾 Saving user data:', userData);
+
 
         let userResult;
         if (userInfoExists) {
@@ -295,8 +290,6 @@ export default function ProfilePage() {
           setUserInfoExists(true);
         }
 
-        // 🔍 DEBUG: 打印保存结果
-        console.log('💾 Save result:', userResult);
 
         if (!userResult.success) {
           alert('Failed to save profile');
