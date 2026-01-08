@@ -4,6 +4,7 @@ using System.Text.Json;
 using Mapper;
 using Microsoft.Extensions.Logging;
 
+
 namespace Service
 {
     public class AppointmentReminderService : BackgroundService
