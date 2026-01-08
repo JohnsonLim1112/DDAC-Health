@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
@@ -20,8 +20,8 @@ import {
   UserCog,
   BarChart3,
 } from 'lucide-react';
-import { authAPI, authUtils } from '../lib/api';
-
+import { authAPI, authUtils, userInfoAPI } from '../lib/api';
+import Image from 'next/image';
 
 interface MenuItem {
   label: string;
@@ -30,9 +30,7 @@ interface MenuItem {
   roles: string[];
 }
 
-
 const menuItems: MenuItem[] = [
- 
   {
     label: 'Dashboard',
     href: '/dashboard',
@@ -80,7 +78,6 @@ const menuItems: MenuItem[] = [
     roles: ['doctor'],
   },
   
-  
   // Admin 
   {
     label: 'User Management',
@@ -100,8 +97,6 @@ const menuItems: MenuItem[] = [
     icon: <BarChart3 className="w-5 h-5" />,
     roles: ['admin'],
   },
- 
-  
 
   {
     label: 'Profile',
@@ -109,7 +104,6 @@ const menuItems: MenuItem[] = [
     icon: <User className="w-5 h-5" />,
     roles: ['customer', 'doctor', 'admin'],
   },
-
 ];
 
 interface SidebarProps {
@@ -119,22 +113,42 @@ interface SidebarProps {
 
 export default function Sidebar({ userRole, userName }: SidebarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [userPicture, setUserPicture] = useState<string | null>(null);
+  const [isLoadingPicture, setIsLoadingPicture] = useState(true);
   const pathname = usePathname();
   const router = useRouter();
 
- 
   const currentRole = userRole || authUtils.getUserRole() || 'customer';
+
+  // Load user picture
+  useEffect(() => {
+    const loadUserPicture = async () => {
+      try {
+        const userId = authUtils.getUserId();
+        if (userId) {
+          const result = await userInfoAPI.get(userId);
+          if (result.success && result.data?.picture) {
+            setUserPicture(result.data.picture);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading user picture:', error);
+      } finally {
+        setIsLoadingPicture(false);
+      }
+    };
+
+    loadUserPicture();
+  }, []);
 
   const filteredMenuItems = menuItems.filter(item =>
     item.roles.includes(currentRole)
   );
 
-
   const handleLogout = () => {
     authAPI.logout();
     router.push('/login');
   };
-
 
   const getRoleDisplayName = (role: string) => {
     const roleNames: Record<string, string> = {
@@ -190,17 +204,55 @@ export default function Sidebar({ userRole, userName }: SidebarProps) {
             </div>
           </div>
 
-          {/* User Info */}
+          {/* User Info with Picture */}
           <div className="p-4 border-b border-blue-500">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-blue-400 rounded-full flex items-center justify-center">
-                <User className="w-6 h-6" />
+            <Link 
+              href="/dashboard/profile"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="flex items-center space-x-3 hover:bg-blue-700 p-2 rounded-lg transition-colors duration-200"
+            >
+              <div className="relative w-12 h-12 flex-shrink-0">
+                {isLoadingPicture ? (
+                  // Loading skeleton
+                  <div className="w-12 h-12 bg-blue-400 rounded-full animate-pulse" />
+                ) : userPicture ? (
+                  // User picture
+                  <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-blue-300 bg-white">
+                    <img
+                      src={userPicture}
+                      alt={userName || 'User'}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        // Fallback to default icon if image fails to load
+                        e.currentTarget.style.display = 'none';
+                        const parent = e.currentTarget.parentElement;
+                        if (parent) {
+                          parent.innerHTML = `
+                            <div class="w-full h-full bg-blue-400 flex items-center justify-center">
+                              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                              </svg>
+                            </div>
+                          `;
+                        }
+                      }}
+                    />
+                  </div>
+                ) : (
+                  // Default icon
+                  <div className="w-12 h-12 bg-blue-400 rounded-full flex items-center justify-center border-2 border-blue-300">
+                    <User className="w-6 h-6 text-white" />
+                  </div>
+                )}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-semibold truncate">{userName || 'User'}</p>
+                <p className="font-semibold truncate text-white">{userName || 'User'}</p>
                 <p className="text-xs text-blue-200">{getRoleDisplayName(currentRole)}</p>
+                <p className="text-xs text-blue-300 hover:text-blue-100 transition-colors">
+                  View Profile →
+                </p>
               </div>
-            </div>
+            </Link>
           </div>
 
           {/* Navigation Menu */}

@@ -12,7 +12,10 @@ import {
   MapPin,
   Calendar,
   Award,
-  FileText
+  FileText,
+  Camera,
+  Upload,
+  X
 } from 'lucide-react';
 import { authUtils, userInfoAPI, authAPI } from '../../../lib/api';
 import { useRouter } from 'next/navigation';
@@ -26,6 +29,7 @@ interface UserInfo {
   specialization: string;
   experienceYears: number;
   bio: string;
+  picture: string;
 }
 
 interface LoginInfo {
@@ -48,6 +52,11 @@ export default function ProfilePage() {
   const [newPassword, setNewPassword] = useState('');
   const [securityPassword, setSecurityPassword] = useState('');
   const [isSecurityVerified, setIsSecurityVerified] = useState(false);
+  
+  // Image upload states
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>('');
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   useEffect(() => {
     loadProfile();
@@ -73,11 +82,12 @@ export default function ProfilePage() {
         role: (userRole as 'customer' | 'doctor' | 'admin') || 'customer'
       });
 
-
       const result = await userInfoAPI.get(userId);
       
       if (result.success && result.data) {
         setUserInfoExists(true);
+        const pictureUrl = result.data.picture || '';
+        
         setUserInfo({
           userId: result.data.userId,
           name: result.data.name || '',
@@ -86,8 +96,13 @@ export default function ProfilePage() {
           address: result.data.address || '',
           specialization: result.data.specialization || '',
           experienceYears: result.data.experienceYears || 0,
-          bio: result.data.bio || ''
+          bio: result.data.bio || '',
+          picture: pictureUrl
         });
+        
+        if (pictureUrl) {
+          setImagePreview(pictureUrl);
+        }
       } else {
         setUserInfoExists(false);
         setUserInfo({
@@ -98,7 +113,8 @@ export default function ProfilePage() {
           address: '',
           specialization: '',
           experienceYears: 0,
-          bio: ''
+          bio: '',
+          picture: ''
         });
       }
     } catch (error) {
@@ -109,6 +125,56 @@ export default function ProfilePage() {
     }
   };
 
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image size should be less than 5MB');
+      return;
+    }
+
+    setSelectedImage(file);
+    
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveImage = () => {
+    setSelectedImage(null);
+    setImagePreview('');
+    if (userInfo) {
+      setUserInfo({ ...userInfo, picture: '' });
+    }
+  };
+
+  const uploadImageToS3 = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5255';
+    
+    const response = await fetch(`${apiUrl}/file/s3`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    const result = await response.json();
+    
+    if (!result.success) {
+      throw new Error(result.message || 'Failed to upload image');
+    }
+
+    return result.data;
+  };
 
   const handleVerifySecurityPassword = async () => {
     if (!securityPassword.trim()) {
@@ -136,12 +202,10 @@ export default function ProfilePage() {
   const handleSave = async () => {
     if (!userInfo || !loginInfo) return;
 
-  
     if (newPassword.trim() && !isSecurityVerified) {
       alert('Please verify your security password before changing your password!');
       return;
     }
-
 
     if (loginInfo.role === 'doctor') {
       if (!userInfo.name || !userInfo.address) {
@@ -157,10 +221,25 @@ export default function ProfilePage() {
     try {
       setIsSaving(true);
 
-    
+      // Upload image if selected
+      let pictureUrl = userInfo.picture;
+      if (selectedImage) {
+        setIsUploadingImage(true);
+        try {
+          pictureUrl = await uploadImageToS3(selectedImage);
+          console.log('✅ Image uploaded successfully:', pictureUrl);
+          setIsUploadingImage(false);
+        } catch (error) {
+          setIsUploadingImage(false);
+          console.error('❌ Error uploading image:', error);
+          alert('Failed to upload image. Please try again.');
+          return;
+        }
+      }
+
+      // Update password if needed
       if (newPassword.trim() && isSecurityVerified) {
         const userId = authUtils.getUserId();
-        
         const loginResult = await authAPI.changePassword(userId!, newPassword);
         
         if (!loginResult.success) {
@@ -169,8 +248,13 @@ export default function ProfilePage() {
         }
       }
 
-   
-      const shouldSaveUserInfo = userInfo.name || userInfo.address || loginInfo.role === 'doctor';
+      // ✅ 修改: 如果上传了图片，强制保存 UserInfo（即使其他字段为空）
+      const shouldSaveUserInfo = 
+        userInfo.name || 
+        userInfo.address || 
+        loginInfo.role === 'doctor' || 
+        selectedImage ||  // 🔥 如果选择了图片，就保存
+        pictureUrl;       // 🔥 如果有图片 URL，就保存
 
       if (shouldSaveUserInfo) {
         const userData: UserInfo = {
@@ -181,8 +265,11 @@ export default function ProfilePage() {
           address: userInfo.address || '',
           specialization: loginInfo.role === 'doctor' ? userInfo.specialization : '',
           experienceYears: loginInfo.role === 'doctor' ? userInfo.experienceYears : 0,
-          bio: loginInfo.role === 'doctor' ? userInfo.bio : ''
+          bio: loginInfo.role === 'doctor' ? userInfo.bio : '',
+          picture: pictureUrl
         };
+
+        console.log('💾 Saving user data with picture:', userData);
 
         let userResult;
         if (userInfoExists) {
@@ -191,6 +278,8 @@ export default function ProfilePage() {
           userResult = await userInfoAPI.create(userData);
           setUserInfoExists(true);
         }
+
+        console.log('💾 Save result:', userResult);
 
         if (!userResult.success) {
           alert('Failed to save profile');
@@ -202,9 +291,12 @@ export default function ProfilePage() {
       setNewPassword('');
       setSecurityPassword('');
       setIsSecurityVerified(false);
-      loadProfile(); 
+      setSelectedImage(null);
+      
+      // Reload profile to get fresh data
+      await loadProfile();
     } catch (error) {
-      console.error('Error saving profile:', error);
+      console.error('❌ Error saving profile:', error);
       alert('Failed to save profile');
     } finally {
       setIsSaving(false);
@@ -242,6 +334,86 @@ export default function ProfilePage() {
       </div>
 
       <div className="space-y-6">
+        {/* Profile Picture Section */}
+        <div className="bg-white rounded-xl shadow-md p-6 border">
+          <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <Camera className="w-5 h-5 text-purple-600" />
+            Profile Picture
+          </h2>
+
+          <div className="flex flex-col md:flex-row items-center gap-6">
+            {/* Image Preview */}
+            <div className="relative">
+              <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-gray-200 bg-gray-100 flex items-center justify-center">
+                {imagePreview ? (
+                  <img
+                    src={imagePreview}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      console.error('❌ Image failed to load:', imagePreview);
+                      e.currentTarget.style.display = 'none';
+                      const parent = e.currentTarget.parentElement;
+                      if (parent) {
+                        parent.innerHTML = '<svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>';
+                      }
+                    }}
+                  />
+                ) : (
+                  <User className="w-16 h-16 text-gray-400" />
+                )}
+              </div>
+              {imagePreview && (
+                <button
+                  onClick={handleRemoveImage}
+                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                  title="Remove image"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+
+            {/* Upload Controls */}
+            <div className="flex-1">
+              <label className="cursor-pointer">
+                <div className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors w-fit">
+                  <Upload className="w-5 h-5" />
+                  <span>Choose Image</span>
+                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageSelect}
+                  className="hidden"
+                />
+              </label>
+              <p className="text-sm text-gray-500 mt-2">
+                Upload a profile picture (max 5MB)
+              </p>
+              <p className="text-xs text-gray-400 mt-1">
+                Supported formats: JPG, PNG, GIF, WebP
+              </p>
+              {selectedImage && (
+                <div className="mt-3 space-y-2">
+                  <p className="text-sm text-green-600 flex items-center gap-1">
+                    ✓ New image selected: {selectedImage.name}
+                  </p>
+                  <p className="text-xs text-blue-600 bg-blue-50 border border-blue-200 rounded p-2">
+                    💡 <strong>Tip:</strong> Click "Save Changes" button below to upload and save your profile picture!
+                  </p>
+                </div>
+              )}
+              {isUploadingImage && (
+                <div className="text-sm text-blue-600 mt-2 flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                  Uploading image...
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
         {/* Account Information */}
         <div className="bg-white rounded-xl shadow-md p-6 border">
           <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
@@ -250,7 +422,6 @@ export default function ProfilePage() {
           </h2>
 
           <div className="space-y-4">
-            {/* Email - Read Only */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 <Mail className="w-4 h-4 inline mr-2" />
@@ -265,7 +436,6 @@ export default function ProfilePage() {
               <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
             </div>
 
-            {/* Role - Read Only */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 <User className="w-4 h-4 inline mr-2" />
@@ -282,7 +452,6 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            {/* New Password */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 <Lock className="w-4 h-4 inline mr-2" />
@@ -315,7 +484,6 @@ export default function ProfilePage() {
               )}
             </div>
 
-            {/* Security Password Verification */}
             <div className="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 <Lock className="w-4 h-4 inline mr-2" />
@@ -433,7 +601,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Doctor Information - Only for doctors */}
+        {/* Doctor Information */}
         {loginInfo.role === 'doctor' && (
           <div className="bg-blue-50 rounded-xl shadow-md p-6 border-2 border-blue-200">
             <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
@@ -497,11 +665,11 @@ export default function ProfilePage() {
           </button>
           <button
             onClick={handleSave}
-            disabled={isSaving}
+            disabled={isSaving || isUploadingImage}
             className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
           >
             <Save className="w-5 h-5" />
-            {isSaving ? 'Saving...' : 'Save Changes'}
+            {isSaving ? 'Saving...' : isUploadingImage ? 'Uploading...' : 'Save Changes'}
           </button>
         </div>
       </div>
