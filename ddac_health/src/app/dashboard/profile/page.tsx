@@ -107,7 +107,7 @@ export default function ProfilePage() {
         
         // Set image preview if picture exists
         if (pictureUrl) {
-          console.log('Setting image preview:', pictureUrl);
+     
           setImagePreview(pictureUrl);
         } else {
           console.log('No picture URL found');
@@ -188,7 +188,7 @@ export default function ProfilePage() {
       throw new Error(result.message || 'Failed to upload image');
     }
 
-    console.log('✅ Image uploaded, S3 URL:', result.data);
+ 
     return result.data; // This should be the S3 URL
   };
 
@@ -243,7 +243,7 @@ export default function ProfilePage() {
         setIsUploadingImage(true);
         try {
           pictureUrl = await uploadImageToS3(selectedImage);
-          console.log('✅ New picture URL:', pictureUrl);
+
           setIsUploadingImage(false);
         } catch (error) {
           setIsUploadingImage(false);
@@ -344,15 +344,7 @@ export default function ProfilePage() {
       </div>
 
       <div className="space-y-6">
-        {/* 🔍 DEBUG INFO */}
-        <div className="bg-yellow-50 border-2 border-yellow-300 rounded-lg p-4">
-          <h3 className="font-bold text-yellow-800 mb-2">🔍 Debug Info:</h3>
-          <div className="text-sm space-y-1">
-            <p><strong>Picture URL:</strong> {userInfo.picture || '(empty)'}</p>
-            <p><strong>Image Preview:</strong> {imagePreview || '(empty)'}</p>
-            <p><strong>Selected File:</strong> {selectedImage?.name || '(none)'}</p>
-          </div>
-        </div>
+        
 
         {/* Profile Picture Section */}
         <div className="bg-white rounded-xl shadow-md p-6 border">
