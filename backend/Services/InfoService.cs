@@ -17,7 +17,7 @@ namespace Service
                 Specialization: createInfoVO.Specialization,
                 ExperienceYears: createInfoVO.ExperienceYears,
                 Bio: createInfoVO.Bio,
-                Picture: createInfoVO.Picture
+                Picture: "https://ddachlife.s3.ap-southeast-2.amazonaws.com/images/1ec17e46-90c8-4e82-9192-e7008f0be93f.png"
             );
 
             UserInfoMapper.Insert(userInfoDO);
